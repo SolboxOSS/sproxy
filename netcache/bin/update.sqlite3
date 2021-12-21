@@ -1,0 +1,41 @@
+#
+# 현재 경로에  sqlite3의 가장최근 공식 릴리즈를 update
+#
+
+SOURCE_ROOT=~/netcache
+if [ "X$1" != "X" ]
+then
+SOURCE_ROOT=$1
+fi
+
+answer="Y"
+read -p "Confirm if the netcache source root is $SOURCE_ROOT. (Y/n)" answer
+
+
+if [ "X"$answer = "X" ] 
+then
+	answer="Y"
+fi
+
+if [ "X"$answer = "Xn" ] || [ "X"$answer = "XN" ]
+then
+	echo "Change SOURCE_ROOT in shell script and re-run"
+	exit
+fi
+
+if [ ! -d $SOURCE_ROOT ]
+then
+	echo "NetCache source directory, $SOURCE_ROOT does not exist"
+	exit
+fi 
+
+
+export PATH=$PATH:$SOURCE_ROOT/bin
+mkdir  -p $SOURCE_ROOT/sqlite3.fossil
+cd $SOURCE_ROOT/sqlite3.fossil
+fossil clone https://www.sqlite.org/src $SOURCE_ROOT/sqlite.fossil
+fossil open $SOURCE_ROOT/sqlite.fossil
+fossil update release #latest official release, 아니면 버전정보 기재해도 됨
+
+rm -rf $SOURCE_ROOT/sqlite.current
+ln -s $SOURCE_ROOT/sqlite3.fossil $SOURCE_ROOT/sqlite.current

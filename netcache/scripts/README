@@ -1,0 +1,17 @@
+useful tools for monitoring
+
+(1) ps_mem.py
+	- output private/shared memory usage
+	#ps_mem.py -p <pid of solproxy child>
+
+(2) s.restart.sh
+	- solproxy restart script
+	- restart after cleaning log and cache files
+	- cache directory read from /usr/service/etc/solproxy/default.conf
+
+(3) htop
+	#wget http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+  	#rpm -ihv epel-release-6-8.noarch.rpm
+    #yum install htop
+	#htop -p <pid of solproxy child>
+

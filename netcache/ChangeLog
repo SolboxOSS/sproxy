@@ -1,0 +1,872 @@
+﻿
+
+Revision 2091
+-------------------
+수정일 : 2020-07-20
+수정자 : 유희곤
+
+- CHG: consistent hash ring 에서 online 상태 node 검색 시도 최대 횟수 변경 (#33116)
+       - consistent hash ring 에서 online node 검색시 
+       - 기존에는 origin count + 3 회까지만 시도했으나.. 동일 origin 연속 배치 등으로 인해 online origin 검색 실패 발생
+       - 이를 개선하기 위해 orign count * 4 까지 재시도 하도록 수정
+       - 재시도 횟수가 origin count * 3 이상되면.. 관련 내역 로깅되도록 추가
+       - 수정파일: /trunk/plugins/common/lb.c
+
+
+Revision 1931
+-------------------
+수정일 : 2020-01-23
+수정자 : 유희곤
+
+- NEW: DNS cache timeout 설정 기능 추가 (#32867)
+       - curl 상의 dns cache timeout 관련 설정 기능 추가
+       - solproxy 에서 NC_IOCTL_SET_DNS_CACHE_TIMEOUT 호출을 통해 sec 단위 설정 가능토록 지원
+       - default 60 sec
+
+
+Revision 1926
+-------------------
+수정일 : 2020-01-20
+수정자 : 유희곤
+
+- CHG: blk_make_crc() 의 ASSERT 발생 관련 수정 (#32781) 
+       - min() 호출시 type casting 관련 변수간 type 을 signed 로 통일.
+       - ASSERT 발생 시 분석을 위한 로깅 추가.
+       - 수정 파일: common/blk_io.c
+
+
+Revision 1925
+-------------------
+수정일 : 2020-01-20
+수정자 : 유희곤
+
+- NEW: Redirection 무한 반복을 방지하기 위해 Redirection 최대 횟수 설정 (#32861)
+       - 기존 V30 의 #32859 이슈에 의해 수정된 사항을 V31 에 적용
+       - conf 상의 follow_redirection 옵션이 활성화 된 경우
+       - 최대 5회까지 redirection 을 허용하도록 CURLOPT_MAXREDIRS 옵션 설정 처리
+	     -- 기존 V30 은 최대 3회까지 허용했으나.. 
+	     -- 원부사장님 의견 및 RFC 문서, CURL 등의 설정을 참고로 최대 허용값을 RFC 참고의견인 5회로 변경.
+       - Redirection 이 5회 초과 상황 발생하면 curl 47 오류가 발생하고... HTTP 400 응답하도록 수정
+              - 수정파일 : session_pool.c http_driver.c
+
+
+Revision 1924
+-------------------
+수정일 : 2020-01-20
+수정자 : 유희곤
+
+- NEW: 원부사장님 수정소스 반영 (#32924)
+       - POST 처리과정에서 solproxy에서 free된 메모리 읽기 쓰기 시도가 나중에 발생하는 문제 수정
+       - Page-fault시 disk fault, origin fault의 구분 플래그 세팅제대로 안되는 문제 수정
+         -- disk-read-ahead 크기 동적 조절시 차이 발생
+
+
+Revision 1923
+-------------------
+수정일 : 2020-01-17
+수정자 : 유희곤
+
+- NEW: Origin OFFLINE 상태 변경 관련 민감도 조정 기능 추가 (#32839)
+       - V30 revision 1800, 1812 에 적용된 Origin OFFLINE 변경 민감도 기능 추가
+       - 기존에는 origin 접속 실패 또는 이상 응답 발생시 바로 해당 origin 을 offline 처리
+       - 이를 개선하기 위해 origin 또는 parent 에 대한 오류 발생시마다 count 처리
+       - 오류가 연속으로 지정된 설정값 이상이면 OFFline 처리.
+       - default 설정은 연속 오류가 3회 발생하면 offline 처리됨
+       - 마지막 오류가 발생한 후 60 sec 동안 정상 상태가 유지되면 이전 오류상태는 reset 됨.
+
+
+Revision 1922
+-------------------
+수정일 : 2020-01-17
+수정자 : 유희곤
+        
+- CHG: 버전 정보 3.0 -> 3.1 로 변경 (#32921)
+       - 성능개선 버전 소스 trunk merge 처리에 따른 3.1 버전 적용
+       - ./configure 재처리 필요
+       - 수정 파일: configure.ac
+
+
+Revision 1918
+-------------------
+수정일 : 2020-01-16
+수정자 : 유희곤
+
+- CHG: 성능개선 버전 /branches/V30.Perf 최종 소스를 trunk 로 병합 (#32921)
+       - 기존 /trunk 상의 version 3.0 최종 소스 /branches/V30 백업
+       - 성능개선 버전 /branches/V30.Perf -> /trunk 로 병합 처리
+       - /branches/V30.Perf 폴더 삭제
+
+
+Revision 1718
+-------------------
+수정일 : 2019-07-26
+수정자 : 유희곤
+
+- CHG: consistent hash ring 관련 로깅 level 조정
+       - 불필요 ERROR, WARN level 로깅을 INFO 등으로 조정 처리
+       - 본 사항은 V30 에 이미 적용된 사항으로 동기화 목적으로 적용
+       - 수정 파일: lb.c lb.h
+
+
+Revision 1715
+-------------------
+수정일 : 2019-07-19
+수정자 : 유희곤
+
+- NEW: consistent hash ring 기능 추가 (#32409)
+       - 기존 google consistent hash 알고리즘을 사용했던 hash 정책 관련 flow 는
+       - 개별 세션으로 인해 장비가 on/off 처리될 경우... 장비 순서가 변경되어...
+       - 모든 장비가 동일한 순서가 아닌 서로 다른 서버 순서를 가지게 되어 consistent 분산이 되지 않았음.
+       - 이를 개선하기 위해 ketama consistent hash ring 의 opensource (https://github.com/RJ/ketama)를 참고로
+       - netcache 에 적합한 consistent hash ring 을 개발하여 적용함
+       - hash 정책은 등록 서버의 순서 무시, 중복 등록 허용 안함.
+       - server 증설, 감설, 변경시 균등 분산 처리 지원.
+       - 수정 파일: lb.c lb.h http_driver.c
+
+- CHG: md5 객체 생성시 출력 변수 memset 처리 추가 (#32409)
+       - md5 객체를 재사용하기 위해 출력변수 digest 값에 대한 초기화 기능 추가
+       - 수정 파일: md5.c 의 nc_MD5Init()
+
+- CHG: lb_t 에서 pool_by_not[] 객체 관련 처리 코드 제거 (#32409)
+       - 위의 consistent ring hash 기능 추가에 따라...
+       - 기존에 hash 처리에서 사용하던 pool_by_not[] 이 더 이상 불필요해짐
+       - 이에 pool_by_not[] 및 관련 코드들 정리 처리.
+       - 수정 파일: lb.c lb.h
+
+
+Revision 1714
+-------------------
+수정일 : 2019-06-12
+수정자 : 유희곤
+
+* 본 수정 사항은 branches/V30, branches/V30.Perf 에 모두 적용함 
+
+- CHG: cfs_free_session() 에서 SIGSEGV 발생 (#32701)
+       - config reload 처리시 호출되는 nvm_destroy_internal() 에서 volume 객체 메모리 해제했으나..  
+       - cfs_free_session()에서 해당 volume 메모리 참조하여 SIGSEGV 발생
+       - 참조 대상 memory 가 유효한지 check 하도록 기능 추가했으나
+       - 이미 free 되었다가 재할당된 memory 영역일 수 있어 SIGSEGV 재발생 가능함. (재발시 다른 방안 검토해야 함)
+       - 또한 volume 정보가 유효하지 않은 경우 IOCB 객체를 release 하지 않으면 메모리 누수 발생하므로... 
+       - 전역 driver class 가 유효한 경우.. 해당 class 이용하여 iocb 객체 release 처리
+       - 수정 파일: cfs_driver.c 의 cfs_free_session()
+
+- CHG: nvm_destroy_internal() 에서 잘못된 로깅 메시지 수정 (#32701)
+       - (null) 로깅 메시지 관련 volume, driver 정보를 출력하도록 수정
+       - 수정 파일: volumeops.c 의 nvm_destroy_internal()
+
+
+Revision 1712
+-------------------
+수정일 : 2019-06-07
+수정자 : 유희곤
+
+- NEW: origin health check 정보를 origin.log 에 logging 처리 (#32651, #32705)
+       - 문제 상황의 빠른 파악을 위한 운영 편의 제공 목적
+       - 수정 파일: plugins/httpn_v2/session_pool.c 의 http_check_alive()
+
+- CHG: origin health check 방식(full -> range GET) 개선 (#32652, #32705)
+       - 대용량 contnet인 경우 opeation timeout 따른 alive check 실패 개선 목적
+       - full size 가 아닌 1 byte range GET 요청 전송
+       - range GET 미지원 대응 코드 추가
+       - connection timeout, operation timeout 설정 관련 서비스 설정값 사용토록 수정
+       - 로깅 처리 보완.
+       - 수정 파일: plugins/httpn_v2/session_pool.c 의 http_check_alive()
+
+- CHG: 로깅 내역 개선 (#32705)
+       - http_driver.c 의 httpn_bind_context()
+         origin 등록시 중복으로 인해 무시되는 origin 정보 로깅 관련 ERROR -> WARN 으로 변경처리
+
+
+Revision 1677 ~ 1708
+-------------------
+수정일 : 2019-05-29
+수정자 : 원태환
+
+- NEW: 처리 성능 개선 (#32649)
+       - Origin 처리 성능 및 Edge 전송 처리 성능 개선을 위한 전반적인 구조 개선 수행
+
+
+Revision 1676
+-------------------
+수정일 : 2019-04-19
+수정자 : 유희곤
+
+- BUG: Origin, Parent 등록시 검색, sort 처리 버그 수정 (#32604) 
+       - qsort 에서 사용하는 함수 인자 문제로 origin 등록시 검색, sort 처리 비정상 동작
+       - 이를 해결하기 위해 신규 함수 추가 후 qsort 처리 함수 변경
+       - 본 수정으로 인해 origin 등록시
+       - 중복 허용 안하고 자동 sorting 처리됨
+       - 수정 파일: plugins/common/lb.c 의 lb_rebuild_order(), lb_pool_compare_id_by_qsort()
+
+
+Revision 1674, 1675
+-------------------
+수정일 : 2019-04-16
+수정자 : 원태환
+
+- BUG: 부분 캐싱된 상황에서 신선도 검사 단계가 아닌 상황에서 원본 객체가 변경되었을 때 감지 및 처리 (#32617)
+       - 원부사장님의 부분 caching 관련 문제점 수정
+       - 원부사장님이 revision 1674, 1675 에서 수정하여 commit 했지만.
+       - 이력 관리 목적으로 ChangeLog 에 기록함.
+
+
+Revision 1673
+-------------------
+수정일 : 2019-04-01
+수정자 : 유희곤
+
+- BUG: 4GByte 이상 대용량 Cache 파일 read 시 마지막 block 부분에서 CRC 오류 발생 문제점 수정 (#32576)
+       - blk->blkno * NC_BLOCK_SIZE 계산시 int * int = int 의 문제로 계산식이 비정상 동작
+       - 이를 연관일감 #30965 의 방식처럼 강제 형변환 처리하여 수정 처리함
+       - 수정 파일: common/blk_io.c 의 blk_handle_io_cache_read_nolock(), blk_make_crc()
+
+
+Revision 1672
+-------------------
+수정일 : 2019-03-27
+수정자 : 유희곤
+
+- CHG: solproxy 에서 URL 경로 정보 임의 변경시 반영 안되는 문제점 수정 (#32574)
+       - NC_IOCTL_SET_ORIGIN_PHASE_REQ_HANDLER 을 설정하여 origin 요청에 대한 callback 함수 호출하도록 설정된 경우
+       - URL 정보를 변경해도 실제 origin 으로 변경된 URL 정보가 전달되지 않음
+       - 이는 session_pool.c 의 httpn_bind_RS() 의 호출 순서 문제로.. 수정 처리함
+       - 수정 파일: session_pool.c 의 httpn_bind_RS() 
+
+
+Revision 1671
+-------------------
+수정일 : 2019-03-25
+수정자 : 유희곤
+
+- CHG: origin 응답코드에 대해 운영자 설정에 따른 OFFLINE 처리 기능 개선 (#32565)
+       - 기존에는 origin 이 응답하면 무조건 정상 상태로 처리.
+       - 하지만.. 운영자가 설정한 특정한 HTTP 응답 코드에 대해 강제로 OFFLINE 처리할 수 있는 기능 요청
+       - 이에 HTTP 500 이상의 응답에 대해 solproxy 의 callback 함수를 호출하여 OFFLINE 처리 여부를 check 하도록 기능 수정
+       - solproxy 의 callback 함수가 없는 경우는 기존과 동일하게 response code 에 관계없이 무조건 ONLINE 상태로 처리됨.
+       - 수정 파일: http_driver.c 의 httpn_map_error()
+	                httpd_driver.c 의 httpn_handle_try_result()
+                    session_pool.c 의 http_check_alive()
+
+- CHG: hash.c 의 u_ht_insert_dbg() 함수 관련 들여쓰기 정리
+
+
+Revision 1670
+-------------------
+수정일 : 2019-03-12
+수정자 : 유희곤
+
+- BUG: nvm_create_pattern() 변수 미초기화 및 출력 인자 count mismatch 로 인한 SIGSEGV 발생 수정 (#32543)
+       - 본 함수는 #32386 에서 더이상 호출되지 않도록 수정되었으나.... 구형 버전이 적용된 장비에서 SIGSEGV 발생
+       - 원인은 error_msg 미초기화 및 TRACE 구문 출력인자 mismatch 로 발생.
+       - 향후 본 함수를 다시 사용할 가능성이 있어 변수 초기화 및 출력인자 조정 처리 수행
+       - 수정 파일: volumeops.c
+
+- BUG: ic_init() mutex attribute 객체 destory 코드 추가
+       - 더 이상 사용하지 않는 mutex attribute 에 대한 destory 처리 추가함.
+       - 수정 파일: cacheops.c
+
+
+Revision 1669
+-------------------
+수정일 : 2019-01-24
+수정자 : 유희곤
+
+- BUG: 동일 IOCB 객체에 대해 서로 다른 Thread가 동시 참조, 이로 인해 free 된 메모리 참조로 인한 SIGSEGV 발생 (#32438)
+       - origin 에서 Header 수신 완료시 이를 처리하기 위한 httpn_block_null_reader()가 호출되면서
+       - 해당 iocb 객체에 대한 처리 후 메모리 free 처리 수행
+       - 근데.. 해당 Origin 세션이 끊어지거나 Timeout 상황 발생하는 경우..
+       - 다른 독립 thread 인 httpn_mpx_handler() 의 complete iocb 처리 루프에
+       - 위에서 참조되는 iocb 객체가 pop 처리 됨
+       - 따라서 httpn_block_null_reader() 관련 thread 에서 처리 후 free 처리한 객체가
+       - httpn_mpx_handler() thread 에 의해 다시 참조되면서 SIGSEGV 발생
+       - httpn_mpx_handler() thread 에 예외 처리 기능 추가하여... 이미 처리 중인 IOCB 객체는 그냥 Pass 하도록 수정
+       - 수정 파일: plugins/httpn_v2/http_request.c plugins/httpn_v2/http_driver.c diskcache.c
+
+
+Revision 1668
+-------------------
+수정일 : 2018-11-29
+수정자 : 유희곤
+
+- BUG: nc_asio_vector_t 객체의 iob 포인터 변수 동시 접근에 따른 SIGSEGV 발생 (#32444)
+       - dio_job_scheduler thread 에서 호출되는 asioc_dump_prefix() 와
+       - httpn_mpx_handler thread 에서 호출되는 asio_prepare_context() 에서
+       - nc_asio_vector_t 객체의 iob 포인터 변수에 대한 동시 접근, memory realloc 처리로 인해 SIGSEGV(11) 발생
+       - Lock 사용 대신 dio_job_scheduler thread 의 __dio_io_done() 함수에서 
+       - nc_asio_vector_t 객체의 iob 포인터 변수에 접근하지 않도록 수정 처리
+       - 수정 파일: disk_io_ops.c common/asio_mgr.c
+
+
+Revision 1667
+-------------------
+수정일 : 2018-11-13
+수정자 : 원태환, 유희곤
+
+- BUG: content 수신 중 backup origin 전환시 죽는 문제 수정 사항 정리 (#32413)
+       - 원부사장님이 수정하신 내역 정리
+       - asio_bio_fill(), asio_context_handler() 함수에서 
+         해당 block이 이미 이전 origin 에서 data 수신을 완료하여 completed 된 경우
+         추가적으로 처리하지 않도록 처리.
+        
+- NEW: Debug 모드에서 inode 에 대한 메모리 check 코드 추가
+       - NC_RELEASE_BUILD 모드가 아닌 경우.. 
+       - dm_verify_allocation() 를 호출하여 memory check 할 수 있도록 기능 추가
+
+- NEW: Heaptrack 관련 malloc_usable_size() hooking 함수 추가
+       - 할당된 메모리 크기 조회 관련 hooking 함수 추가
+
+- CHG: 원부사장님 수정 내역 ChangeLog 기록 및 버전 정보 자동 업데이트
+       - 수정 파일: ChangeLog, cfs_apix.c
+
+
+Revision 1663
+-------------------
+수정일 : 2018-11-07
+수정자 : 유희곤
+
+- BUG: 인증 정보 없어도 빈 Authorization Header 가 생성되는 문제점 수정 (#32424) 
+       - parent 구성시 인증 정보가 없는 경우에도 빈 Authorization Header 생성되어 Origin 에서 인증 실패 발생
+       - 이를 방지하기 위해 인증 정보가 없거나 유효하지 않은 경우 Authorization Header 가 생성되지 않도록 수정
+       - 수정 파일: plugins/httpn_v2/session_pool.c 의 httpn_setup_storage()
+
+
+Revision 1662
+-------------------
+수정일 : 2018-10-30
+수정자 : 유희곤
+
+- BUG: Parent 존재하나.. parent로 요청이 전송되지 않는 문제점 수정 (#32410) 
+       - parent 가 구성되었으나.. active_lb 가 무조건 0 으로 Origin 만 가르켜.. parent 사용이 안됨.
+       - active_lb 가 parent, origin 상태 및 업무 flow 따라 선택되로록 수정 처리.
+       - 불필요한 코드 제거
+       - 수정 파일: plugins/httpn_v2/session_pool.c 의 httpn_next_pool()
+
+- CHG: conf reload 처리시 기존 등록된 parent 삭제만 하는 기능 추가 (#32410)
+       - parent 정보를 conf 에서 삭제 후 reload 처리하면... 기존 parent 정보가 삭제되지 않고 그대로 유지됨.
+       - 이를 해결하기 위해 conf 에 parent 정보 유무에 상관없이 reload 처리시 parent 정보 갱신 요청 예정 (김현호) 
+       - 이에 전달받은 count 값이 0 인 경우.. unbind 만 처리하고...
+       - 그 외에는 기존과 동일하게 unbind -> bind 처리하도록 수정
+       - origin 인 경우.. 전체 삭제하는 상황은 운영자 실수 이므로.... 기존과 같이 오류처리.
+       - 수정 파일: plugins/httpn_v2/http_driver.c 의 httpn_rebind_context()
+
+- CHG: nc_get_revision() 함수 revision 자동 업데이트 처리
+       - 수정 파일: cfs_apix.c
+
+
+Revision 1661
+-------------------
+수정일 : 2018-10-29
+수정자 : 유희곤
+
+- CHG: Parent 구성시 죽는 문제 관련 V28 에 #30586 에 적용된 사항을 V30 에도 적용 (#32410)
+       - Parent 구성시 죽는 문제 발견됨
+       - 코드 확인 결과 기존 V2.8 에서 수정된 사항임
+       - 이를 V3.0 에 적용 처리함.
+       - 해당 LB 객체가 유효한 경우에만 unbind, destory 처리하도록 httpn_unbind_context_i() 수정
+       - 수정 파일: plugins/httpn_v2/http_driver.c
+
+- CHG: nc_get_revision() 함수 revision 자동 업데이트 처리
+       - 수정 파일: cfs_apix.c
+
+
+Revision 1660
+-------------------
+수정일 : 2018-10-26
+수정자 : 유희곤
+
+- CHG: Origin Transfer Timeout 지원을 위한 기능 추가 (#32401)
+       - 기존 V2.8 에서 CURLOPT_TIMEOUT 옵션을 이용한 방법과
+       - V3.0 에서 신규 추가된 Timer 이용 방법 중
+       - Timer 를 이용한 방법으로 최종 결정
+       - 이에 Timer 를 이용하여 Transfer Timeout 기능을 지원하도록 수정.
+       - 수정 파일: plugins/httpn_v2/http_request.c
+
+- CHG: Origin transfer timeout 관련 default 값 10 sec 적용 (#32401)
+       - v2.8 에서는 30 sec
+       - v3.0 에서는 방식이 확정되지 않아 timer 관련 하드코딩으로 60 sec
+       - 운영자와 협의를 거쳐 timer 방식 사용으로 인해 default 값 10 sec 로 결정.
+       - 참고로 connect timeout default 값은 v2.8 과 동일한 5 sec
+       - 수정 파일: plugins/httpn_v2/http_driver.c
+       - https://jarvis.solbox.com/redmine/projects/solproxy/wiki/Conf#origin_transfer_timeout 내역도 수정
+
+- CHG: Origin transfer timeout 발생시 HTTP 504 Gateway Timeout 응답하도록 수정 (#32401)
+       - tansfer timeout 발생시 HTTP 500 -> 504 응답하도록 수정 처리함.
+       - 참고로 connect timeout 발생시에는 HTTP 502 반환 
+       - 수정 파일: plugins/httpn_v2/http_request.c
+
+- CHG: 기존 ChangeLog 파일을 이용한 변경사항 기록 활성화
+       - 2012년까지 업데이트 후 사용하지 않는 ChangeLog 파일 관련
+       - 앞으로 변경 이력 기록 목적으로 사용하기로 함.
+
+- CHG: nc_get_revision() 함수 revision 자동 업데이트 처리
+       - 수정 파일: cfs_apix.c
+
+======================================================================
+
+2018-10-25 부터 다시 기록 시작 by huibong
+누락된 기간동안 수정 내역은 
+Redmine (https://jarvis.solbox.com/redmine/projects/netcache-core) 내역 참고
+
+======================================================================
+
+10-8 2012  Tawan Won <weon@solbox.com>
+		- [CHG] dm_wait_pending_io modified to handle inteleaved open calls
+9-25 2012  Tawan Won <weon@solbox.com>
+		- all modification since Auguest 2012 collected here
+		- disk-cache manager totally replaced with new implementation
+		- inode hash table moved to mount context
+		- cpath, qr_path of inode removed to dynamically calulcate
+		  to adopt case-sensitivity change.
+		- HASH(path) modified to use lower string of path.
+		- iconv dependancy removed from netcache core, webdav, and swift driver.
+		- memory leakage removed
+		- -DENABLE_POOL_ALLOCATOR removed from Makefile.am(s)
+8-08, 2012  Tawan Won <weon@solbox.com>
+		- [CHG] dm_update_size changed to call sc_update_size only if inode->mnt is
+		  valid
+		- [NEW] mount context pool added to mountops.c. when a mount context
+		  destroyed, the context should be pooled rather than freed to allow
+		  lazy access to the invalid mount context.
+		- [CHG] mnt_is_accessible(), mnt_is_online() modified to get one more
+		  param, makeref.
+8-07, 2012  Tawan Won <weon@solbox.com>
+		- [FIX] dm_truncate modified to check the return value of
+		  sc_query_entry
+8-06, 2012  Tawan Won <weon@solbox.com>
+		- [CHG] ASIO_LIMITS changed to 200
+		- [CHG] ASIO_HANG_TIMEOUT changed to 300 (secs)
+		- [NEW] Copyright string added to netcache core engine.
+		- [CHG] dm_close_inode modified to handle to restore cache file name
+		  if inode->temporal is set.
+		- [CHG] DM_FD_VALID call modified to get inode->fd instead of inode
+8-03, 2012  Tawan Won <weon@solbox.com>
+		- [CHG] u_ht_table_new_withlock added to hash.c
+		- [CHG] dm_init() modified to call u_ht_table_new_withlock instead of
+		  u_ht_table_new() for inode table manipulation.
+		- [CHG] mnt_destroy() modified to wait for 60 secs before timeout.
+		- [CHG] dm_register_inode_nolock/dm_unregister_inode_nolock added 
+		  The two functions guaranteed to work in atomic way.
+8-02, 2012  Tawan Won <weon@solbox.com>
+		- [FIX] dm_close_inode() modified to clear inode->writable flag to 0.
+		- [CHG] dm_inode_stat() changed to return inode's internal stat only if inode->writable is
+		   non-zero and inode->nsize != inode->size. Otherwise stat-cache
+		   value returned.
+		- [CHG] dm_resize_inode() modified to update inode->mtime
+		  
+7-30, 2012  Tawan Won <weon@solbox.com>
+		- when purging, stat-cache entry even if exist removed(dm_purge...).
+
+7-25, 2012  Tawan Won <weon@solbox.com>
+		- [FIX] webdav_driver modified to handle rename correctly.
+		  internal inode-bound data modified to keep the changed name.
+7-22, 2012  Tawan Won <weon@solbox.com>
+		- [FIX] webdav_quota modified when got EIO
+7-19, 2012  Tawan Won <weon@solbox.com>
+		- [FIX] webdav_driver fixed to query quota with path of '/'.
+		- [CHG] dm_make_qualified_name() modified to get the nc_mount_context
+		  as first param.
+		- [CHG] alwayslower added into nc_mount_context
+		- [CHG] mnt_create() modified to initialize alwayslower and preservecase.
+		- [CHG] NC_API(T_API) added to trace.{h,c} and ncapi.h
+		- [*] dm_find_cache_key with QR_KEY encouraged!!
+		- [FIX] sc_update_internal() modified to keep negated value of
+		  cfs_getattr()
+7-17, 2012	Tawan Won <weon@solbox.com>
+		- [NEW] multi-lingual support added to swift driver, based on nc.xml
+		    * s3_make_full_path() added
+			* s3_lower() added
+
+		- [FIX] counting sub-entries modified to correctly pass the pointer to cnt.
+		- [NEW] AlwaysLower options handled in swift driver.
+		- [CHG] AM_CONDITIONAL, NC_ADD_LIBRT, NC_ADD_STRPTIME added to
+		  configure.ac (maybe need calarification. AC_CHECK_LIB)
+7-16, 2012	Tawan Won <weon@solbox.com>
+		- [CHG] blk_get() modified to check if blk_ref's state 
+		  is BS_WRITEBACK_DIRTY.
+		- [FIX] in swift driver, PUT/DELETE operation modified to
+		  disable the following tags: 
+		    * Expect : 100-Continue
+			* Transfer-Encoding: chunked
+		- [CHG] printing curl version/features added
+7-13, 2012	Tawan Won <weon@solbox.com>
+		- [CHG] webdav_driver's truncate modified to call webdav_mknod
+		  with 'setforce' flag of 0 in first call. When got redirection,
+		  setforce flag changed to 1.
+		- [FIX} blk_handle_io_event modified to left blk->state intack
+		  when iot=OSD_WRITE and got error.
+		- [CHG] dm_truncate modified to call cfs_unlink within inode's lock
+7-11, 2012	Tawan Won <weon@solbox.com>
+		- HTTP 1.1 Keep-Alive handling added to webdav_driver
+		  * dav_push_session() modified.
+		  * webdav_get_persist_info() added.
+
+7-10, 2012	Tawan Won <weon@solbox.com>
+		- FIX: dm_cached_check_unlock() modified to return 0
+		  if DM_FD_VALID(inode->fd) is false.
+		- CHG: dav_session_monitor changed to show more detail info.
+		  when disconnected.
+7-4, 2012	Tawan Won <weon@solbox.com>
+		- FIX: s3_rmdir modified to check if the dir is empty.
+		- FIX: s3_open/s3_creat modified to use open/lseek/write if platform is
+		  linux without calling dio.
+		- FIX : webdav_readdir modified to convert the entry's name to lower
+		  if AlwaysLower is set.
+6-30, 2012	Tawan Won <weon@solbox.com>
+		- NEW: in asio, asio_push()/asio_pop() added for ASIO resource pooling.
+		- NEW: struct nc_timespec added for correct data type sharing between
+		  libnc and APP.
+		- CHG: nc_utimens changed to use 'struct nc_timespec'
+		- NEW : nc_ftruncate added to cfs_apix.c
+		- NEW : dm_ftruncate and others added to diskcache.c 
+		- FIX : hang in dm_close_inode() fixed by forcely calling asio_push in asio hang timer.
+			* This is a temporal FIX!
+		- CHG : The definition, _PERSISTENT_STATCACHE removed, which became a default feature. 
+		- CHG : 
+6-21, 2012	Tawan Won <weon@solbox.com>
+		- NEW:in webdav_driver, 'X-SB-CaseSensitive' handling added.
+		  driver's operation vector changed to contain the set_notifier.
+		  the notifier callback would be used to upcall-style IOCTL.
+		- CHG: disk_io_ops.c INFO message was changed to display the 
+		  current running threads
+		- CHG: webdav driver read function changed to exit read try loop
+		  when iocb->canceled set for faster return.
+6-20, 2012	Tawan Won <weon@solbox.com>
+		- CHG: in statcache.c, findinfo_t structure modified to
+		  use static memory wihout allocating via XCALLOC
+		  to avoid double-free.
+		- CHG: asio_mgr.c modified for structured asio operations.
+		  > asio resources would be prepared in asio_init() 
+	        to avoid frequent alloc/free.
+		  > inode's pending_ioq handling will be done in asio_pop/asio_push.
+		  > asio_fini_vector would be called only in asio_contex_handler().
+		  > asio lock timer added for maintenance.
+		    when the lock timer expired, TRAP will be issued.
+		  
+6-19, 2012	Tawan Won <weon@solbox.com>
+		- CHG: pool allocater changed to keep 'freed' field to
+		  detect double free.
+6-18, 2012	Tawan Won <weon@solbox.com>
+		- CHG: blk_fault() changed to call mnt_is_online() before issuing ASIO
+		  will enhance IO response time when transition to OFFLINE.
+		- FIX: webdav_driver: ne_debug_init() commented out to disable logging to /tmp/dav.log
+		- NEW: in netcache core, shared memory-based backstore in size of 2 MB
+		  added. In sc_expire_entries(), all dir stat-cache backed up onto the
+		  shared memory. The backup will be restored when netcache starts
+		  again.
+	
+6-13, 2012	Tawan Won <weon@solbox.com>
+		- if a file stat-cache entry exist but in offline,
+		  stat() call modified to return -EREMOTEIO
+		  if the file is not cached or partially cached.
+		- mountops.c added. Almost calls to cfs_is_online() 
+	      changed to call mnt_is_online.
+		  Some calls replaced with mnt_is_accessible().
+		  mnt_is_accessible is for determining where the mount context
+		  is in progress of destroying.
+6-12, 2012
+		- upto 1,000 directory stat-cache entries are regularily
+		  backed up onto a shared memory for each mount context.
+		  when NetCache restarted, it restores the stat-caches backup.
+3-09, 2012	Tawan Won <weon@solbox.com>
+		- mount point activity monitor added.
+		- operation counter added to nc_mount_context_t
+		- cfs_xxx() changed to pass nc_mount_context instead of
+		  cfs_origin_driver_t
+3-07, 2012	Tawan Won <weon@solbox.com>
+		- in blk_read(), while loop changed to check ioerror within the loop.
+		  when ioerror is ECANCELED or EBADF, we will try again to avoid
+		  nc_read returning with ioerror.
+3-06, 2012	Tawan Won <weon@solbox.com>
+		- in webdav/webdav_driver, probe_pool_thread changed to properly 
+		  handle NE_ERROR when requesting with non-existing URL.
+		- CLFU_MIN_BAND_COUNT changed to 2
+		- The threshold of base_band count update is changed to 30% instead of
+		  50%
+		  * This may cause free-buffer run-out in new IO request.
+3-04, 2012	Tawan Won <weon@solbox.com>
+		- dm_close_inode changed to wait until pending_io goes to 0.
+		  * The change properly handled async-io(read) invoked by fuse.
+		- in webdav_driver.c, dav_read() changed to call dav_destroy_session()
+	      if ioc->canceled set.
+		- crc_errcnt added to fc_file_t. if crc_errcnt > 5, the inode goes
+		  to be isolated with DoC set. 
+		- Cache statistics summary changed.
+2-12, 2012	Tawan Won <weon@solbox.com>
+		- Enhancement : dm_truncate_XXXX in diskcache.c
+2-12, 2012	Tawan Won <weon@solbox.com>
+		- BUG FIX: inode->{bitmap, pbitmap, blockmap,...} initialization.
+2-12, 2012	Tawan Won <weon@solbox.com>
+		- a new field, 'trace' added to inode structure for selective debug
+		  output , which set by dm_trace_on().
+2-9, 2012	Tawan Won <weon@solbox.com>
+		- bt_init_timer changed to get the flag used in determining if the
+		  timer function should be run in a separate thread.
+		- in plugins/webdav.c, webdav_utimens changed to remove ne_escape()
+	      call.
+		- dm_open_inode() fixed to reset inode->writable to a proper value
+		- in plugins/webdav_driver.c, dav_read() fixed in updating hint info.
+		  after the dav operation finished.
+		- in plugins/webdav_driver.c, when got DAV_TRY_FAILED with empty
+		  'xhost', dav_mark_down_pool called with the pool->key value to
+		  avoid infinite retry.
+2-7, 2012	Tawan Won <weon@solbox.com>
+		- NC_IOCTL_WRITEBACK_BLOCKS added in netcache/cfs_driver.c
+2-4, 2012	Tawan Won <weon@solbox.com>
+		- new global command NC_GLOBAL_DEFAULT_USER and NC_GLOBAL_DEFAULT_GROUP added.
+		  if not set, 'nobody' would be used.
+
+11-28, 2011	Tawan Won <weon@solbox.com>
+		- in cyclic_lfu, min/max value changed to get more flexibility
+		  in cache-entry leveling.
+		- http code, 500~505 changed to EREMOTEIO in plugins/webdav/webdav.c
+11-15, 2011	Tawan Won <weon@solbox.com>
+		- dm_update_partition_info changed to make same result of 'df'
+		  in calculating available disk space. The same fomula
+		  applied on Windows.
+		- in netcache/Makefile.am VERSIONINFO marco changed to use '--versioninfo'
+11-14, 2011	Tawan Won <weon@solbox.com>
+		- asio_cancel_io FIXED. There were access to a freed memory block. 
+		- LPmap_find_cursor() added to recover collect pbitmap, physical_cursor.
+		- nc_checkfs changed to use LPmap_find_cursor to recover cached files.
+11-09, 2011	Tawan Won <weon@solbox.com>
+		- A tool, nc_checkfs deployed to repair cache files
+		- when cache writing failed, redrawing physical blocks modified
+		  to avoid file increase beyond the file size.
+		- new command of nc_ioctl added to set origin storage access timeout.
+		  The default value restored to 10 secs.
+11-02, 2011	Tawan Won <weon@solbox.com>
+		- when the remote is offline, blk_fault() return with error of EREMOTEIO
+		- when the remote is offline, asio_schedule return the negated errno.
+		- when an inode hit in offline, dm_prepare_... opens the file if it is already completely cached.
+		- nc_ioctl() changed to support charset control of the origin storage.
+		  In current implementation, local charset fixed to 'UTF-8'
+		- BUG FIX : crc error recovery fixed in common/blk_io.c
+11-01, 2011	Tawan Won <weon@solbox.com>
+		- even in compaction mode, dio_open_file() in Win32 conducts
+		  the privileged file operation of file size extension.
+		  The size extending is to allocate one netcache block for
+		  meta information.
+		- in disk_io_ops.c, dio_extend_file() added for Windows.
+		- in blkio_lpmap.c, lpmap_allocate...() changed to call 
+		  dio_extend_file on Windows platform.
+10-31, 2011	Tawan Won <weon@solbox.com>
+		- nc_handle_of() added to cfs_apix.c
+		- dm_lookup_inode() added to diskcache.c to serve nc_handle_of() call.
+		- BUG FIX: in dm_open_inode() we changed to check if refcnt=1 before calling dm_activate_inode()
+10-30, 2011	Tawan Won <weon@solbox.com>
+		- BUG FIX: dm_close_inode() fixed close/open racing condition
+		- BUG FIX : dm_close_inode() fixed the lock-remained problem.
+		- dm_close_inode()/dm_open_inode() changed to allow more concurrency.
+		  * The change makes one inode's slowness less affect in global inode operation
+		    performance.
+		- BUG FIX : dm_make_new_inode() fixed in logging inode info with INODE nulled.
+		- For debugging, dm_spin_inode_lfu() changed to call clfu_for_each()
+		  to track the opened inode count. => SHOULD BE COMMENTED IN PRODUCTOIN STAGE!!!
+10-29, 2011	Tawan Won <weon@solbox.com>
+		- asio_signal_cancel() added to asio_mgr.c
+		- a field of 'canceled' added to nc_asio_vector_t
+		- in disk_io_ops.c, when the canceled value of the asio vector set, 
+		  immediate return coded added with result code of ECANCELED.
+		- in netcache_types.h, ECANCELED definition added for Windows.
+		- in plugins/web/webdav_driver.c, IO canceling code added.
+		- in diskcache.c, dm_close_inode(), dm_open_inode() completely changed to
+		  reduce global lock region.
+		- BUG FIX : lpmap_recover() in blkio_lpmap.c fixed.
+10-28, 2011	Tawan Won <weon@solbox.com>
+		- lpmap_allocate_xxx(), sometimes pblkno > (maxblkno+1).
+		  ASSERT(...) commented out and warning added.
+		- INFO log messages cleaned up in netcache/*.c
+		- in threadpool.c, output of thread monitor modified for more information.
+		- in test/driver_test.c, '-G'option added to specify the driver class name to use.
+10-27, 2011	Tawan Won <weon@solbox.com>
+		- loopback driver $(topdir)/plugins/loopback/* added
+		- in dm_close_inode, call to drv->close() moved.
+10-24, 2011	Tawan Won <weon@solbox.com>
+		- hit from the negative stat cache is logged at level of 'Information' for easy operation
+		- when logging the cache miss, printing file length is changed to decial point based digits.
+		  for more readibility
+		- NC_GLOBAL_ENABLE_COMPACTION introduced to enable/disable the compacted cache file format feature,
+		  while is controlled by calling nc_set_param().
+		  The default is to enable the compacted file format feature.
+		- rebuild progress is logged
+10-23, 2011	Tawan Won <weon@solbox.com>
+		- compacted cache file format deployed for more efficiency in using local disk
+			* LPmap field added in fc_file_info_t.
+			* physical_cursor field added in fc_file_info_t
+			* blkio_lpmap.c added
+			* common/blk_io.c, common/asio_mgr.c, diskcache.c changed to cover the new LPmap.
+			* nc_aligned_{malloc, realloc, free} created into util.c
+		- meta information in disk cache re-aligned at boundary of 8-byte
+10-22, 2011	Tawan Won <weon@solbox.com>
+		- BUG fix: dav_read() in plugins/webdav/webdav_driver.c fixed to properly handle the origin down
+		- BUG fix : all other racing condition occured after asio_destroy.
+10-20, 2011	Tawan Won <weon@solbox.com>
+		- BUG fix: dav_read() in plugins/webdav/webdav_driver.c fixed to access to the freed memory, asio->state.
+		  after calling dispatch()
+		- BUG fix : improper calls to TRACE()  fixed
+		- Buffer allocation scheme changed to allocate each block buffer separately instead of allocating
+		  one continuous giga bytes memory with commited state. 
+10-19, 2011	Tawan Won <weon@solbox.com>
+		- ne_alloc.c changed to lock protected memory allocation.
+		- In ne_uri.c, we removed extra buffer allocation.
+10-13, 2011	Tawan Won <weon@solbox.com>
+		- __asio_per_thread_runnings in asio_mgr.c fixed to counting pending async IO in windows 
+		- using netcache_stat.txt commented out.
+		- verbose logs in disk-reclaiming removed
+		- in asio_mgr.c, per_thread_running changed to use heap alloc instead of thread local storage.
+		  the memory pointer is shared only between disk_io_ops.c and asio_mgr.c
+		  the purpose of per_thread_running is to make ASIO thread wait till all pending IOs
+		  completed in Windows, because we use callback-based IO API. According to Microsoft,
+		  completion signal of pending IOs will be delivered to the iussing thread.
+
+10-11, 2011	Tawan Won <weon@solbox.com>
+		- in webdav_driver.c, dav_read modified for more intelligent retry mechanism.
+		- in webdav-driver.c, read timeout changed to 5 from 10 secs.
+		- in webdav_driver.c, read retry limited to 2.
+10-10, 2011	Tawan Won <weon@solbox.com>
+		- block cache IO completely re-implemented.
+		- EREMOTEIO deployed to indicate the OSD down, which used to make difference between EAGAIN and EREMOTEIO.
+		- file-based memory-only caching introducted, which activated when available disk space is under high-water mark.
+		- 1-byte block finger print deployed to check the block data's validity which XOR(block data + block_no) 
+		- separation of netcache intrisic from OSD driver-specific part was made.
+		- Dynamic driver loading implemented
+		- in ncapi.h, nc_load_driver() added.
+		- disk_io_{unix,win}.c merged into disk_io_ops.c
+		- disk_io_ops.c revised to handle KAIO queue congestion error on linux.
+		- BUG FIX: in windows, file creation fixed to allocate enough disk space to contain all file blocks.
+		- high/low water mark of disk reclaiming changed to represent the meaning of disk utilization in percent.
+09-08, 2011	Tawan Won <weon@solbox.com>
+		- dm_count_valid_block changed to compare dbitmap
+		- dio_submit() in disk_io_unix changed to return iov_cnt to avoid to call additional cancel logic
+		- fc_put_free call removed, which means reclaiming blocks depends on the memory cache manager.
+		- adding a block to CLFU called in read-done callback, not in write-done callback.
+09-04, 2011	Tawan Won <weon@solbox.com>
+		- asio_cnt introducted to replace racnt in inode structure.
+		- asio_cnt just counts # of async-ios.
+		- dm_ref call in webdav_driver removed, which makes dm_close_inode confused.
+		- log message cleaned.
+08-30, 2011	Tawan Won <weon@solbox.com>
+		- in sc_query_entry, BUG FIX in processing negative stat cache hit when it is found in negative cache and it's refresh needed.
+		- BUG FIX in webdav_prop_handler(): wrong processing of the current dir name.
+		- statcache.c modified as followings:
+			- ptime added for keeping pruning time. - stat cache removed after ptime.
+			- statcache's key changed to include full qualified path name
+			- enhanced to work well even when  in off-line mode.
+		
+08-25, 2011	Tawan Won <weon@solbox.com>
+		- refcnt of fc_file_info_t changed to 2 byte integer.
+		- FC_VALID_INODE_2(...) changed to cover complete caching
+		- in bc_read(), inode_invalid initialized to 1 for correct logging
+08-24, 2011	Tawan Won <weon@solbox.com>
+		- prepare_read_ahead()  changed to avoid remote IO invocation when the remote is not online
+		- bc_origin_copy changed to avoid remote IO invocation when the remote is not online.
+		- in memory-cache only mode, bug of invoking disk-io fixed.
+		- Bug Fix : FC_BITMAP_LEN macro changed to calc a correct bitmap length. 
+		- in cfs_driver.h two methods introduced, set_lasterror(), online(). Also implemented in webdav_driver.c
+07-10, 2011	Tawan Won <weon@solbox.com>
+		- problem fix in trace().localtime_r() does not handle tv_sec of gettimeofday result.
+		- racing condition fixed between block freeing and condition waiting
+06-27, 2011	Tawan Won <weon@solbox.com>
+		- in dm_open_inode, checking if isolated added into victim checking.
+06-26, 2011	Tawan Won <weon@solbox.com>
+		- bug fixed in taking fail-over in webdav_driver.c
+		- bug fixed in inode reclaiming 
+		- bug fixed in recovering disk block-io error
+		- 1.01P11 release
+05-16, 2011	Tawan Won <weon@solbox.com>
+		- in neon, ne_set_error changed to print "socket error" instead of ne_get_error() output. to avoid SEGV
+05-09, 2011	Tawan Won <weon@solbox.com>
+		- dav_readdir changed to take care of fail-over.
+		- when expiring stat cache entry, if it has it's waiters, the entry would not be temporarily removed.
+		- when querying the stat info of '/', the default information returned without querying to the OSD.
+		- racing condition on disk-cache manager removed by using DM lock.
+		- thread pool information log removed
+		- HTTP 207 partial content warning removed.
+		- when the OSD goest to DOWN and recovered, dav_read caused SEGV by buggy buffer handling. FIXED
+11-18, 2010	Tawan Won <weon@solbox.com>
+		- in fc_block_destructor, atomic sub(blockmap) code removed, so we don't worry about racing condition
+		  on blockmap of inode.
+		- to keep inode free list, LRU structure replaced linked list.
+		- FC_VALID_BLOCK_2(...) added to check if a block association to an inode is valid.
+
+
+11-17, 2010	Tawan Won <weon@solbox.com>
+		- in dm_close_inode(), lock of dm removed.
+		- in dm_close_inode(), we use inode's complete field to skip extra operations.
+		- LRU deployed to manager free inode list 
+11-16, 2010	Tawan Won <weon@solbox.com>
+		- BUG found in fc_complete_ra_block & fc_handle_cache - racing condition
+11-12, 2010	Tawan Won <weon@solbox.com>
+		- changing high/low water mark of disk-reclaiming added, which is done by calling nc_set_param. 
+		- RC12 release candidate 
+11-10, 2010	Tawan Won <weon@solbox.com>
+		- On windows, _aligned_malloc replaced _mm_malloc.
+		- RC11 release candidate (again)
+11-09, 2010	Tawan Won <weon@solbox.com>
+		- buf fixed in bc_origin_copy. the retun value of bc_origin_copy has bug, which caused indefinite loop in bc_read. 
+		- log add. dav->read() in bc_origin_copy would be profiled.
+		- in diskcache manger (diskcache.c), many enhancement added for faster cache rebuilind and inode lookup.
+		- RC11 release candidate
+11-06, 2010	Tawan Won <weon@solbox.com>
+		- in statfs for Windows changed to fix 64-bit value overflow problem.
+11-04, 2010	Tawan Won <weon@solbox.com>
+		- reclaiming added to disk-cache to allow it to reclaim files even if in cache-rebuilding stage.
+		- dio_busy() check changed to return TRUE if # of in-progress IO is more than 30% of max-io.
+		- callstack dump added for Windows DLL.
+11-03, 2010	Tawan Won <weon@solbox.com>
+		- while using hash table, locking hash table changed be an option for higher responsiveness.
+		  u_ht_table_lock_mode() added to hash.c for that purpose. 
+		- Version 1.01-RC9 release candidate
+11-01, 2010	Tawan Won <weon@solbox.com>
+		- memory-cache only option added - when disk cache path is not defined, netcache run in
+		  memory only mode.
+		- block reference assertion error fixed by racing condition
+		- Version 1.01-RC8 release candidate
+
+10-30, 2010	Tawan Won <weon@solbox.com>
+		- bug fixed in dm_stat(). FC_UNLOCK_RAW(..) missed in the success case of valid cache.
+
+10-27, 2010	Tawan Won <weon@solbox.com>
+		- in dm_select_dir(), code changed to use new hashing algorhtim for making cache sub directories.
+		- dm_rebuid_dir() changed to be run in multi-threaded mode. (4 independant threads scan a part of sub directories)
+		- dm_read_header() is added to replace dm_stat_disk_read() codes. Its purpose is to reduce cache file header IO overhead.
+		- dm_flush_inode() is changed to be called only in dm_close_inode(). In the prev. version, it is called
+		  whenever # of dirty blocks is somewhat larger.
+		- Version 1.01-RC5 release candidate
+10-17, 2010 Tawan Won <weon@solbox.com>
+		- NetCache for Windows changed to write logs in separate daily-based log file.
+		- LRU_join() changed to run faster with minimum cpu cycles.
+		- LRU_hit() changed to run faster with minimum cpu cycles
+10-13, 2010	Tawan Won <weon@solbox.com>
+		- stat cache expiration logic changed to be disabled when the all of origin servers marked down.
+		- checking if the stat cache needs to be freshed is disabled when the origin storage marked down.
+		- bug fix in blockcache.c and webdav_driver.c: when all origins went down, it did not return in bc_read().
+			driver->read should set driver's errno = EIO to break the infinite loop.
+		- bug fix in webdav_driver.c: if the origin's representative host is serving a file, it did not make any REDIRECTION reply.
+		  at that case, we needed to set file handle->host to ""
+		- bug fix in webdav_driver.c: if all remote are dead and dav_read is called, we changed to regard it as a read_error case.
+		- modification: if stat cachen entry is for directory, it's expiration time changed to add extra 180 secs.
+		- in webdav_driver.{c,h}, used field added. If used count is larger than 10, the session will be destroyed when pushing
+
+10-10, 2010	Tawan Won <weon@solbox.com>
+		- generating netcache_stat.txt is disabled in release production.
+		- checking if the real file name is the same with the given name is changed in case-insensitive way.
+
+10-09, 2010	Tawan Won <weon@solbox.com>
+		- log changed to write out the real file name instead of the cache name.
+		- in filecache.c, "bitmap reset" log line changed to the level of "T_BLOCK"
+		- in filecache.c, "canceled freeing" log line changed to the level of "T_BLOCK"
+		- in filecache.c, when attempting to free a block and it's ref count is larger than 1,
+		  the call will be blocked until refcnt goes to 1.
+		- dm_open_inode in diskcache.c changed to provide rich information when processing the stalled file.
+		- Version 1.01-RC1
+10-06, 2010	Tawan Won <weon@solbox.com>
+		- cache file naming scheme changed to use: 
+			MD5(real full file name path) => cache file name
+		- the warning message of "no location info" removed.
+			
+07-09, 2010	Tawan Won <weon@solbox.com>
+		- fault tolerance support when the remote storage is not available.
+			- getattr : if the local cached file is complete, its stat returned
+			- open : the same as above
+

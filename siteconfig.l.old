@@ -1,0 +1,189 @@
+%{
+#include <stdio.h>
+#include <stdlib.h>
+#include "site.h"
+#include "parse_defs.h"
+/*#define 	YY_DECL		site_token_t *yylex(void) */
+/*site_token_t 	yylval; */
+%}
+
+%option debug
+%option reentrant stack
+%option bison-bridge
+%option bison-locations
+%option noyywrap
+%x str 
+%x lua lua_internal trigger server server_set server_set_value server_set_quoted trigger_quote
+%%
+
+server 	{
+			fprintf(stderr, "TOK:server\n");
+			BEGIN(server);
+			strcpy(yylval->token.string, yytext);
+			return TOK_SERVER;
+		}
+<server>\{ 		{
+			BEGIN(server_set);
+			fprintf(stderr, "TOK<server>: BEGIN_GROUP\n");
+			strcpy(yylval->token.string, yytext); 
+			return TOK_BEGIN_GROUP;
+		}
+<server>\} 		{
+			BEGIN(INITIAL);
+				fprintf(stderr, "TOK<server_set>: END_GROUP\n");
+			*yylval->token.pstr = '\0';
+			return TOK_END_GROUP;
+		}
+<server_set>\} 		{
+			BEGIN(INITIAL);
+				fprintf(stderr, "TOK<server_set>: END_GROUP\n");
+			*yylval->token.pstr = '\0';
+			return TOK_END_GROUP;
+		}
+
+
+<server_set>[[:alpha:]][[:alnum:]]* {
+					fprintf(stderr, "TOK<server_set>: VAR[%s]\n", yytext);
+					strcpy(yylval->token.string, yytext);
+					return TOK_VARIABLE;
+			}
+<server_set>= {
+				BEGIN(server_set_value);
+				fprintf(stderr, "TOK<server_set>: = (%s:op)\n", yytext);
+				strcpy(yylval->token.string, yytext);
+				return TOK_OPERATOR;
+			
+			}
+<server_set_value>[[:alnum:]][[:alnum:]]* {
+					BEGIN(server_set);
+					fprintf(stderr, "TOK<server_set>: VALUE[%s]\n", yytext);
+					strcpy(yylval->token.string, yytext);
+					return TOK_VALUE;
+			}
+<server_set_value>\" {
+					fprintf(stderr, "TOK<server_set>: QUOTE begin\n");
+				BEGIN(server_set_quoted);
+				yylval->token.pstr = yylval->token.string;
+			}
+<server_set_quoted>\" {
+			BEGIN(server);
+			/* end of quoted string */
+			*yylval->token.pstr = '\0';
+			yylval->token.pstr = yylval->token.string;
+			return TOK_VALUE;
+		}
+<server_set_quoted>\n {
+			//fprintf(stderr, "unterminated string\n");
+			return 0;
+		}
+<server_set_quoted>\\n *yylval->token.pstr++ = '\n';
+<server_set_quoted>\\t *yylval->token.pstr++ = '\t';
+<server_set_quoted>\\r *yylval->token.pstr++ = '\r';
+<server_set_quoted>\\b *yylval->token.pstr++ = '\b';
+<server_set_quoted>\\f *yylval->token.pstr++ = '\f';
+<trigger_quote>[^\\\n\"]+ {
+			char  *yptr = yytext;
+			//fprintf(stderr, "yytext='%c'\n", *yptr);
+			while (*yptr) *yylval->token.pstr++ = *yptr++;
+		}
+
+
+
+trigger 	{
+			fprintf(stderr, "TOK_TRIGGER\n"); 
+			strcpy(yylval->token.string, yytext);
+			BEGIN(trigger);
+			return TOK_TRIGGER;
+		}
+<trigger>[a-z][a-z0-9\._]* {
+				fprintf(stderr, "<trigger>:TOK_VAR(%s)\n", yytext);
+				strcpy(yylval->token.string, yytext);
+				return TOK_VARIABLE;
+		}
+<trigger>\~ {
+				fprintf(stderr, "<trigger>:TOK_OP(%s)\n", yytext);
+				strcpy(yylval->token.string, yytext);
+				return TOK_OPERATOR;
+		}
+<trigger>\!\~  {
+				fprintf(stderr, "<trigger>:TOK_OP(%s)\n", yytext);
+				strcpy(yylval->token.string, yytext);
+				return TOK_OPERATOR;
+		}
+<trigger>=  {
+				fprintf(stderr, "<trigger>:TOK_OP(%s)\n", yytext);
+				strcpy(yylval->token.string, yytext);
+				return TOK_OPERATOR;
+		}
+<trigger>\!= {
+				fprintf(stderr, "<trigger>:TOK_OP(%s)\n", yytext);
+				strcpy(yylval->token.string, yytext);
+				return TOK_OPERATOR;
+		}
+
+<trigger>\" {
+			BEGIN(trigger_quote); yylval->token.pstr = yylval->token.string;
+		}
+<trigger_quote>\" {
+			BEGIN(trigger);
+			/* end of quoted string */
+			*yylval->token.pstr = '\0';
+			yylval->token.pstr = yylval->token.string;
+			return TOK_VALUE;
+		}
+<trigger_quote>\n {
+			//fprintf(stderr, "unterminated string\n");
+			return 0;
+		}
+<trigger_quote>\\n *yylval->token.pstr++ = '\n';
+<trigger_quote>\\t *yylval->token.pstr++ = '\t';
+<trigger_quote>\\r *yylval->token.pstr++ = '\r';
+<trigger_quote>\\b *yylval->token.pstr++ = '\b';
+<trigger_quote>\\f *yylval->token.pstr++ = '\f';
+<trigger_quote>[^\\\n\"]+ {
+			char  *yptr = yytext;
+			//fprintf(stderr, "yytext='%c'\n", *yptr);
+			while (*yptr) *yylval->token.pstr++ = *yptr++;
+		}
+<trigger_quote>\\(.|\n) *yylval->token.pstr++ = yytext[1];
+
+
+
+<trigger>[[:alnum:]]+ {
+			strcpy(yylval->token.string, yytext);
+			return TOK_VALUE;
+		}
+<trigger>\{ 		{
+			BEGIN(lua_internal);
+			strcpy(yylval->token.string, yytext); 
+			return TOK_BEGIN_GROUP;
+		}
+<lua_internal>\} 		{
+			BEGIN(INITIAL);
+			strcpy(yylval->token.string, yytext); 
+			return TOK_END_GROUP;
+		}
+<lua_internal>[^\}]*  {
+			strcat(yylval->token.string, yytext);
+			return TOK_SCRIPT;
+		}
+.		{fprintf(stderr, "yytext[%s]\n", yytext); }
+
+%%
+
+#if 0
+main()
+{
+	YYSTYPE	_yylval;
+	void 	*myscanner = NULL;
+	yylex_init(&myscanner);
+	yylex(&_yylval, &myscanner); 
+	/*
+		yylex_destroy(&myscanner);
+	*/
+}
+#endif
+void yyerror(YYLTYPE *l, site_context_t *context, char *msg)
+{
+	fprintf(stderr, "YYERROR:'%s (%d,%d:%d,%d)'\n", msg, l->first_line, l->first_column, l->last_line, l->last_column);
+}

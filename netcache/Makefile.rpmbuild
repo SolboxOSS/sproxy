@@ -1,0 +1,10 @@
+#
+# Makefile.rpmbuild for volgen-lighttpd RPM build
+#
+
+include /usr/local/solbox-rpm-util/makefile/Makefile.header
+SPECFILE=netcache.spec
+
+all: rpm
+
+include /usr/local/solbox-rpm-util/makefile/Makefile.footer

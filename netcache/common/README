@@ -1,0 +1,6 @@
+* PURPOSE
+ 	- defined data structure and API shared between netcache main shared library and loadable plugins
+* data types
+	- block
+	- stat 
+

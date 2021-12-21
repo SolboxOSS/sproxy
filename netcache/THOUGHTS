@@ -1,0 +1,18 @@
+(1) dynamic lock pool management
+	- shared/exclusive support
+	- keep small lock pool as long as possible
+
+
+
+* open flow
+	- does it really need exclusive lock? if not, how can we determine?
+
+
+* origin activity monitor
+	- deliverables (to cover various type origin, information encoded into string)
+		- origin address(ipaddress?) in string
+		- request info in string
+		- reply info  in string
+		- time elapsed in microsec
+		- sent bytes in bytes
+		- received bytes in bytes

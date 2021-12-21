@@ -1,0 +1,54 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+LB_POLICY	lb.c	691;"	d	file:
+LB_TRANSACTION	lb.c	55;"	d	file:
+MAX_LOOP	lb.c	687;"	d	file:
+MAX_POOLS	lb.c	688;"	d	file:
+host	lb.c	/^	char 	host[128];$/;"	m	struct:__anon1	file:
+lb_add_pool	lb.c	/^lb_add_pool(lb_t *lb, lb_pool_t *pool, int priority)$/;"	f
+lb_check_online	lb.c	/^lb_check_online(lb_t *lb, nc_uint64_t phandle)$/;"	f	file:
+lb_check_version	lb.c	/^lb_check_version(lb_t *lb, nc_pool_handle_t v)$/;"	f
+lb_create	lb.c	/^lb_create(void (*expire_object)(void *object), void (*free_object)(void *object), nc_int32_t (*probe_online)(lb_t *lb, lb_pool_t*pool_id, void *ud))$/;"	f
+lb_create_pool	lb.c	/^lb_create_pool(const char *id, void *userdata)$/;"	f
+lb_del_pool	lb.c	/^lb_del_pool(lb_t *lb, const char *id)$/;"	f
+lb_destroy	lb.c	/^lb_destroy(lb_t *lb)$/;"	f
+lb_destroy_pool	lb.c	/^lb_destroy_pool(lb_pool_t *pool)$/;"	f	file:
+lb_expire_object	lb.c	/^lb_expire_object(void *vlo)$/;"	f	file:
+lb_find_next_pool_online_nolock	lb.c	/^lb_find_next_pool_online_nolock(lb_t *lb, nc_uint64_t current)$/;"	f	file:
+lb_find_object_nolock	lb.c	/^lb_find_object_nolock(lb_pool_t *pool, const char *object_id)$/;"	f	file:
+lb_find_pool_byid_nolock	lb.c	/^lb_find_pool_byid_nolock(lb_t *lb, const char *id)$/;"	f	file:
+lb_free_object_nolock	lb.c	/^lb_free_object_nolock(lb_object_t *lo, int timerrun)$/;"	f	file:
+lb_get_pindex	lb.c	/^lb_get_pindex(nc_uint64_t cv)$/;"	f
+lb_get_policy_pool	lb.c	/^lb_get_policy_pool(lb_t *lb, const void *hint)$/;"	f
+lb_is_online_nolock	lb.c	/^lb_is_online_nolock(lb_pool_t *pool)$/;"	f	file:
+lb_make_index	lb.c	/^lb_make_index(nc_uint32_t conf, nc_uint32_t eind)$/;"	f	file:
+lb_off_pool	lb.c	/^lb_off_pool(void *ud)$/;"	f	file:
+lb_policy_hash	lb.c	/^lb_policy_hash(lb_t *lb, const void *hint) $/;"	f	file:
+lb_policy_ps	lb.c	/^lb_policy_ps(lb_t *lb, const void *hint) $/;"	f	file:
+lb_policy_rr	lb.c	/^lb_policy_rr(lb_t *lb, const void *hint) $/;"	f	file:
+lb_pool_by_index	lb.c	/^lb_pool_by_index(lb_t *lb, nc_uint32_t pi)$/;"	f
+lb_pool_compare_id	lb.c	/^lb_pool_compare_id(const void *a, const void *b)$/;"	f	file:
+lb_pool_compare_pri	lb.c	/^lb_pool_compare_pri(const void *a, const void *b)$/;"	f	file:
+lb_pool_count_online	lb.c	/^lb_pool_count_online(lb_t *lb)$/;"	f
+lb_pool_set_online	lb.c	/^lb_pool_set_online(lb_t *lb, lb_pool_t *pool, int onoff, int needrecover)$/;"	f
+lb_pool_set_online_nolock	lb.c	/^lb_pool_set_online_nolock(lb_t *lb, lb_pool_t *pool, int onoff, int needrecover)$/;"	f	file:
+lb_pool_userdata	lb.c	/^lb_pool_userdata(lb_t *lb, nc_pool_handle_t ph)$/;"	f
+lb_pop_object	lb.c	/^lb_pop_object(lb_t *lb, nc_pool_handle_t poolinfo, const char *object_id)$/;"	f
+lb_print	lb.c	/^lb_print(lb_t *lb)$/;"	f
+lb_probe_pool	lb.c	/^lb_probe_pool(lb_t *lb, lb_pool_t *pool)$/;"	f	file:
+lb_probe_pools	lb.c	/^lb_probe_pools(void *ud)$/;"	f	file:
+lb_push_object	lb.c	/^lb_push_object(lb_t *lb, nc_pool_handle_t poolinfo, void *object, const char *object_id)$/;"	f
+lb_rebuild_order	lb.c	/^lb_rebuild_order(lb_t *lb)$/;"	f	file:
+lb_remove_object_nolock	lb.c	/^lb_remove_object_nolock(lb_pool_t *pool, lb_object_t *lo)$/;"	f	file:
+lb_set_policy	lb.c	/^lb_set_policy(lb_t *lb, nc_policy_type_t pt)$/;"	f
+lb_set_pool_ioflag	lb.c	/^lb_set_pool_ioflag(lb_t *lb, lb_pool_t *pool, nc_uint32_t flags)$/;"	f
+lb_update_pri_index	lb.c	/^lb_update_pri_index(lb_t *lb)$/;"	f	file:
+main	lb.c	/^main()$/;"	f
+t_offtest	lb.c	/^	bt_timer_t		t_offtest;$/;"	v
+test_session_t	lb.c	/^} test_session_t;$/;"	t	typeref:struct:__anon1	file:
+tlb_free_session	lb.c	/^tlb_free_session(void *ud)$/;"	f	file:
+tlb_probe_online	lb.c	/^tlb_probe_online(lb_t *lb, lb_pool_t *pool, void *ud)$/;"	f

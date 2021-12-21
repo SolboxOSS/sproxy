@@ -1,0 +1,7 @@
+data structure
+	nc_asio_vector_t
+	nc_asio_context_t
+	fc_blk_t
+	nc_handle_t
+	nc_stat_cache_t
+	

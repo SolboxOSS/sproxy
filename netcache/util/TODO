@@ -1,0 +1,2 @@
+nc_chkfs [-C <cache_path>] [-r]
+	-r : recover if found error

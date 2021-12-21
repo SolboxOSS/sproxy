@@ -1,0 +1,14 @@
+
+
+olleh_com = {
+	defines {
+		client_ip
+	}
+	acl {
+		if (header.host belogsto allowed
+	}
+	rewrite = {
+		if (header.host = "babo") 
+	}
+
+}

@@ -1,0 +1,197 @@
+# Wedit Makefile for project ansicStl
+SRCDIR=.
+CFLAGS=-I. -O -A  -p6 -ansic  -g2
+CC=lcc.exe
+LINKER=lcclnk.exe
+HEADERS=containers.h ccl_internal.h valarray.h valarraygen.h
+OBJS=\
+	buffer.obj \
+	vector.obj \
+	bitstrings.obj \
+	bloom.obj \
+	error.obj \
+	deque.obj \
+	doublelist.obj \
+	dictionary.obj \
+	dlist.obj \
+	fgetline.obj \
+	generic.obj \
+	hashtable.obj \
+	heap.obj \
+	iMask.obj \
+	intlist.obj \
+	list.obj \
+	longlonglist.obj \
+	malloc_debug.obj \
+	pool.obj \
+	pooldebug.obj \
+	qsortex.obj \
+	queue.obj \
+	redblacktree.obj \
+	scapegoat.obj \
+	searchtree.obj \
+	strcollection.obj \
+	valarraydouble.obj \
+	valarrayint.obj \
+	valarrayuint.obj \
+	valarraysize_t.obj \
+	valarrayfloat.obj \
+	valarraylongdouble.obj \
+	valarrayuint.obj \
+	valarraylonglong.obj \
+	valarrayulonglong.obj \
+	valarrayshort.obj \
+	observer.obj \
+	memorymanager.obj \
+	priorityqueue.obj \
+	sequential.obj \
+	wstrcollection.obj \
+
+LIST_GENERIC=listgen.c listgen.h
+
+EXE=dotest.exe
+
+LIBS=ccl.lib
+
+$(EXE):	$(OBJS) Makefile test.obj ccl.lib
+	$(LINKER) -subsystem console -o $(EXE) test.obj $(LIBS)
+
+ccl.lib: $(OBJS) 
+	lcclib /out:ccl.lib $(OBJS)
+
+# Build arraylist.c
+arraylist.obj: $(HEADERS) $(SRCDIR)\arraylist.c $(HEADERS)
+	$(CC) -c $(CFLAGS) $(SRCDIR)\arraylist.c
+
+# Build bitstrings.c
+
+bitstrings.obj: $(HEADERS) $(SRCDIR)\bitstrings.c $(HEADERS)
+	$(CC) -c $(CFLAGS) $(SRCDIR)\bitstrings.c
+
+bloom.obj: $(HEADERS) $(SRCDIR)\bloom.c $(HEADERS)
+	$(CC) -c $(CFLAGS) $(SRCDIR)\bloom.c
+
+error.obj: $(HEADERS) $(SRCDIR)\error.c $(HEADERS)
+	$(CC) -c $(CFLAGS) $(SRCDIR)\error.c
+
+# Build deque.c
+deque.obj: $(HEADERS) $(SRCDIR)\deque.c $(HEADERS)
+	$(CC) -c $(CFLAGS) $(SRCDIR)\deque.c
+
+dictionary.obj: $(HEADERS) $(SRCDIR)\dictionary.c $(HEADERS)
+	$(CC) -c $(CFLAGS) $(SRCDIR)\dictionary.c
+
+dlist.obj: $(HEADERS) $(SRCDIR)\dlist.c $(HEADERS)
+	$(CC) -c $(CFLAGS) $(SRCDIR)\dlist.c
+
+fgetline.obj: $(HEADERS) $(SRCDIR)\fgetline.c $(HEADERS)
+	$(CC) -c $(CFLAGS) $(SRCDIR)\fgetline.c
+
+generic.obj:	$(HEADERS) generic.c $(HEADERS)
+	$(CC) -c $(CFLAGS) $(SRCDIR)\generic.c
+
+hashtable.obj: $(HEADERS) $(SRCDIR)\hashtable.c $(HEADERS)
+	$(CC) -c $(CFLAGS) $(SRCDIR)\hashtable.c
+
+heap.obj: $(HEADERS) $(SRCDIR)\heap.c $(HEADERS)
+	$(CC) -c $(CFLAGS) $(SRCDIR)\heap.c
+
+# Build list.c
+LIST_C= $(HEADERS)
+
+list.obj: $(LIST_C) $(SRCDIR)\list.c
+	$(CC) -c $(CFLAGS) $(SRCDIR)\list.c
+
+# Build malloc_debug.c
+MALLOC_DEBUG_C= $(HEADERS)
+
+malloc_debug.obj: $(SRCDIR)\malloc_debug.c $(HEADERS)
+	$(CC) -c $(CFLAGS) $(SRCDIR)\malloc_debug.c
+
+# Build pool.c
+
+pool.obj: $(SRCDIR)\pool.c $(HEADERS)
+	$(CC) -c $(CFLAGS) $(SRCDIR)\pool.c
+
+# Build pooldebug.c
+
+pooldebug.obj:  $(SRCDIR)\pooldebug.c $(HEADERS)
+	$(CC) -c $(CFLAGS) $(SRCDIR)\pooldebug.c
+
+# Build qsortex.c
+
+qsortex.obj:  $(SRCDIR)\qsortex.c $(HEADERS)
+	$(CC) -c $(CFLAGS) $(SRCDIR)\qsortex.c
+
+# Build redblacktree.c
+
+redblacktree.obj:  $(SRCDIR)\redblacktree.c $(HEADERS) 
+	$(CC) -c $(CFLAGS) $(SRCDIR)\redblacktree.c
+
+# Build scapegoat.c
+
+scapegoat.obj: $(HEADERS) $(SRCDIR)\scapegoat.c $(HEADERS)
+	$(CC) -c $(CFLAGS) $(SRCDIR)\scapegoat.c
+
+# Build searchtree.c
+
+searchtree.obj: $(HEADERS) $(SRCDIR)\searchtree.c $(HEADERS)
+	$(CC) -c $(CFLAGS) $(SRCDIR)\searchtree.c
+
+# Build strcollection.c
+
+strcollection.obj: $(HEADERS) $(SRCDIR)\strcollection.c strcollectiongen.c $(HEADERS)
+	$(CC) -c $(CFLAGS) $(SRCDIR)\strcollection.c
+
+queue.obj:	$(SRCDIR)\containers.h queue.c $(HEADERS)
+	$(CC) $(CFLAGS) queue.c
+
+
+valarrayint.obj:	valarrayint.c valarraygen.c   $(HEADERS)
+	$(CC) -c $(CFLAGS) $(SRCDIR)\valarrayint.c
+
+valarrayuint.obj:	valarrayuint.c valarraygen.c   $(HEADERS)
+	$(CC) -c $(CFLAGS) $(SRCDIR)\valarrayuint.c
+
+valarrayfloat.obj:	valarrayfloat.c valarraygen.c   $(HEADERS)
+	$(CC) -c $(CFLAGS) $(SRCDIR)\valarrayfloat.c
+
+valarraydouble.obj:	valarraydouble.c valarraygen.c   $(HEADERS)
+	$(CC) -c $(CFLAGS) $(SRCDIR)\valarraydouble.c
+
+valarraylongdouble.obj:	valarraylongdouble.c valarraygen.c   $(HEADERS)
+	$(CC) -c $(CFLAGS) $(SRCDIR)\valarraylongdouble.c
+
+ort.obj:	valarrayshort.c valarraygen.c  valarray.h $(HEADERS)
+	$(CC) -c $(CFLAGS) $(SRCDIR)\ort.c
+
+valarraysize_t.obj:	valarraysize_t.c valarraygen.c   $(HEADERS)
+	$(CC) -c $(CFLAGS) $(SRCDIR)\valarraysize_t.c
+
+valarrayulonglong.obj:     valarrayulonglong.c valarraygen.c   $(HEADERS)
+	$(CC) -c $(CFLAGS) $(SRCDIR)\valarrayulonglong.c
+
+sequential.obj:	sequential.c $(HEADERS)
+	$(CC) $(CFLAGS) $(SRCDIR)\sequential.c
+
+memorymanager.obj:	$(HEADERS) memorymanager.c
+	$(CC) $(CFLAGS) $(SRCDIR)\memorymanager.c
+
+intarray.obj:	$(HEADERS) intarray.c
+	$(CC) $(CFLAGS) $(SRCDIR)\intarray.c
+
+iMask.obj:	iMask.c $(HEADERS)
+	$(CC) $(CFLAGS) iMask.c
+
+wstrcollection.obj:	wstrcollection.c strcollectiongen.c containers.h ccl_internal.h
+	$(CC) $(CFLAGS) wstrcollection.c
+
+test.obj: $(TEST_C) $(SRCDIR)\test.c $(HEADERS)
+	$(CC) -c $(CFLAGS) $(SRCDIR)\test.c
+intlist.obj: intlist.c intlist.h ccl_internal.h containers.h $(LIST_GENERIC)
+
+link:
+	$(LINKER)  -subsystem console -o $(SRCDIR)\lcc\ansicstl.exe $(OBJS) $(LIBS)
+
+clean:
+	del $(OBJS) dotest.exe ccl.lib

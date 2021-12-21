@@ -1,0 +1,71 @@
+#!/bin/bash
+# colorise the text lines fro standard input
+# written by weon@solbox.com
+program=${0##*/}
+usage()
+{
+	cat <<EO
+Usage: $program [options]
+options:
+  --red=<string> & colours the give string with red 
+  --yellow=<string> & colours the give string with yellow 
+  --green=<string> & colours the give string with green 
+EO
+}
+
+SHORTOPTS="r:y:g:"
+LONGOPTS="red:,yellow:,green:"
+ARGS=$(getopt -s bash --options $SHORTOPTS \
+	--longoptions $LONGOPTS --name $program -- "$@" )
+
+eval set -- "$ARGS"
+
+
+
+R="ERROR|WARN"
+Y="INFO"
+G=""
+while true
+do
+echo $1
+	case $1 in
+		-r|--red)
+			shift
+			R=$1
+			;;
+		-y|--yellow)
+			shift
+			Y=$1
+			;;
+		-g|--green)
+			shift
+			G=$1
+			;;
+		--)
+			break
+			;;
+		*)
+			usage
+			exit 0
+			;;
+	esac
+	shift
+done
+
+if [ "X$G" = "X" ];then
+	G="__NULL__"
+fi
+if [ "X$Y" = "X" ];then
+	Y="__NULL__"
+fi
+if [ "X$G" = "X" ];then
+	G="__NULL__"
+fi
+
+awk -v Rvar="$R" -v Gvar="$G" -v Yvar="$Y" 'BEGIN { red=31;green=32;yellow=33;  pr=0;} 
+match($0, Gvar) {printf "\033[%dm%s\033[0m\n", green, $0; pr=1;}
+match($0, Yvar) { if ( pr == 0) printf "\033[%dm%s\033[0m\n", yellow, $0; pr=1;}
+match($0, Rvar) { if ( pr == 0) printf "\033[%dm%s\033[0m\n", red, $0; pr=1;}
+{if ( pr == 0) print $0;pr=0;}
+END {system("");}
+'

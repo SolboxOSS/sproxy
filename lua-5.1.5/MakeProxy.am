@@ -1,0 +1,24 @@
+all-local:
+        cd subdir && $(MAKE) $(AM_MAKEFLAGS) local
+check-local:
+        cd subdir && $(MAKE) $(AM_MAKEFLAGS) test
+clean-local:
+        cd subdir && $(MAKE) $(AM_MAKEFLAGS) clean
+
+# Assuming the package knows how to install itself
+install-data-local:
+        cd subdir && $(MAKE) $(AM_MAKEFLAGS) install
+install-exec-local:
+        cd subdir && $(MAKE) $(AM_MAKEFLAGS) install
+uninstall-local:
+
+# Distribute files from here.
+EXTRA_DIST = 	doc/contents.html  doc/cover.png  doc/logo.gif  doc/lua.1  doc/luac.1  doc/luac.html  doc/lua.css  doc/lua.html  doc/manual.css  doc/manual.html  doc/readme.html \
+				src/lapi.c     src/lbaselib.c  src/ldebug.c  src/ldump.c  src/lgc.h     src/llex.h      src/lmem.h     src/lopcodes.c  src/lparser.h  src/lstring.h  \
+				src/ltablib.c  src/luac.c     src/lundump.c  src/lzio.c src/lapi.h     src/lcode.c     src/ldebug.h  src/lfunc.c  src/linit.c   src/llimits.h   src/loadlib.c  \
+				src/lopcodes.h  src/lstate.c   src/lstrlib.c  src/ltm.c      src/luaconf.h  src/lundump.h  src/lzio.h \
+				src/lauxlib.c  src/lcode.h     src/ldo.c     src/lfunc.h  src/liolib.c  src/lmathlib.c  src/lobject.c  src/loslib.c    src/lstate.h   \
+				src/ltable.c   src/ltm.h      src/lua.h      src/lvm.c      src/print.c src/lauxlib.h  src/ldblib.c    src/ldo.h     src/lgc.c    src/llex.c    \
+				src/lmem.c      src/lobject.h  src/lparser.c   src/lstring.c  src/ltable.h   src/lua.c      src/lualib.h   src/lvm.h
+
+

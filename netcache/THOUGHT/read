@@ -1,0 +1,48 @@
+norandom=1 인경우
+
+inode 생성
+	norandom = 1
+	state = NOTFILLED
+	complete = 0
+	mappedblks = 0
+
+read(inode, off, len)
+{
+	remained = len
+	while (!EOF(inode) && rem > 0 {
+		blk = blk_get_or_fault(blkno);
+
+		if (!blk) {
+			/* check EOF */
+		}
+
+		copy blk
+	}
+	
+}
+
+blk_fault()
+	v = asio_new(ENTIRE,...)
+
+
+blk_prepare(offset)
+	iob가 모자르면, iob할당
+	blkno = BLKNO(offset)
+
+	inode_resize()
+
+
+fix_length( length)
+{
+	size = length;
+	nsize = length;
+}
+
+
+inode_resize(length)
+	maxblk = BLKNO(length);
+
+	if (maxblk >= mappedblks) {
+		mappedblks += 최소 증가 (약 4blks?)
+		모든 mapping 크기 증가
+	}

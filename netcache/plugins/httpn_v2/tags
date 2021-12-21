@@ -1,0 +1,727 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+ALLOW_MAX_REDIRECTION_COUNT	session_pool.c	58;"	d	file:
+ASSERT_IOCB	httpn_driver.h	41;"	d
+ATTRIBUTE_CONSTRUCTOR	http_driver.c	36;"	d	file:
+ATTRIBUTE_DESTRUCTOR	http_driver.c	37;"	d	file:
+Base64decode	base64.c	/^int Base64decode(char *bufplain, const char *bufcoded)$/;"	f
+Base64decode_len	base64.c	/^int Base64decode_len(const char *bufcoded)$/;"	f
+Base64encode	base64.c	/^int Base64encode(char *encoded, const char *string, int len)$/;"	f
+Base64encode_len	base64.c	/^int Base64encode_len(int len)$/;"	f
+CCI_END	http_driver.c	252;"	d	file:
+CCI_MAX_AGE	http_driver.c	248;"	d	file:
+CCI_MUST_REVALIDATE	http_driver.c	244;"	d	file:
+CCI_NO_CACHE	http_driver.c	238;"	d	file:
+CCI_NO_STORE	http_driver.c	240;"	d	file:
+CCI_NO_TRANSFORM	http_driver.c	242;"	d	file:
+CCI_PRIVATE	http_driver.c	236;"	d	file:
+CCI_PROXY_REVALIDATE	http_driver.c	246;"	d	file:
+CCI_PUBLIC	http_driver.c	234;"	d	file:
+CCI_S_MAXAGE	http_driver.c	250;"	d	file:
+CHECK_BIT	http_driver.c	1955;"	d	file:
+CHECK_BUGGY_URL	http_request.c	91;"	d	file:
+CHK_IOCB_OPT	httpn_driver.h	60;"	d
+CHK_OPT	httpn_driver.h	54;"	d
+CURLOFF_FLOAT	iocb.c	354;"	d	file:
+DAV_POOLDOWN_BREAK	session_pool.c	46;"	d	file:
+DAV_POOLDOWN_RETURN	session_pool.c	40;"	d	file:
+DEBUG_IOCB	httpn_driver.h	20;"	d
+DEFAULT_DNS_CACHE_TIMEOUT	http_driver.c	93;"	d	file:
+DEFAULT_ORIGIN_CONNECT_TIMEOUT	http_driver.c	86;"	d	file:
+DEFAULT_ORIGIN_TRANSFER_TIMEOUT	http_driver.c	87;"	d	file:
+DEFER_TIME	http_driver.c	2425;"	d	file:
+DPS_DOWN	httpn_driver.h	/^	DPS_DOWN = 0,$/;"	e	enum:__anon14
+DPS_ONLINE	httpn_driver.h	/^	DPS_ONLINE = 1,$/;"	e	enum:__anon14
+DPS_PROBING	httpn_driver.h	/^	DPS_PROBING = 2,$/;"	e	enum:__anon14
+DP_CURRENT	httpn_driver.h	/^	DP_CURRENT 	= 0,$/;"	e	enum:__anon17
+DP_NEXT	httpn_driver.h	/^	DP_NEXT 	= 0,$/;"	e	enum:__anon17
+DRIVER_NAME	httpn_driver.h	529;"	d
+GMT_DATEFORMAT	http_driver.c	40;"	d	file:
+HAVE_SSL	session_pool.c	37;"	d	file:
+HCD_COUNT	http_codes.c	77;"	d	file:
+HMC_DESTROY	httpn_driver.h	/^	HMC_DESTROY 	= 4,$/;"	e	enum:__anon9
+HMC_FREED	httpn_driver.h	/^	HMC_FREED 		= 5$/;"	e	enum:__anon9
+HMC_NONE	httpn_driver.h	/^	HMC_NONE 		= 0,$/;"	e	enum:__anon9
+HMC_REMOVE	httpn_driver.h	/^	HMC_REMOVE 		= 3,$/;"	e	enum:__anon9
+HMC_RESUME	httpn_driver.h	/^	HMC_RESUME 		= 2,$/;"	e	enum:__anon9
+HMC_SCHEDULE	httpn_driver.h	/^	HMC_SCHEDULE 	= 1,$/;"	e	enum:__anon9
+HS_BODY	httpn_driver.h	/^	HS_BODY			= 5,$/;"	e	enum:__anon6
+HS_DONE	httpn_driver.h	/^	HS_DONE			= 6,$/;"	e	enum:__anon6
+HS_EOH	httpn_driver.h	/^	HS_EOH			= 4, \/* end of header *\/$/;"	e	enum:__anon6
+HS_HEADER_IN	httpn_driver.h	/^	HS_HEADER_IN 	= 3,$/;"	e	enum:__anon6
+HS_HEADER_OUT	httpn_driver.h	/^	HS_HEADER_OUT 	= 1,$/;"	e	enum:__anon6
+HS_INIT	httpn_driver.h	/^	HS_INIT			= 0,$/;"	e	enum:__anon6
+HS_MAX	httpn_driver.h	/^	HS_MAX			= 7$/;"	e	enum:__anon6
+HS_POSTING	httpn_driver.h	/^	HS_POSTING		= 2,$/;"	e	enum:__anon6
+HS_VALID	httpn_driver.h	144;"	d
+HTTPDE_CRITICAL	httpn_driver.h	33;"	d
+HTTPDE_OK	httpn_driver.h	31;"	d
+HTTPDE_RETRY	httpn_driver.h	32;"	d
+HTTPDE_USER	httpn_driver.h	37;"	d
+HTTPN_AGENT	http_request.c	37;"	d	file:
+HTTPN_NEED_RESUME	httpn_driver.h	531;"	d
+HTTPN_WAIT_CMD_DONE	http_request.c	100;"	d	file:
+HTTP_ACCEPTED	http_codes.h	8;"	d
+HTTP_ALREADY_REPORTED	http_codes.h	14;"	d
+HTTP_API_GETATTR	httpn_driver.h	/^typedef enum {HTTP_API_NULL = 0, HTTP_API_GLOBAL=1, HTTP_API_GETATTR=2, HTTP_API_READ=3, HTTP_API_WRITE=4, HTTP_API_PROBE = 5} httpn_api_t;$/;"	e	enum:__anon4
+HTTP_API_GLOBAL	httpn_driver.h	/^typedef enum {HTTP_API_NULL = 0, HTTP_API_GLOBAL=1, HTTP_API_GETATTR=2, HTTP_API_READ=3, HTTP_API_WRITE=4, HTTP_API_PROBE = 5} httpn_api_t;$/;"	e	enum:__anon4
+HTTP_API_NULL	httpn_driver.h	/^typedef enum {HTTP_API_NULL = 0, HTTP_API_GLOBAL=1, HTTP_API_GETATTR=2, HTTP_API_READ=3, HTTP_API_WRITE=4, HTTP_API_PROBE = 5} httpn_api_t;$/;"	e	enum:__anon4
+HTTP_API_PROBE	httpn_driver.h	/^typedef enum {HTTP_API_NULL = 0, HTTP_API_GLOBAL=1, HTTP_API_GETATTR=2, HTTP_API_READ=3, HTTP_API_WRITE=4, HTTP_API_PROBE = 5} httpn_api_t;$/;"	e	enum:__anon4
+HTTP_API_READ	httpn_driver.h	/^typedef enum {HTTP_API_NULL = 0, HTTP_API_GLOBAL=1, HTTP_API_GETATTR=2, HTTP_API_READ=3, HTTP_API_WRITE=4, HTTP_API_PROBE = 5} httpn_api_t;$/;"	e	enum:__anon4
+HTTP_API_WRITE	httpn_driver.h	/^typedef enum {HTTP_API_NULL = 0, HTTP_API_GLOBAL=1, HTTP_API_GETATTR=2, HTTP_API_READ=3, HTTP_API_WRITE=4, HTTP_API_PROBE = 5} httpn_api_t;$/;"	e	enum:__anon4
+HTTP_AUTHENTICATION_REQUIRED	http_codes.h	67;"	d
+HTTP_BAD_GATEWAY	http_codes.h	59;"	d
+HTTP_BAD_REQUEST	http_codes.h	25;"	d
+HTTP_BANDWIDTH_LIMIT_EXPECTED	http_codes.h	65;"	d
+HTTP_BLOCKED_BY_WINDOW_PARENTAL_CONTROL	http_codes.h	55;"	d
+HTTP_CLIENT_CLOSED_REQUEST	http_codes.h	56;"	d
+HTTP_CONFLICT	http_codes.h	34;"	d
+HTTP_CONTINUE	http_codes.h	3;"	d
+HTTP_CREATED	http_codes.h	7;"	d
+HTTP_CUSTOM	httpn_driver.h	/^typedef enum {HTTP_NULL=0, HTTP_HEAD=1, HTTP_PUT=2, HTTP_GET=3, HTTP_MKDIR=4, HTTP_DELETE=5, HTTP_POST=6, HTTP_CUSTOM=7} httpn_method_t;$/;"	e	enum:__anon5
+HTTP_DELETE	httpn_driver.h	/^typedef enum {HTTP_NULL=0, HTTP_HEAD=1, HTTP_PUT=2, HTTP_GET=3, HTTP_MKDIR=4, HTTP_DELETE=5, HTTP_POST=6, HTTP_CUSTOM=7} httpn_method_t;$/;"	e	enum:__anon5
+HTTP_ENHANCE_YOUR_CALM	http_codes.h	44;"	d
+HTTP_EXPECTATION_FAILED	http_codes.h	42;"	d
+HTTP_FAILED_DEPENDENCY	http_codes.h	47;"	d
+HTTP_FORBIDDEN	http_codes.h	28;"	d
+HTTP_GATEWAY_TIMEOUT	http_codes.h	61;"	d
+HTTP_GET	httpn_driver.h	/^typedef enum {HTTP_NULL=0, HTTP_HEAD=1, HTTP_PUT=2, HTTP_GET=3, HTTP_MKDIR=4, HTTP_DELETE=5, HTTP_POST=6, HTTP_CUSTOM=7} httpn_method_t;$/;"	e	enum:__anon5
+HTTP_GONE	http_codes.h	35;"	d
+HTTP_HEAD	httpn_driver.h	/^typedef enum {HTTP_NULL=0, HTTP_HEAD=1, HTTP_PUT=2, HTTP_GET=3, HTTP_MKDIR=4, HTTP_DELETE=5, HTTP_POST=6, HTTP_CUSTOM=7} httpn_method_t;$/;"	e	enum:__anon5
+HTTP_IM_TEAPOT	http_codes.h	43;"	d
+HTTP_IM_USED	http_codes.h	15;"	d
+HTTP_INSUFFICIENT_STORAGE	http_codes.h	64;"	d
+HTTP_INTERNAL_ERROR	http_codes.h	57;"	d
+HTTP_IO_DATA_AVAILABLE	httpn_driver.h	/^	HTTP_IO_DATA_AVAILABLE = 1,$/;"	e	enum:__anon16
+HTTP_IO_EOT	httpn_driver.h	/^	HTTP_IO_EOT = 3$/;"	e	enum:__anon16
+HTTP_IO_INPROGRESS	httpn_driver.h	/^	HTTP_IO_INPROGRESS = 2,$/;"	e	enum:__anon16
+HTTP_IO_READ	httpn_driver.h	73;"	d
+HTTP_IO_WAIT_INPUT	httpn_driver.h	/^	HTTP_IO_WAIT_INPUT = 0,$/;"	e	enum:__anon16
+HTTP_IO_WRITE	httpn_driver.h	74;"	d
+HTTP_LENGTH_REQUIRED	http_codes.h	36;"	d
+HTTP_LOCKED	http_codes.h	46;"	d
+HTTP_METHOD_NOT_ALLOWED	http_codes.h	30;"	d
+HTTP_MKDIR	httpn_driver.h	/^typedef enum {HTTP_NULL=0, HTTP_HEAD=1, HTTP_PUT=2, HTTP_GET=3, HTTP_MKDIR=4, HTTP_DELETE=5, HTTP_POST=6, HTTP_CUSTOM=7} httpn_method_t;$/;"	e	enum:__anon5
+HTTP_MOVED_PERMANANTLY	http_codes.h	17;"	d
+HTTP_MOVED_TEMPORARILY	http_codes.h	18;"	d
+HTTP_MPX_COUNT	httpn_driver.h	132;"	d
+HTTP_MULTIPLE_CHOICES	http_codes.h	16;"	d
+HTTP_MULTI_STATUS	http_codes.h	13;"	d
+HTTP_NON_AUTHORITATIVE_INFO	http_codes.h	9;"	d
+HTTP_NOT_ACCEPTABLE	http_codes.h	31;"	d
+HTTP_NOT_EXTENDED	http_codes.h	66;"	d
+HTTP_NOT_FOUND	http_codes.h	29;"	d
+HTTP_NOT_IMPLEMENTED	http_codes.h	58;"	d
+HTTP_NOT_MODIFIED	http_codes.h	20;"	d
+HTTP_NO_CONTENT	http_codes.h	10;"	d
+HTTP_NO_RESPONSE	http_codes.h	53;"	d
+HTTP_NULL	httpn_driver.h	/^typedef enum {HTTP_NULL=0, HTTP_HEAD=1, HTTP_PUT=2, HTTP_GET=3, HTTP_MKDIR=4, HTTP_DELETE=5, HTTP_POST=6, HTTP_CUSTOM=7} httpn_method_t;$/;"	e	enum:__anon5
+HTTP_OK	http_codes.h	6;"	d
+HTTP_PARTIAL_CONTENT	http_codes.h	12;"	d
+HTTP_PAYMENT_REQUIRED	http_codes.h	27;"	d
+HTTP_PERMANENT_REDIRECT	http_codes.h	24;"	d
+HTTP_POST	httpn_driver.h	/^typedef enum {HTTP_NULL=0, HTTP_HEAD=1, HTTP_PUT=2, HTTP_GET=3, HTTP_MKDIR=4, HTTP_DELETE=5, HTTP_POST=6, HTTP_CUSTOM=7} httpn_method_t;$/;"	e	enum:__anon5
+HTTP_PRECONDITION_FAILED	http_codes.h	37;"	d
+HTTP_PRECONDITION_FAILED_2	http_codes.h	50;"	d
+HTTP_PROCESSING	http_codes.h	5;"	d
+HTTP_PROXY_AUTHENTICATION_REQUIRED	http_codes.h	32;"	d
+HTTP_PUT	httpn_driver.h	/^typedef enum {HTTP_NULL=0, HTTP_HEAD=1, HTTP_PUT=2, HTTP_GET=3, HTTP_MKDIR=4, HTTP_DELETE=5, HTTP_POST=6, HTTP_CUSTOM=7} httpn_method_t;$/;"	e	enum:__anon5
+HTTP_REQUEST_ENTITY_TOO_LARGE	http_codes.h	38;"	d
+HTTP_REQUEST_HEADER_FIELDS_TOO_LARGE	http_codes.h	52;"	d
+HTTP_REQUEST_RANGE_NOT_SATISFIABLE	http_codes.h	41;"	d
+HTTP_REQUEST_TIMEOUT	http_codes.h	33;"	d
+HTTP_RESET_CONTENT	http_codes.h	11;"	d
+HTTP_RETRY_WITH	http_codes.h	54;"	d
+HTTP_SEE_OTHER	http_codes.h	19;"	d
+HTTP_SERVICE_UNAVAILABLE	http_codes.h	60;"	d
+HTTP_SWITCHING_PROTOCOLS	http_codes.h	4;"	d
+HTTP_SWITCH_PROXY	http_codes.h	22;"	d
+HTTP_TEMPORAL_REDIRECT	http_codes.h	23;"	d
+HTTP_TOO_MANY_REQUESTS	http_codes.h	51;"	d
+HTTP_TRY_CONTINUE	httpn_driver.h	526;"	d
+HTTP_TRY_FAILED	httpn_driver.h	527;"	d
+HTTP_TRY_STOP	httpn_driver.h	525;"	d
+HTTP_UNAUTHOIZED	http_codes.h	26;"	d
+HTTP_UNORDERED_COLLECTION	http_codes.h	48;"	d
+HTTP_UNPROCESSABLE_ENTITY	http_codes.h	45;"	d
+HTTP_UNSUPPORTED_MEDIA_TYPE	http_codes.h	40;"	d
+HTTP_UPGRADE_REQUIRED	http_codes.h	49;"	d
+HTTP_URL_TOO_LONG	http_codes.h	39;"	d
+HTTP_USE_PROXY	http_codes.h	21;"	d
+HTTP_VARIANT_ALSO_NEGOTIATES	http_codes.h	63;"	d
+HTTP_VERSION_NOT_SUPPORTED	http_codes.h	62;"	d
+IOCB_EVENT_BEGIN_TRY	httpn_driver.h	/^	IOCB_EVENT_BEGIN_TRY	= 1,$/;"	e	enum:__anon8
+IOCB_EVENT_END_TRY	httpn_driver.h	/^	IOCB_EVENT_END_TRY		= 6,$/;"	e	enum:__anon8
+IOCB_EVENT_EXECUTE	httpn_driver.h	/^	IOCB_EVENT_EXECUTE		= 0,$/;"	e	enum:__anon8
+IOCB_EVENT_FINISH	httpn_driver.h	/^	IOCB_EVENT_FINISH		= 7$/;"	e	enum:__anon8
+IOCB_EVENT_PAUSE_TRY	httpn_driver.h	/^	IOCB_EVENT_PAUSE_TRY	= 3,$/;"	e	enum:__anon8
+IOCB_EVENT_PROPERTY_DONE	httpn_driver.h	/^	IOCB_EVENT_PROPERTY_DONE	= 2,$/;"	e	enum:__anon8
+IOCB_EVENT_RESUME_TRY	httpn_driver.h	/^	IOCB_EVENT_RESUME_TRY	= 4,$/;"	e	enum:__anon8
+IOCB_EVENT_TIMEOUT_TRY	httpn_driver.h	/^	IOCB_EVENT_TIMEOUT_TRY	= 5,$/;"	e	enum:__anon8
+IOCB_MPX_FINISHED	httpn_driver.h	/^	IOCB_MPX_FINISHED	= 5$/;"	e	enum:__anon7
+IOCB_MPX_INIT	httpn_driver.h	/^	IOCB_MPX_INIT		= 0,$/;"	e	enum:__anon7
+IOCB_MPX_PAUSED	httpn_driver.h	/^	IOCB_MPX_PAUSED		= 3,$/;"	e	enum:__anon7
+IOCB_MPX_READY	httpn_driver.h	/^	IOCB_MPX_READY		= 1,$/;"	e	enum:__anon7
+IOCB_MPX_TRY_DONE	httpn_driver.h	/^	IOCB_MPX_TRY_DONE	= 4,$/;"	e	enum:__anon7
+IOCB_MPX_TRY_RUN	httpn_driver.h	/^	IOCB_MPX_TRY_RUN		= 2,$/;"	e	enum:__anon7
+IOCB_VALID_MAGIC	httpn_driver.h	147;"	d
+KEEP_BUGGY_URL	http_request.c	92;"	d	file:
+LB	http_driver.c	/^	lb_t					*LB;$/;"	m	struct:__anon1	file:
+LB	httpn_driver.h	/^	lb_t 				 *LB[2]; 		\/* 0:NC_CT_ORIGIN, 1:NC_CT_PARENT *\/$/;"	m	struct:httpn_driver_info
+MAX_HEADER_SIZE	httpn_driver.h	76;"	d
+MAX_IOCB_TOCLEAN	iocb.c	819;"	d	file:
+MAX_PATH_SIZE	httpn_driver.h	77;"	d
+MAX_SESSION_REUSE_LIMIT	session_pool.c	52;"	d	file:
+MAX_URL_SIZE	httpn_driver.h	78;"	d
+MB_LEN_MAX	http_driver.c	141;"	d	file:
+MPXOP_EPILOG	httpn_driver.h	/^	MPXOP_EPILOG=1$/;"	e	enum:__anon3
+MPXOP_PROLOG	httpn_driver.h	/^	MPXOP_PROLOG=0,$/;"	e	enum:__anon3
+MPX_RELAX	httpn_request.h	64;"	d
+MPX_TASK_CONTINUE	httpn_driver.h	94;"	d
+MPX_TASK_RESULT_COMPLETE	httpn_driver.h	91;"	d
+MPX_TASK_RESULT_PAUSED	httpn_driver.h	92;"	d
+MPX_TASK_STOP	httpn_driver.h	95;"	d
+MPX_TRANSACTION	httpn_request.h	61;"	d
+POOL_READABLE	httpn_driver.h	360;"	d
+POOL_WRITABLE	httpn_driver.h	361;"	d
+PROFILE_PERFORM_TIME	httpn_driver.h	21;"	d
+REQUEST_RETRIES	session_pool.c	53;"	d	file:
+RFC3986_RESERVED	http_request.c	714;"	d	file:
+RFC3986_UNRESERVED	http_request.c	715;"	d	file:
+SET_OPT	httpn_driver.h	51;"	d
+__HTTP_CODES_H__	http_codes.h	2;"	d
+__HTTP_REQUEST_H__	httpn_request.h	2;"	d
+___schedule_id	http_request.c	/^static nc_uint32_t 	___schedule_id = 0;$/;"	v	file:
+__cc_resp_el	http_driver.c	/^static cc_resp_element_t 	__cc_resp_el[] = {$/;"	v	file:
+__cnt_paused	http_request.c	/^long __cnt_paused		= 0;$/;"	v
+__cnt_running	http_request.c	/^long __cnt_running		= 0;$/;"	v
+__curl_inited	http_driver.c	/^static int    __curl_inited = 0;$/;"	v	file:
+__default_filter	http_driver.c	/^const char 	*__default_filter="Connection;Keep-Alive;Content-Length;Content-Range";$/;"	v
+__driver_instance_id	http_driver.c	/^static int 		__driver_instance_id = 0;$/;"	v	file:
+__http_code_dict	http_codes.c	/^} __http_code_dict[] = {$/;"	v	typeref:struct:tag_http_code
+__httpn_DRIVER_H__	httpn_driver.h	2;"	d
+__httpn_errno	http_driver.c	/^__thread int 	__httpn_errno = 0;$/;"	v
+__httpn_httpcode	http_driver.c	/^__thread int 	__httpn_httpcode = 0;$/;"	v
+__httpn_native	http_driver.c	/^cfs_origin_driver_t __httpn_native = {$/;"	v
+__max_read_tries	http_driver.c	/^static int 		__max_read_tries = 3;$/;"	v	file:
+__mpx_q_lock	http_request.c	/^static pthread_mutex_t	__mpx_q_lock = PTHREAD_MUTEX_INITIALIZER;$/;"	v	file:
+__running	http_driver.c	/^static unsigned long	__running = 0;$/;"	v	file:
+__timer_am	http_request.c	/^bt_timer_t	__timer_am;$/;"	v
+__zevents	iocb_stm.c	/^static char	__zevents[][32] = {$/;"	v	file:
+__zowner	http_request.c	/^char	__zowner[][32] = {$/;"	v
+__zresult	http_request.c	/^char	__zresult[][32]={$/;"	v
+_tohex	http_request.c	/^_tohex(char c)$/;"	f	file:
+_zmpxstate	session_pool.c	/^char	_zmpxstate[][32] = {			$/;"	v
+_zs	http_request.c	/^char 	_zs[][32]={$/;"	v
+accepted	httpn_driver.h	/^	long long 			accepted;	\/* 받은 데이타 중 실제로 파싱된 데이타 *\/$/;"	m	struct:tag_httpn_io_context
+active_lb	httpn_driver.h	/^	int 				active_lb; 		\/* [0,1]: 현재 사용 중인 LB index *\/$/;"	m	struct:httpn_driver_info
+allow_retry	httpn_driver.h	/^	nc_int8_t 		allow_retry;$/;"	m	struct:tag_httpn_io_context
+always_lower	httpn_driver.h	/^	nc_int16_t 				always_lower:1;$/;"	m	struct:httpn_driver_info
+assoc_lb	httpn_driver.h	/^	lb_t						*assoc_lb;		\/* iocb가 할당받은 세션이 속하는 LB *\/$/;"	m	struct:tag_httpn_io_context
+assume_rangeable	httpn_driver.h	/^	nc_uint32_t					assume_rangeable:1;$/;"	m	struct:tag_httpn_io_context
+autocreat	httpn_driver.h	/^	nc_uint32_t					autocreat:1;$/;"	m	struct:tag_httpn_io_context
+b64tbl	base64.c	/^static const unsigned char b64tbl[256] = {$/;"	v	file:
+basis_64	base64.c	/^static const char basis_64[] =$/;"	v	file:
+blk_cursor	httpn_driver.h	/^			int					blk_cursor;	\/* 현재 write중인 blk index *\/$/;"	m	struct:tag_httpn_io_context::__anon10::__anon12
+blk_cursor	httpn_driver.h	/^			int					blk_cursor;$/;"	m	struct:tag_httpn_io_context::__anon10::__anon11
+blk_filled	httpn_driver.h	/^			int 				blk_filled;$/;"	m	struct:tag_httpn_io_context::__anon10::__anon12
+blk_fini	httpn_driver.h	/^			int					blk_fini; 	\/* fill 후 callback호출 완료된 idx *\/$/;"	m	struct:tag_httpn_io_context::__anon10::__anon12
+blk_flushed	httpn_driver.h	/^			int					blk_flushed; \/* # of blocks sent *\/$/;"	m	struct:tag_httpn_io_context::__anon10::__anon11
+blk_off	httpn_driver.h	/^			int					blk_off; \/* written bytes in current block *\/$/;"	m	struct:tag_httpn_io_context::__anon10::__anon11
+blk_off	httpn_driver.h	/^			int 				blk_off;	\/* 현재 write중인 block내의 데이타 옵셋*\/$/;"	m	struct:tag_httpn_io_context::__anon10::__anon12
+buf	http_driver.c	/^	char 		*buf;$/;"	m	struct:tag_stream_data_info	file:
+cachedhttpcode	httpn_driver.h	/^	int							cachedhttpcode; \/* getattr()시 캐싱되어있던 오리진 응답코드 *\/$/;"	m	struct:tag_httpn_io_context
+canceled	httpn_driver.h	/^	nc_uint8_t					canceled;$/;"	m	struct:tag_httpn_io_context
+cc_resp_element_t	http_driver.c	/^} cc_resp_element_t;$/;"	t	typeref:struct:tag_cc_resp_element	file:
+cfc	httpn_driver.h	/^	nc_int32_t				cfc;		\/* consecutive failure count:연속 원본 오류 횟수 *\/$/;"	m	struct:httpn_session_pool
+client_info_t	httpn_request.h	/^} client_info_t;$/;"	t	typeref:struct:client_info_tag
+client_info_tag	httpn_request.h	/^typedef struct client_info_tag {$/;"	s
+cline	httpn_driver.h	/^	int							cline;$/;"	m	struct:tag_httpn_io_context
+cmd_id	httpn_driver.h	/^	httpn_mpx_cmd_t				cmd_id;	\/* valid only when dequeued *\/$/;"	m	struct:tag_httpn_io_context
+cmd_id	httpn_driver.h	/^	httpn_mpx_cmd_t				cmd_id;	\/* valid only when dequeued *\/$/;"	m	struct:tag_httpn_io_context_exc
+cmd_signal	httpn_driver.h	/^	nc_cond_t					cmd_signal; \/* 필요할때만 할당 *\/$/;"	m	struct:tag_httpn_io_context
+cmd_signal	httpn_driver.h	/^	nc_cond_t					cmd_signal; \/* 필요할때만 할당 *\/$/;"	m	struct:tag_httpn_io_context_exc
+cmd_target	httpn_driver.h	/^	httpn_pin_state_t			cmd_target;	\/* valid only when dequeued *\/$/;"	m	struct:tag_httpn_io_context
+cmd_target	httpn_driver.h	/^	httpn_pin_state_t			cmd_target;	\/* valid only when dequeued *\/$/;"	m	struct:tag_httpn_io_context_exc
+code	http_codes.c	/^	int		code;$/;"	m	struct:tag_http_code	file:
+code	httpn_request.h	/^	int					code;  \/* HTTP status code *\/$/;"	m	struct:httpn_request
+cond_data_avail	httpn_driver.h	/^	pthread_cond_t 		cond_data_avail;$/;"	m	struct:httpn_file_info
+cond_data_done	httpn_driver.h	/^	pthread_cond_t 		cond_data_done;$/;"	m	struct:httpn_file_info
+confver	httpn_driver.h	/^	nc_uint32_t					confver;$/;"	m	struct:tag_httpn_io_context
+confver	httpn_driver.h	/^	nc_uint32_t				confver;$/;"	m	struct:httpn_driver_info
+control	http_driver.c	/^	char 	control[32];$/;"	m	struct:tag_cc_resp_element	file:
+count	httpn_driver.h	/^	int				count; \/* host count *\/$/;"	m	struct:tag_httpn_url
+csource	httpn_driver.h	/^	char						*csource;$/;"	m	struct:tag_httpn_io_context
+ctime	httpn_driver.h	/^	nc_time_t		ctime;	\/* creation time in sec*\/$/;"	m	struct:tag_httpn_io_context
+ctxtype	http_driver.c	/^	int						ctxtype;$/;"	m	struct:__anon1	file:
+curl	httpn_driver.h	/^	CURL				*curl; 		\/* non-rangeable객체에만 valid, != NULL *\/$/;"	m	struct:__anon13
+cursor	http_driver.c	/^	nc_off_t 	cursor;$/;"	m	struct:tag_stream_data_info	file:
+datalen	httpn_request.h	/^	nc_size_t 			datalen;$/;"	m	struct:httpn_request
+dbg_node	httpn_driver.h	/^	link_node_t 				dbg_node;$/;"	m	struct:tag_httpn_io_context
+default_dir_mode	http_driver.c	/^mode_t default_dir_mode;$/;"	v
+default_file_mode	http_driver.c	/^mode_t default_file_mode;$/;"	v
+dline	httpn_driver.h	/^	int							dline;$/;"	m	struct:tag_httpn_io_context
+dns_cache_timeout	httpn_driver.h	/^	int						dns_cache_timeout;$/;"	m	struct:httpn_driver_info
+download_bytes	httpn_request.h	/^	double 			download_bytes;$/;"	m	struct:httpn_request
+driver	http_driver.c	/^	cfs_origin_driver_t 	*driver;$/;"	m	struct:__anon1	file:
+driver	httpn_driver.h	/^	cfs_origin_driver_t		*driver;$/;"	m	struct:httpn_session_pool
+driver	httpn_driver.h	/^	cfs_origin_driver_t 		*driver;$/;"	m	struct:tag_httpn_io_context
+driver	httpn_driver.h	/^	cfs_origin_driver_t*		driver;$/;"	m	struct:httpn_session
+drvctx	httpn_driver.h	/^	struct httpn_driver_info	*drvctx;$/;"	m	struct:tag_httpn_io_context	typeref:struct:tag_httpn_io_context::httpn_driver_info
+dsource	httpn_driver.h	/^	char						*dsource;$/;"	m	struct:tag_httpn_io_context
+dynheaders	httpn_request.h	/^	struct curl_slist	*dynheaders;$/;"	m	struct:httpn_request	typeref:struct:httpn_request::curl_slist
+eif	httpn_driver.h	/^	CURL						*eif; \/* easy interface *\/$/;"	m	struct:httpn_session
+entire	httpn_driver.h	/^	nc_uint32_t					entire:1;	\/* 1 if FULL-GET *\/$/;"	m	struct:tag_httpn_io_context
+entire_read	httpn_request.h	/^	int					entire_read:1; \/*전체 읽기인 경우 1 *\/$/;"	m	struct:httpn_request
+eot	httpn_driver.h	/^	int 				eot;$/;"	m	struct:httpn_file_info
+error	httpn_request.h	/^	int					error;   \/* CURL error code *\/$/;"	m	struct:httpn_request
+error_string	httpn_request.h	/^	char				error_string[128]; \/* CURL error string *\/$/;"	m	struct:httpn_request
+eurl	httpn_request.h	/^	char 			*eurl; 		 \/* recently-used effective url *\/$/;"	m	struct:httpn_request
+event	httpn_driver.h	/^	apc_overlapped_t 			event;$/;"	m	struct:tag_httpn_io_context
+expected	httpn_driver.h	/^	cfs_size_t 			expected;$/;"	m	struct:httpn_file_info
+fd	http_request.c	/^	int 	fd;$/;"	m	struct:__anon2	file:
+fd	httpn_request.h	/^		HANDLE 		fd;$/;"	m	struct:httpn_request::__anon18
+file_off	httpn_driver.h	/^			cfs_off_t 			file_off;	\/* 현재 저장중인 데이타 옵셋*\/$/;"	m	struct:tag_httpn_io_context::__anon10::__anon12
+file_off	httpn_driver.h	/^			cfs_off_t 			file_off;$/;"	m	struct:tag_httpn_io_context::__anon10::__anon11
+file_off_prev	httpn_driver.h	/^			cfs_off_t 			file_off_prev;	\/* 이전 시도에서 정상적으로 수신한 데이타의 옵셋*\/$/;"	m	struct:tag_httpn_io_context::__anon10::__anon12
+filled	httpn_driver.h	/^			cfs_size_t 			filled;		\/* IOCB 생성 이후 현재까지 받은 데이타 *\/$/;"	m	struct:tag_httpn_io_context::__anon10::__anon12
+filter	httpn_driver.h	/^	char 					*filter;$/;"	m	struct:httpn_driver_info
+flushed	httpn_driver.h	/^			cfs_size_t			flushed; \/* written bytes so far *\/$/;"	m	struct:tag_httpn_io_context::__anon10::__anon11
+follow_redirection	httpn_driver.h	/^	nc_int16_t 				follow_redirection:1;$/;"	m	struct:httpn_driver_info
+from_server_enc	httpn_driver.h	/^	iconv_t				from_server_enc;$/;"	m	struct:httpn_driver_info
+from_utf_8	httpn_driver.h	/^	iconv_t 			from_utf_8;$/;"	m	struct:httpn_driver_info
+g__current_mpx	http_request.c	/^__thread httpn_mux_info_t	*g__current_mpx = NULL;$/;"	v
+g__iocb_cleaner	http_driver.c	/^pthread_t		g__iocb_cleaner;$/;"	v
+g__iocb_cleaner_shutdown	iocb.c	/^int			g__iocb_cleaner_shutdown = 0;$/;"	v
+g__iocb_count	iocb.c	/^long		g__iocb_count = 0;$/;"	v
+g__iocb_free_queue	iocb.c	/^tlc_queue_t	g__iocb_free_queue;$/;"	v
+g__mpx_q	http_driver.c	/^link_list_t		g__mpx_q = LIST_INITIALIZER;$/;"	v
+g__netpool	http_driver.c	/^tp_handle_t		g__netpool;$/;"	v
+g__perform	http_driver.c	/^mavg_t						*g__perform;$/;"	v
+hcd_compare	http_codes.c	/^hcd_compare(const void *a, const void *b)$/;"	f	file:
+hcd_errstring	http_codes.c	/^hcd_errstring(int code)$/;"	f
+hcd_init	http_codes.c	/^hcd_init() $/;"	f
+head_cb	httpn_request.h	/^	void				*head_cb; \/* callback data which passwd to the following procs *\/$/;"	m	struct:httpn_request
+head_proc	httpn_request.h	/^	httpn_head_data_proc_t	head_proc;$/;"	m	struct:httpn_request
+headers	httpn_request.h	/^	struct curl_slist	*headers;$/;"	m	struct:httpn_request	typeref:struct:httpn_request::curl_slist
+host	httpn_driver.h	/^	char			host[128];$/;"	m	struct:__anon15
+host_list	httpn_driver.h	/^	link_list_t		host_list;$/;"	m	struct:tag_httpn_url
+http_check_alive	session_pool.c	/^http_check_alive(lb_t *lb, lb_pool_t *pool, void *ud) $/;"	f
+http_iocb_valid	iocb.c	/^http_iocb_valid(httpn_io_context_t *iocb)$/;"	f
+http_retry_allowed	iocb.c	/^http_retry_allowed(httpn_io_context_t *iocb)$/;"	f
+httpcode	httpn_driver.h	/^	int 				httpcode; \/* worker threadrk 설정 *\/$/;"	m	struct:httpn_file_info
+httpn_PH_on_receive_response	http_driver.c	/^httpn_PH_on_receive_response(httpn_io_context_t *iocb)$/;"	f
+httpn__agent	session_pool.c	/^char						httpn__agent[128] = "NetCache plugin : " DRIVER_NAME;$/;"	v
+httpn_activity_monitor	http_request.c	/^httpn_activity_monitor(void *u)$/;"	f
+httpn_add_user_headers	http_request.c	/^httpn_add_user_headers(char *key, char *value, void *cb)$/;"	f	file:
+httpn_allocate_context	http_driver.c	/^httpn_allocate_context(cfs_origin_driver_t *drv, apc_open_context_t *aoc)$/;"	f	file:
+httpn_api_t	httpn_driver.h	/^typedef enum {HTTP_API_NULL = 0, HTTP_API_GLOBAL=1, HTTP_API_GETATTR=2, HTTP_API_READ=3, HTTP_API_WRITE=4, HTTP_API_PROBE = 5} httpn_api_t;$/;"	t	typeref:enum:__anon4
+httpn_bind_context	http_driver.c	/^httpn_bind_context(cfs_origin_driver_t *drv, char *prefix, nc_origin_info_t *ctx, int ctxcnt, int ctxtype)$/;"	f	file:
+httpn_bind_pool	session_pool.c	/^httpn_bind_pool(httpn_session_t *session, httpn_session_pool_t *pool)$/;"	f
+httpn_bind_request	iocb.c	/^httpn_bind_request(httpn_io_context_t *iocb, httpn_request_t *req) {$/;"	f
+httpn_bind_request_to_session	session_pool.c	/^httpn_bind_request_to_session(cfs_origin_driver_t *drv, httpn_session_t *session, httpn_request_t *request)$/;"	f
+httpn_bind_vector	iocb.c	/^httpn_bind_vector(httpn_io_context_t *iocb, nc_asio_vector_t *v)$/;"	f
+httpn_block_probe_reader	session_pool.c	/^httpn_block_probe_reader(void *ptr, size_t size, size_t nmemb, void *userdata)$/;"	f	file:
+httpn_block_reader	http_driver.c	/^httpn_block_reader(void *ptr, size_t size, size_t nmemb, void *userdata)$/;"	f
+httpn_buffer_avail	http_driver.c	/^httpn_buffer_avail(httpn_io_context_t *iocb, nc_off_t objoff)$/;"	f	file:
+httpn_cleanup_request	http_request.c	/^httpn_cleanup_request(httpn_request_t *request)$/;"	f
+httpn_cleanup_session	session_pool.c	/^httpn_cleanup_session(httpn_session_t *session)$/;"	f
+httpn_cleanup_try	http_driver.c	/^httpn_cleanup_try(httpn_io_context_t *iocb)$/;"	f
+httpn_close	http_driver.c	/^httpn_close(dev_file_handle_t *handle)$/;"	f	file:
+httpn_commit_headers	http_request.c	/^httpn_commit_headers(httpn_request_t *req)$/;"	f
+httpn_commit_user_headers	http_request.c	/^httpn_commit_user_headers(char *key, char *value, void *cb)$/;"	f	file:
+httpn_convert_or_not	http_driver.c	/^httpn_convert_or_not(iconv_t eh, const char *s)$/;"	f	file:
+httpn_create_instance	http_driver.c	/^httpn_create_instance(char *signature, $/;"	f	file:
+httpn_create_iocb	iocb.c	/^httpn_create_iocb(	cfs_origin_driver_t *drv, $/;"	f
+httpn_curl_calloc	http_driver.c	/^httpn_curl_calloc(size_t nmemb, size_t siz)$/;"	f	file:
+httpn_curl_free	http_driver.c	/^httpn_curl_free(void *ptr)$/;"	f	file:
+httpn_curl_malloc	http_driver.c	/^httpn_curl_malloc(size_t siz)$/;"	f	file:
+httpn_curl_realloc	http_driver.c	/^httpn_curl_realloc(void *ptr, size_t siz)$/;"	f	file:
+httpn_curl_strdup	http_driver.c	/^httpn_curl_strdup(const char *str)$/;"	f	file:
+httpn_curl_version_print	http_driver.c	/^httpn_curl_version_print(void)$/;"	f	file:
+httpn_defered_free_t	http_driver.c	/^} httpn_defered_free_t;$/;"	t	typeref:struct:__anon1	file:
+httpn_delegate_destroy_iocb	iocb.c	/^httpn_delegate_destroy_iocb(httpn_io_context_t *iocb, int force, char *f, int l)$/;"	f	file:
+httpn_destroy_instance	http_driver.c	/^httpn_destroy_instance(cfs_origin_driver_t *driver)$/;"	f	file:
+httpn_destroy_iocb	iocb.c	/^httpn_destroy_iocb(httpn_io_context_t *iocb, int force, char *f, int l)$/;"	f
+httpn_destroy_pool	http_driver.c	/^httpn_destroy_pool(httpn_session_pool_t *pool)$/;"	f	file:
+httpn_driver_info	httpn_driver.h	/^typedef struct httpn_driver_info {$/;"	s
+httpn_driver_info_t	httpn_driver.h	/^} httpn_driver_info_t;$/;"	t	typeref:struct:httpn_driver_info
+httpn_dump_info	iocb.c	/^httpn_dump_info(char *buf, int len, CURL *handle)$/;"	f
+httpn_dump_iocb	iocb.c	/^httpn_dump_iocb(char *buf, int len, httpn_io_context_t *iocb)$/;"	f
+httpn_dump_iocb_s	iocb.c	/^httpn_dump_iocb_s(char *buf, int len, httpn_io_context_t *iocb)$/;"	f
+httpn_dump_iocbs	iocb.c	/^httpn_dump_iocbs()$/;"	f
+httpn_dump_phase_command	http_request.c	/^httpn_dump_phase_command(nc_origin_io_command_t *cmd, int pid, const char *msg)$/;"	f
+httpn_dump_session	http_driver.c	/^httpn_dump_session(char *buf, int siz, void *u)$/;"	f	file:
+httpn_encode_url	http_request.c	/^httpn_encode_url(const char *path)$/;"	f	file:
+httpn_endof_xfer	http_driver.c	/^httpn_endof_xfer(httpn_io_context_t *iocb)$/;"	f	file:
+httpn_errno	http_driver.c	/^httpn_errno(void)$/;"	f	file:
+httpn_expect_redirection	http_request.c	/^httpn_expect_redirection(httpn_io_context_t *iocb)$/;"	f
+httpn_expire_session	session_pool.c	/^httpn_expire_session(void *d)$/;"	f
+httpn_file_handle_t	httpn_driver.h	/^} httpn_file_handle_t;$/;"	t	typeref:struct:httpn_file_info
+httpn_file_info	httpn_driver.h	/^typedef struct httpn_file_info {$/;"	s
+httpn_file_read_info_t	http_request.c	/^} httpn_file_read_info_t;$/;"	t	typeref:struct:__anon2	file:
+httpn_file_reader	http_request.c	/^httpn_file_reader( void *ptr, size_t size, size_t nmemb, void *userdata)$/;"	f
+httpn_flush	http_driver.c	/^httpn_flush(struct tag_fc_inode_info *handle)$/;"	f	file:
+httpn_forcely_down	http_driver.c	/^httpn_forcely_down(httpn_driver_info_t *drvctx, char *url, int curle, int httpcode)$/;"	f
+httpn_free_context	http_driver.c	/^httpn_free_context(cfs_origin_driver_t *drv, nc_origin_session_t vctx)$/;"	f	file:
+httpn_free_iocb	iocb.c	/^httpn_free_iocb(httpn_io_context_t *iocb)$/;"	f
+httpn_free_session	session_pool.c	/^httpn_free_session(httpn_session_t *session)$/;"	f
+httpn_get_LB	iocb.c	/^httpn_get_LB(httpn_io_context_t *iocb)$/;"	f
+httpn_get_errno	http_driver.c	/^httpn_get_errno(void)$/;"	f	file:
+httpn_get_stat	iocb.c	/^httpn_get_stat(int 	stat[])$/;"	f
+httpn_getattr_completion	http_driver.c	/^httpn_getattr_completion(void *u)$/;"	f
+httpn_getattr_mpx	http_driver.c	/^httpn_getattr_mpx(	struct cfs_origin_driver 	*drv, $/;"	f	file:
+httpn_handle_defered_queue	http_driver.c	/^httpn_handle_defered_queue(cfs_origin_driver_t *drv, int force)$/;"	f
+httpn_handle_error	error.c	/^httpn_handle_error(httpn_io_context_t *iocb, CURLcode *curle, int *httpcode, int *dtc)$/;"	f
+httpn_handle_response_headers	http_driver.c	/^httpn_handle_response_headers(httpn_io_context_t *iocb) $/;"	f
+httpn_handle_tag_cache_control	http_driver.c	/^httpn_handle_tag_cache_control(char *input, httpn_io_context_t *iocb)$/;"	f	file:
+httpn_handle_try_result	http_driver.c	/^httpn_handle_try_result(httpn_io_context_t *iocb)$/;"	f
+httpn_head_data_proc_t	httpn_request.h	/^typedef size_t (*httpn_head_data_proc_t)(void *ptr, size_t size, size_t nmemb, void *userdata);$/;"	t
+httpn_head_dispatch	http_driver.c	/^httpn_head_dispatch(void *ptr, size_t size, size_t nmemb, void *userdata)$/;"	f	file:
+httpn_healthcheck_monitor	http_driver.c	/^httpn_healthcheck_monitor(void *u)$/;"	f	file:
+httpn_hit_on_filter	http_driver.c	/^httpn_hit_on_filter(httpn_driver_info_t *driver, char *tag)$/;"	f	file:
+httpn_host_t	httpn_driver.h	/^} httpn_host_t;$/;"	t	typeref:struct:__anon15
+httpn_idle_mpx	http_request.c	/^httpn_idle_mpx()$/;"	f
+httpn_init_encoding	http_driver.c	/^httpn_init_encoding(cfs_origin_driver_t *drv, const char *lencoding, const char *sencoding)$/;"	f	file:
+httpn_init_locks	session_pool.c	/^httpn_init_locks()$/;"	f
+httpn_init_mod	http_driver.c	/^httpn_init_mod()$/;"	f	file:
+httpn_init_once	http_driver.c	/^httpn_init_once()$/;"	f	file:
+httpn_init_session	session_pool.c	/^httpn_init_session(httpn_session_t *session, httpn_io_context_t *iocb)$/;"	f
+httpn_init_try	http_driver.c	/^httpn_init_try(httpn_io_context_t *iocb, int allowretry)$/;"	f	file:
+httpn_io_context_t	httpn_driver.h	/^typedef struct tag_httpn_io_context httpn_io_context_t;$/;"	t	typeref:struct:tag_httpn_io_context
+httpn_io_state_t	httpn_driver.h	/^} httpn_io_state_t;$/;"	t	typeref:enum:__anon16
+httpn_iocb_cleaner	iocb.c	/^httpn_iocb_cleaner(void *notused)$/;"	f
+httpn_iocb_event_t	httpn_driver.h	/^} httpn_iocb_event_t;$/;"	t	typeref:enum:__anon8
+httpn_iocb_prepare_pool	iocb.c	/^httpn_iocb_prepare_pool(int n)$/;"	f
+httpn_ioctl	http_driver.c	/^httpn_ioctl(cfs_origin_driver_t *drv, int cmd, void *val, int vallen)$/;"	f	file:
+httpn_is_redirection	http_driver.c	/^httpn_is_redirection(int c)$/;"	f
+httpn_is_secure	http_request.c	/^httpn_is_secure(const char *path)$/;"	f
+httpn_is_state	session_pool.c	/^httpn_is_state(httpn_session_t *s, httpn_pin_state_t state)$/;"	f
+httpn_iserror	http_driver.c	/^httpn_iserror(int code)$/;"	f	file:
+httpn_issamecode	http_driver.c	/^httpn_issamecode(int cached, int newcode)$/;"	f	file:
+httpn_make_fullpath	http_driver.c	/^httpn_make_fullpath(httpn_driver_info_t *drvctx, char **urlpath, const char *path, int need_esc)$/;"	f
+httpn_make_range	http_driver.c	/^httpn_make_range(nc_asio_vector_t *vector, int for_extend, int cursor, cfs_off_t *range_begin, cfs_off_t *range_end)$/;"	f	file:
+httpn_map_httpcode	http_driver.c	/^httpn_map_httpcode(httpn_io_context_t *iocb, int httpcode)$/;"	f
+httpn_map_method	iocb.c	/^httpn_map_method(char *method)$/;"	f
+httpn_map_property_stat	http_driver.c	/^static int httpn_map_property_stat(char *key, char *value, void *cb)$/;"	f	file:
+httpn_mark_down_pool_x	session_pool.c	/^httpn_mark_down_pool_x(cfs_origin_driver_t *drv, httpn_session_pool_t * sp, char *path, int force)$/;"	f
+httpn_mark_ok_pool_x	session_pool.c	/^void httpn_mark_ok_pool_x( cfs_origin_driver_t * drv, httpn_session_pool_t * sp )$/;"	f
+httpn_method_t	httpn_driver.h	/^typedef enum {HTTP_NULL=0, HTTP_HEAD=1, HTTP_PUT=2, HTTP_GET=3, HTTP_MKDIR=4, HTTP_DELETE=5, HTTP_POST=6, HTTP_CUSTOM=7} httpn_method_t;$/;"	t	typeref:enum:__anon5
+httpn_migrate_http_state	session_pool.c	/^httpn_migrate_http_state(httpn_io_context_t *iocb, httpn_pin_state_t ps, char *f, int l)$/;"	f
+httpn_mpx_bound	http_request.c	/^httpn_mpx_bound(httpn_io_context_t *iocb)$/;"	f
+httpn_mpx_cmd_t	httpn_driver.h	/^} httpn_mpx_cmd_t;$/;"	t	typeref:enum:__anon9
+httpn_mpx_execute_iocb	http_request.c	/^httpn_mpx_execute_iocb(httpn_io_context_t *iocb, httpn_pin_state_t action)$/;"	f
+httpn_mpx_handle_completed_nolock	http_request.c	/^httpn_mpx_handle_completed_nolock(httpn_mux_info_t *mpx)$/;"	f	file:
+httpn_mpx_handle_direct_queue_nolock	http_request.c	/^httpn_mpx_handle_direct_queue_nolock(httpn_mux_info_t 	*mpx)$/;"	f	file:
+httpn_mpx_handle_done_iocb	http_request.c	/^httpn_mpx_handle_done_iocb(httpn_io_context_t *iocb)$/;"	f
+httpn_mpx_handle_system_queue_nolock	http_request.c	/^httpn_mpx_handle_system_queue_nolock(httpn_mux_info_t *mpx, int maxsched)$/;"	f	file:
+httpn_mpx_handler	http_request.c	/^httpn_mpx_handler(void *v, void *tcb)$/;"	f
+httpn_mpx_handler_epilog	http_request.c	/^httpn_mpx_handler_epilog(void * u)$/;"	f
+httpn_mpx_handler_prolog	http_request.c	/^httpn_mpx_handler_prolog(void *u)$/;"	f
+httpn_mpx_idle	http_request.c	/^httpn_mpx_idle(void *u, void *tcb)$/;"	f
+httpn_mpx_pause_iocb_nolock	http_request.c	/^httpn_mpx_pause_iocb_nolock(httpn_io_context_t *iocb)$/;"	f
+httpn_mpx_put_iocb_direct	http_request.c	/^httpn_mpx_put_iocb_direct(httpn_mux_info_t *mpx, httpn_io_context_t *iocb)$/;"	f
+httpn_mpx_remove_iocb_nolock	http_request.c	/^httpn_mpx_remove_iocb_nolock(httpn_mux_info_t *mpx, httpn_io_context_t *iocb, int needack)$/;"	f
+httpn_mpx_resume_iocb	http_request.c	/^httpn_mpx_resume_iocb(httpn_io_context_t *iocb, int needack)$/;"	f
+httpn_mpx_resume_iocb_nolock	http_request.c	/^httpn_mpx_resume_iocb_nolock(httpn_io_context_t *iocb, int needack)$/;"	f
+httpn_mpx_resume_iocb_self	http_request.c	/^httpn_mpx_resume_iocb_self(httpn_io_context_t *iocb)$/;"	f
+httpn_mpx_state	session_pool.c	/^httpn_mpx_state(httpn_io_context_t *iocb)$/;"	f
+httpn_mpx_state_is	session_pool.c	/^httpn_mpx_state_is(httpn_io_context_t *iocb, httpn_mpx_state_t mpxs)$/;"	f
+httpn_mpx_state_set	session_pool.c	/^httpn_mpx_state_set(httpn_io_context_t *iocb, httpn_mpx_state_t mpxs, char *f, int l)$/;"	f
+httpn_mpx_state_t	httpn_driver.h	/^} httpn_mpx_state_t;$/;"	t	typeref:enum:__anon7
+httpn_mpx_timer_pause	http_request.c	/^httpn_mpx_timer_pause(httpn_io_context_t *iocb, char *f, int l)$/;"	f
+httpn_mpx_timer_restart	http_request.c	/^httpn_mpx_timer_restart(httpn_io_context_t *iocb, char *f, int l)$/;"	f
+httpn_mpx_unregister_nolock_self	http_request.c	/^httpn_mpx_unregister_nolock_self( httpn_mux_info_t *mux, httpn_io_context_t *iocb )$/;"	f
+httpn_mpx_waitlist	http_request.c	/^httpn_mpx_waitlist(httpn_mux_info_t *mpx, int put)$/;"	f	file:
+httpn_mpxop_t	httpn_driver.h	/^} httpn_mpxop_t;$/;"	t	typeref:enum:__anon3
+httpn_mux_info_t	httpn_driver.h	/^} httpn_mux_info_t;$/;"	t	typeref:struct:tag_httpn_mux_info
+httpn_need_break	http_request.c	/^httpn_need_break(httpn_session_t *session, int action)$/;"	f	file:
+httpn_next_pool	session_pool.c	/^httpn_next_pool(cfs_origin_driver_t *driver, const char *hint, int makeref)$/;"	f
+httpn_online	session_pool.c	/^httpn_online(cfs_origin_driver_t *drv, int ioflag)$/;"	f
+httpn_open	http_driver.c	/^httpn_open(cfs_origin_driver_t *drv, char *path, void *hint, int hint_len, int mode, nc_xtra_options_t *opt)$/;"	f	file:
+httpn_origin_monitor	http_driver.c	/^httpn_origin_monitor(lb_t *lb, char *id, void *ud, int online)$/;"	f	file:
+httpn_pin_state_t	httpn_driver.h	/^} httpn_pin_state_t;$/;"	t	typeref:enum:__anon6
+httpn_pin_t	httpn_driver.h	/^} httpn_pin_t;$/;"	t	typeref:struct:__anon13
+httpn_pool_cmd_t	httpn_driver.h	/^} httpn_pool_cmd_t;$/;"	t	typeref:enum:__anon17
+httpn_pool_status_t	httpn_driver.h	/^} httpn_pool_status_t;$/;"	t	typeref:enum:__anon14
+httpn_post_data_proc	http_driver.c	/^httpn_post_data_proc(char *ptr, size_t size, size_t nmemb, void *cb)$/;"	f
+httpn_post_handler	http_driver.c	/^httpn_post_handler(httpn_io_context_t *iocb)$/;"	f	file:
+httpn_post_notification_callback	http_driver.c	/^httpn_post_notification_callback(nc_xtra_options_t *opt, void *ud)$/;"	f
+httpn_prepare_pool	http_driver.c	/^httpn_prepare_pool(cfs_origin_driver_t *drv, nc_origin_info_t *ctx, int ctxtype)$/;"	f	file:
+httpn_prepare_session	session_pool.c	/^httpn_prepare_session(cfs_origin_driver_t *drv, httpn_io_context_t *iocb, httpn_session_pool_t *pool)$/;"	f
+httpn_prepare_try	http_driver.c	/^httpn_prepare_try(httpn_io_context_t *iocb)$/;"	f
+httpn_put_defered_queue	http_driver.c	/^httpn_put_defered_queue(cfs_origin_driver_t *drv, int ctxtype)$/;"	f	file:
+httpn_read_data_proc_t	httpn_request.h	/^typedef size_t (*httpn_read_data_proc_t)(void *ptr, size_t size, size_t nmemb, void *userdata);$/;"	t
+httpn_read_mpx	http_driver.c	/^httpn_read_mpx(cfs_origin_driver_t *driver, nc_asio_vector_t *vector, nc_origin_session_t octx)$/;"	f	file:
+httpn_read_mpx_epilog	http_driver.c	/^httpn_read_mpx_epilog(void *u)$/;"	f	file:
+httpn_rebind_context	http_driver.c	/^httpn_rebind_context(cfs_origin_driver_t *drv, char *prefix, nc_origin_info_t *ctx, int ctxcnt, int ctxtype)$/;"	f	file:
+httpn_release_session	session_pool.c	/^httpn_release_session(httpn_io_context_t *iocb, httpn_session_t *session)$/;"	f
+httpn_report_error	http_driver.c	/^httpn_report_error(nc_asio_vector_t *vector, int cursor, int err)$/;"	f	file:
+httpn_report_origin_log	http_driver.c	/^httpn_report_origin_log(httpn_io_context_t *iocb)$/;"	f
+httpn_request	httpn_request.h	/^struct httpn_request {$/;"	s
+httpn_request_add_header	http_request.c	/^httpn_request_add_header(httpn_request_t *req, const char *name, const char *value, int replace)$/;"	f
+httpn_request_add_ims_header	http_request.c	/^httpn_request_add_ims_header(httpn_io_context_t *iocb, nc_stat_t *old_s, apc_open_context_t *oc)$/;"	f
+httpn_request_contains	http_request.c	/^httpn_request_contains(httpn_io_context_t *iocb, cfs_off_t *off, cfs_size_t *len)$/;"	f
+httpn_request_create	http_request.c	/^httpn_request_create(httpn_io_context_t *iocb, char *method, char *outfilter, nc_kv_list_t *inprop)$/;"	f
+httpn_request_destroy	http_request.c	/^httpn_request_destroy(httpn_request_t *req)$/;"	f
+httpn_request_exec_single	http_request.c	/^httpn_request_exec_single(httpn_io_context_t *iocb)$/;"	f
+httpn_request_set_head_callback	http_request.c	/^httpn_request_set_head_callback(httpn_request_t *req, httpn_read_data_proc_t proc, void *data)$/;"	f
+httpn_request_set_length	http_request.c	/^httpn_request_set_length(httpn_request_t *req, nc_size_t len)$/;"	f
+httpn_request_set_reader_callback	http_request.c	/^httpn_request_set_reader_callback(httpn_request_t *req, httpn_read_data_proc_t proc, void *data)$/;"	f
+httpn_request_set_status_callback	http_request.c	/^httpn_request_set_status_callback(httpn_request_t *req, httpn_result_code_proc_t proc, void *data)$/;"	f
+httpn_request_set_writer_callback	http_request.c	/^httpn_request_set_writer_callback(httpn_request_t *req, httpn_write_data_proc_t proc, void *data)$/;"	f
+httpn_request_set_writer_fd	http_request.c	/^httpn_request_set_writer_fd(httpn_request_t *req, int fd)$/;"	f
+httpn_request_t	httpn_driver.h	/^typedef struct httpn_request httpn_request_t;$/;"	t	typeref:struct:httpn_request
+httpn_reset_response	iocb.c	/^httpn_reset_response(httpn_io_context_t *iocb)$/;"	f
+httpn_reset_session	session_pool.c	/^httpn_reset_session(httpn_io_context_t *iocb, httpn_session_t *session)$/;"	f
+httpn_result_code_proc_t	httpn_request.h	/^typedef void (*httpn_result_code_proc_t)(int status, void *cb);$/;"	t
+httpn_session	httpn_driver.h	/^typedef struct httpn_session {$/;"	s
+httpn_session_monitor	session_pool.c	/^httpn_session_monitor(void *clp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)$/;"	f	file:
+httpn_session_monitor_old	session_pool.c	/^httpn_session_monitor_old(void *clp, double dltotal, double dlnow, double ultotal, double ulnow)$/;"	f	file:
+httpn_session_pool	httpn_driver.h	/^typedef struct httpn_session_pool {$/;"	s
+httpn_session_pool_t	httpn_driver.h	/^} httpn_session_pool_t;$/;"	t	typeref:struct:httpn_session_pool
+httpn_session_t	httpn_driver.h	/^} httpn_session_t;$/;"	t	typeref:struct:httpn_session
+httpn_set_errno	http_driver.c	/^httpn_set_errno(int err)$/;"	f
+httpn_set_owner	iocb.c	/^httpn_set_owner(httpn_io_context_t *iocb, httpn_api_t api)$/;"	f
+httpn_set_private	iocb.c	/^httpn_set_private(httpn_io_context_t *iocb, void *u)$/;"	f
+httpn_set_range_info	http_driver.c	/^httpn_set_range_info(cfs_origin_driver_t *drv, nc_origin_session_t vctx, nc_int64_t off, nc_int64_t len)$/;"	f	file:
+httpn_set_raw_code_ifpossible	iocb.c	/^httpn_set_raw_code_ifpossible(httpn_io_context_t *iocb, int code)$/;"	f
+httpn_set_readinfo	http_request.c	/^httpn_set_readinfo(httpn_io_context_t *iocb, cfs_off_t off, cfs_size_t siz)$/;"	f
+httpn_set_status	http_driver.c	/^httpn_set_status(httpn_io_context_t *iocb)$/;"	f
+httpn_set_task	iocb.c	/^httpn_set_task(httpn_io_context_t *iocb, httpn_task_proc_t proc)$/;"	f
+httpn_setup_curl_sock	http_request.c	/^httpn_setup_curl_sock(void *clientp, curl_socket_t curlfd, curlsocktype purpose)$/;"	f
+httpn_setup_pool	session_pool.c	/^httpn_setup_pool(httpn_session_pool_t *pool, const char *docroot, const char *id, const char *pass)$/;"	f
+httpn_setup_url	http_request.c	/^httpn_setup_url(httpn_session_pool_t *pool, char *pool_url, const char *path)$/;"	f
+httpn_state	session_pool.c	/^httpn_state(httpn_session_t *s)$/;"	f
+httpn_tag_t	httpn_driver.h	/^} httpn_tag_t;$/;"	t	typeref:struct:tag_node
+httpn_task_id	http_request.c	/^httpn_task_id()$/;"	f
+httpn_task_proc_t	httpn_driver.h	/^typedef int (*httpn_task_proc_t)(struct tag_httpn_io_context *, httpn_mpxop_t, int);$/;"	t
+httpn_tp_monitor	http_driver.c	/^httpn_tp_monitor(void *u)$/;"	f	file:
+httpn_trace_io	session_pool.c	/^httpn_trace_io(CURL *curl, curl_infotype itype, char *msg, size_t msglen, void *ud)$/;"	f
+httpn_trim_string	http_driver.c	/^httpn_trim_string(char *str)$/;"	f	file:
+httpn_unbind_context	http_driver.c	/^httpn_unbind_context(cfs_origin_driver_t *drv, int ctxtype)$/;"	f	file:
+httpn_unbind_context_i	http_driver.c	/^httpn_unbind_context_i(cfs_origin_driver_t *drv, int ctxtype)$/;"	f	file:
+httpn_unbind_pool	session_pool.c	/^httpn_unbind_pool(httpn_session_t *session)$/;"	f
+httpn_unload	http_driver.c	/^httpn_unload()$/;"	f	file:
+httpn_update_operation	iocb.c	/^httpn_update_operation(httpn_io_context_t *iocb, char *method)$/;"	f
+httpn_update_probe_url	http_driver.c	/^httpn_update_probe_url(cfs_origin_driver_t *drv, httpn_session_pool_t *pool, char *url, int force)$/;"	f	file:
+httpn_update_probe_url_ALL	http_driver.c	/^httpn_update_probe_url_ALL(cfs_origin_driver_t *drv, char *url)$/;"	f	file:
+httpn_url_t	httpn_driver.h	/^} httpn_url_t;$/;"	t	typeref:struct:tag_httpn_url
+httpn_valid_config	http_driver.c	/^httpn_valid_config(cfs_origin_driver_t *drv, nc_uint32_t confver)$/;"	f
+httpn_valid_context	http_driver.c	/^httpn_valid_context(cfs_origin_driver_t *drv, nc_origin_session_t vctx, char *path, nc_off_t *off, nc_size_t *len)$/;"	f	file:
+httpn_wait_on	http_driver.c	/^httpn_wait_on(httpn_file_handle_t *hfh, pthread_cond_t *cond, long waitmsec)$/;"	f	file:
+httpn_write_data_proc_t	httpn_request.h	/^typedef size_t (*httpn_write_data_proc_t)(char *ptr, size_t size, size_t nmemb, void *userdata);$/;"	t
+httpn_zstate	http_request.c	/^httpn_zstate(httpn_session_t *session)$/;"	f
+https	httpn_driver.h	/^	nc_int8_t				https:1; 	\/* 1 if https required *\/$/;"	m	struct:httpn_session_pool
+id	httpn_driver.h	/^	nc_uint32_t					id;$/;"	m	struct:tag_httpn_io_context
+id	httpn_driver.h	/^	nc_uint32_t					id;$/;"	m	struct:tag_httpn_io_context_exc
+imson	httpn_driver.h	/^	nc_uint32_t					imson:1;$/;"	m	struct:tag_httpn_io_context
+in_property	httpn_driver.h	/^	nc_xtra_options_t 			*in_property; \/* input property provided by caller *\/$/;"	m	struct:tag_httpn_io_context
+inject_property	httpn_request.h	/^	nc_xtra_options_t 	*inject_property;$/;"	m	struct:httpn_request
+inode	httpn_driver.h	/^	fc_inode_t 					*inode;$/;"	m	struct:tag_httpn_io_context
+inredirection	httpn_driver.h	/^	nc_uint32_t					inredirection:1;$/;"	m	struct:tag_httpn_io_context
+io_update_property_proc	httpn_driver.h	/^	cfs_io_property_updator_t 	io_update_property_proc;$/;"	m	struct:httpn_driver_info
+io_validator_proc	httpn_driver.h	/^	cfs_io_validator_callback_t  io_validator_proc;$/;"	m	struct:httpn_driver_info
+iocb	httpn_driver.h	/^	httpn_io_context_t 	*iocb;$/;"	m	struct:httpn_file_info
+iotimeout	httpn_driver.h	/^	nc_uint64_t					iotimeout;	\/* NOW + timeout 값 *\/$/;"	m	struct:tag_httpn_io_context
+ip	httpn_request.h	/^	char  	ip[64];$/;"	m	struct:client_info_tag
+keptid	httpn_driver.h	/^	nc_uint32_t					keptid;$/;"	m	struct:tag_httpn_io_context
+key	httpn_driver.h	/^	char						key[64];$/;"	m	struct:httpn_session
+key	httpn_driver.h	/^	char 					key[256];$/;"	m	struct:httpn_session_pool
+knownsize	httpn_driver.h	/^	nc_size_t					knownsize;  	\/* size가 알려진 경우 *\/$/;"	m	struct:tag_httpn_io_context
+last_curle	httpn_driver.h	/^	CURLcode					last_curle; 	\/* last curl error code *\/$/;"	m	struct:tag_httpn_io_context
+last_curle_str	httpn_driver.h	/^	char						last_curle_str[CURL_ERROR_SIZE+1];						$/;"	m	struct:tag_httpn_io_context
+last_errno	httpn_driver.h	/^	int							last_errno;  	\/* last errno code *\/$/;"	m	struct:tag_httpn_io_context
+last_httpcode	httpn_driver.h	/^	int							last_httpcode;  \/* last httpcode code *\/$/;"	m	struct:tag_httpn_io_context
+lastline	httpn_request.h	/^	char				lastline[512];$/;"	m	struct:httpn_request
+lb_pool	httpn_driver.h	/^	lb_pool_t				*lb_pool;$/;"	m	struct:httpn_session_pool
+lblock	httpn_driver.h	/^	nc_lock_t			lblock;$/;"	m	struct:httpn_driver_info
+len	http_driver.c	/^	nc_size_t		len;$/;"	m	struct:tag_post_info	file:
+load	http_driver.c	/^load()$/;"	f
+lock	httpn_driver.h	/^	pthread_mutex_t 	lock;$/;"	m	struct:httpn_file_info
+lock_callback	session_pool.c	/^lock_callback(int mode, int type, char *file, int line)$/;"	f	file:
+magic	http_driver.c	/^	nc_uint32_t				magic;$/;"	m	struct:__anon1	file:
+magic	httpn_driver.h	/^	nc_uint32_t					magic;$/;"	m	struct:tag_httpn_io_context
+max_read_size	httpn_driver.h	/^	nc_int32_t				max_read_size; \/* origin_request_type=2 일때 사용됨*\/$/;"	m	struct:httpn_driver_info
+max_tries	httpn_driver.h	/^	int						max_tries;$/;"	m	struct:httpn_driver_info
+method	httpn_driver.h	/^	httpn_method_t				method;$/;"	m	struct:tag_httpn_io_context
+method	httpn_request.h	/^	httpn_method_t		method;$/;"	m	struct:httpn_request
+mif	httpn_driver.h	/^	CURL					*mif;$/;"	m	struct:tag_httpn_mux_info
+mode	httpn_driver.h	/^	nc_mode_t					mode;$/;"	m	struct:tag_httpn_io_context
+mpx	httpn_driver.h	/^	struct tag_httpn_mux_info	*mpx;$/;"	m	struct:tag_httpn_io_context	typeref:struct:tag_httpn_io_context::tag_httpn_mux_info
+mpx_STM	iocb_stm.c	/^mpx_STM(httpn_io_context_t *iocb, httpn_iocb_event_t event, int finish, char *f, int l)$/;"	f
+mpx_node	httpn_driver.h	/^	link_node_t					mpx_node;$/;"	m	struct:tag_httpn_io_context
+mpxassoc	httpn_driver.h	/^	nc_uint8_t					mpxassoc;	$/;"	m	struct:tag_httpn_io_context
+mpxlock	httpn_driver.h	/^	nc_lock_t				mpxlock;$/;"	m	struct:tag_httpn_mux_info
+needpause	httpn_driver.h	/^	nc_uint32_t					needpause:1;$/;"	m	struct:tag_httpn_io_context
+node	http_driver.c	/^	link_node_t				node;$/;"	m	struct:__anon1	file:
+node	httpn_driver.h	/^		link_node_t		node;$/;"	m	struct:tag_node
+node	httpn_driver.h	/^	link_node_t					node;$/;"	m	struct:httpn_session
+node	httpn_driver.h	/^	link_node_t					node;$/;"	m	struct:tag_httpn_mux_info
+node	httpn_driver.h	/^	link_node_t		node;$/;"	m	struct:__anon15
+node	httpn_driver.h	/^	link_node_t 				node;$/;"	m	struct:tag_httpn_io_context
+node	httpn_driver.h	/^	link_node_t 	node;$/;"	m	struct:tag_httpn_url
+offset	http_request.c	/^	off_t 	offset;$/;"	m	struct:__anon2	file:
+on_receive_response_cbdata	httpn_driver.h	/^	nc_origin_phase_handler_t on_receive_response_cbdata;$/;"	m	struct:httpn_driver_info
+on_receive_response_proc	httpn_driver.h	/^	nc_origin_phase_handler_t on_receive_response_proc;$/;"	m	struct:httpn_driver_info
+on_send_request_cbdata	httpn_driver.h	/^	nc_origin_phase_handler_t on_send_request_cbdata;$/;"	m	struct:httpn_driver_info
+on_send_request_proc	httpn_driver.h	/^	nc_origin_phase_handler_t on_send_request_proc;$/;"	m	struct:httpn_driver_info
+opaque	http_driver.c	/^	char 			*opaque;$/;"	m	struct:tag_post_info	file:
+opt_https_cainfo	httpn_driver.h	/^	char		*opt_https_cainfo;			\/* default NULL *\/$/;"	m	struct:httpn_driver_info
+opt_https_capath	httpn_driver.h	/^	char		*opt_https_capath;			\/* default NULL *\/$/;"	m	struct:httpn_driver_info
+opt_https_cert	httpn_driver.h	/^	char		*opt_https_cert;			\/* default NULL *\/$/;"	m	struct:httpn_driver_info
+opt_https_cert_type	httpn_driver.h	/^	char		*opt_https_cert_type;		\/* default NULL *\/$/;"	m	struct:httpn_driver_info
+opt_https_crlfile	httpn_driver.h	/^	char		*opt_https_crlfile;			\/* default NULL *\/$/;"	m	struct:httpn_driver_info
+opt_https_falsestart	httpn_driver.h	/^	int			opt_https_falsestart; 		\/* default : FALSE *\/$/;"	m	struct:httpn_driver_info
+opt_https_secure	httpn_driver.h	/^	int			opt_https_secure;  			\/* default 0 *\/$/;"	m	struct:httpn_driver_info
+opt_https_sslkey	httpn_driver.h	/^	char		*opt_https_sslkey;			\/* default NULL *\/$/;"	m	struct:httpn_driver_info
+opt_https_sslkey_type	httpn_driver.h	/^	char		*opt_https_sslkey_type;		\/* default NULL *\/$/;"	m	struct:httpn_driver_info
+opt_https_tlsversion	httpn_driver.h	/^	int			opt_https_tlsversion; 	\/* example : deafult "1.1" *\/$/;"	m	struct:httpn_driver_info
+opt_use_https	httpn_driver.h	/^	int 		opt_use_https;				\/* default 0 *\/$/;"	m	struct:httpn_driver_info
+origin	httpn_request.h	/^	char 			*origin; 	 \/* static pointer, don't free it *\/$/;"	m	struct:httpn_request
+origin_is_down	httpn_driver.h	/^	nc_offline_policy_proc_t		origin_is_down;$/;"	m	struct:httpn_driver_info
+origin_monitor2_proc	httpn_driver.h	/^	nc_origin_monitor2_t 	origin_monitor2_proc;$/;"	m	struct:httpn_driver_info
+origin_monitor_cbd	httpn_driver.h	/^	void 				*origin_monitor_cbd;$/;"	m	struct:httpn_driver_info
+origin_monitor_proc	httpn_driver.h	/^	nc_origin_monitor_t 	origin_monitor_proc;$/;"	m	struct:httpn_driver_info
+outfilter	httpn_request.h	/^	char 				*outfilter;$/;"	m	struct:httpn_request
+owner	httpn_driver.h	/^	httpn_api_t					owner;$/;"	m	struct:tag_httpn_io_context
+pass	httpn_driver.h	/^	char 					*pass;$/;"	m	struct:httpn_session_pool
+path	httpn_driver.h	/^	char 				*path;$/;"	m	struct:httpn_file_info
+path	httpn_driver.h	/^	char 			path[1024];$/;"	m	struct:tag_httpn_url
+paused	httpn_driver.h	/^	nc_uint32_t					paused:1; \/* 1 if session is in paused state *\/$/;"	m	struct:httpn_session
+pool	http_driver.c	/^	httpn_session_pool_t    **pool;$/;"	m	struct:__anon1	file:
+pool	httpn_driver.h	/^	httpn_session_pool_t    **pool[2];$/;"	m	struct:httpn_driver_info
+pool	httpn_driver.h	/^	struct httpn_session_pool 	*pool;			\/* if any *\/$/;"	m	struct:tag_httpn_io_context	typeref:struct:tag_httpn_io_context::httpn_session_pool
+pool	httpn_driver.h	/^	struct httpn_session_pool*	pool;$/;"	m	struct:httpn_session	typeref:struct:httpn_session::httpn_session_pool
+pool_cnt	http_driver.c	/^	int    					pool_cnt;$/;"	m	struct:__anon1	file:
+pool_cnt	httpn_driver.h	/^	int    					pool_cnt[2];$/;"	m	struct:httpn_driver_info
+pool_handle	httpn_driver.h	/^	nc_pool_handle_t 			pool_handle;$/;"	m	struct:httpn_session
+pool_handle	httpn_driver.h	/^	nc_pool_handle_t 		pool_handle;$/;"	m	struct:httpn_session_pool
+pool_size	httpn_driver.h	/^	nc_uint32_t 			pool_size; 		\/\/ # of pool$/;"	m	struct:httpn_driver_info
+pooltype	httpn_driver.h	/^	nc_int8_t 				pooltype; 	\/* NC_CT_XXXX *\/$/;"	m	struct:httpn_session_pool
+post_avail	httpn_driver.h	/^	nc_uint32_t					post_avail:1;$/;"	m	struct:tag_httpn_io_context
+postlen	httpn_driver.h	/^	int							postlen; \/* post data len so far *\/$/;"	m	struct:tag_httpn_io_context
+premature	httpn_driver.h	/^	nc_uint32_t					premature:1;$/;"	m	struct:tag_httpn_io_context
+probe_count	httpn_driver.h	/^	int				probe_count;$/;"	m	struct:tag_httpn_url
+probe_count	httpn_driver.h	/^	int 					probe_count;$/;"	m	struct:httpn_driver_info
+probe_interval	httpn_driver.h	/^	int 					probe_interval;$/;"	m	struct:httpn_driver_info
+probe_url	httpn_driver.h	/^	char					probe_url[256];$/;"	m	struct:httpn_session_pool
+probe_url_frozen	httpn_driver.h	/^	nc_int8_t				probe_url_frozen:1; 	\/* 1 if https required *\/$/;"	m	struct:httpn_session_pool
+probe_url_utime	httpn_driver.h	/^	nc_time_t				probe_url_utime;$/;"	m	struct:httpn_session_pool
+probed	httpn_driver.h	/^	int				probed;$/;"	m	struct:__anon15
+probing_url	httpn_driver.h	/^	link_list_t 	probing_url; \/* failed URL *\/$/;"	m	struct:httpn_session_pool
+proxy	httpn_driver.h	/^	char 					*proxy; 		\/*향후 복수개의 proxy 잡을 수 있도록 *\/$/;"	m	struct:httpn_driver_info
+proxy_port	httpn_driver.h	/^	long 					proxy_port; 	\/*향후 복수개의 proxy 잡을 수 있도록 *\/$/;"	m	struct:httpn_driver_info
+q_direct	httpn_driver.h	/^	link_list_t					q_direct;	\/* mux에 할당된 queue *\/$/;"	m	struct:tag_httpn_mux_info
+q_run	httpn_driver.h	/^	link_list_t				q_run;			\/* pending iocb queue *\/$/;"	m	struct:tag_httpn_mux_info
+r	httpn_driver.h	/^		} r;$/;"	m	union:tag_httpn_io_context::__anon10	typeref:struct:tag_httpn_io_context::__anon10::__anon12
+rangeable	httpn_driver.h	/^	nc_uint32_t					rangeable:1; \/* caching된 객체 속석이 rangeable *\/$/;"	m	struct:tag_httpn_io_context
+rangeop	httpn_driver.h	/^	nc_uint32_t					rangeop:1;	\/* sub-range operation sent *\/$/;"	m	struct:tag_httpn_io_context
+read_cb	httpn_request.h	/^	void				*read_cb; \/* callback data which passwd to the following procs *\/$/;"	m	struct:httpn_request
+read_proc	httpn_request.h	/^	httpn_read_data_proc_t	read_proc;$/;"	m	struct:httpn_request
+received	httpn_driver.h	/^	long long 			received; 	\/* curl로부터 받은 데이타 *\/$/;"	m	struct:tag_httpn_io_context
+refs	httpn_driver.h	/^	int 						refs;$/;"	m	struct:tag_httpn_io_context
+registered	http_driver.c	/^	nc_time_t				registered;$/;"	m	struct:__anon1	file:
+remained	http_driver.c	/^	nc_size_t		remained;$/;"	m	struct:tag_post_info	file:
+remained	http_driver.c	/^	nc_size_t 	remained;$/;"	m	struct:tag_stream_data_info	file:
+reported	httpn_driver.h	/^	nc_uint8_t					reported;$/;"	m	struct:tag_httpn_io_context
+req	httpn_driver.h	/^	httpn_request_t		*req;$/;"	m	struct:httpn_file_info
+req_options	httpn_driver.h	/^	nc_xtra_options_t 	*req_options;$/;"	m	struct:httpn_file_info
+reqoffset	httpn_driver.h	/^	nc_off_t					reqoffset;$/;"	m	struct:tag_httpn_io_context
+reqoffset	httpn_request.h	/^	cfs_off_t			reqoffset;$/;"	m	struct:httpn_request
+reqsent	httpn_driver.h	/^	nc_int8_t		reqsent;$/;"	m	struct:tag_httpn_io_context
+reqsize	httpn_driver.h	/^	nc_size_t					reqsize;$/;"	m	struct:tag_httpn_io_context
+reqsize	httpn_request.h	/^	cfs_size_t			reqsize;$/;"	m	struct:httpn_request
+request	httpn_driver.h	/^	struct httpn_request 		*request;$/;"	m	struct:tag_httpn_io_context	typeref:struct:tag_httpn_io_context::httpn_request
+res_options	httpn_driver.h	/^	nc_xtra_options_t 	*res_options;$/;"	m	struct:httpn_file_info
+run	httpn_driver.h	/^	int						run; 		\/* 현재 mux에 add 된 iocb 갯수 *\/$/;"	m	struct:tag_httpn_mux_info
+s__dbg_iocb_list	iocb.c	/^static link_list_t 		s__dbg_iocb_list = LIST_INITIALIZER;$/;"	v	file:
+s__defered_free_init	http_driver.c	/^static int 					s__defered_free_init  	= 0;$/;"	v	file:
+s__defered_free_queue	http_driver.c	/^static link_list_t			s__defered_free_queue 		= LIST_INITIALIZER;$/;"	v	file:
+s__defered_free_queue_lock	http_driver.c	/^static pthread_mutex_t		s__defered_free_queue_lock 	= PTHREAD_MUTEX_INITIALIZER;$/;"	v	file:
+s__iocb_pool	iocb.c	/^static link_list_t 		s__iocb_pool 	 	= LIST_INITIALIZER;$/;"	v	file:
+s__iocb_pool_lock	iocb.c	/^static pthread_mutex_t 	s__iocb_pool_lock = PTHREAD_MUTEX_INITIALIZER;$/;"	v	file:
+session	httpn_driver.h	/^	httpn_session_t 	*session;$/;"	m	struct:httpn_file_info
+session	httpn_driver.h	/^	struct httpn_session 		*session;$/;"	m	struct:tag_httpn_io_context	typeref:struct:tag_httpn_io_context::httpn_session
+shutdown	httpn_driver.h	/^	int						shutdown;$/;"	m	struct:tag_httpn_mux_info
+shutdown	httpn_driver.h	/^	nc_int16_t 				shutdown:1;$/;"	m	struct:httpn_driver_info
+size	httpn_request.h	/^		nc_off_t	size;$/;"	m	struct:httpn_request::__anon18
+size	httpn_request.h	/^	int		size;	\/* client_info_tag의 크기가 들어 간다. solproxy와 httpn간의 같은 헤더를 쓰는지 검증용 *\/$/;"	m	struct:client_info_tag
+sizeknown	httpn_driver.h	/^	nc_uint32_t					sizeknown:1; \/* caching된 객체 속성이 sizeknown 객체 *\/$/;"	m	struct:tag_httpn_io_context
+spec	http_codes.c	/^	char	spec[64];$/;"	m	struct:tag_http_code	file:
+ssl_lockarray	session_pool.c	/^static pthread_mutex_t *ssl_lockarray;$/;"	v	file:
+stat	httpn_driver.h	/^	nc_stat_t					stat;$/;"	m	struct:tag_httpn_io_context
+state	httpn_driver.h	/^	httpn_io_state_t 	state;$/;"	m	struct:httpn_file_info
+state	httpn_driver.h	/^	httpn_mpx_state_t			state;$/;"	m	struct:tag_httpn_io_context
+state	httpn_driver.h	/^	httpn_pin_state_t			state;$/;"	m	struct:httpn_session
+state	httpn_driver.h	/^	httpn_pin_state_t	state;	$/;"	m	struct:__anon13
+status	httpn_driver.h	/^	httpn_pool_status_t 	status;$/;"	m	struct:httpn_session_pool
+status_cb	httpn_request.h	/^	void 				*status_cb;$/;"	m	struct:httpn_request
+status_proc	httpn_request.h	/^	httpn_result_code_proc_t status_proc;$/;"	m	struct:httpn_request
+stderrno	httpn_driver.h	/^	int 						stderrno;$/;"	m	struct:httpn_session
+stderrno	httpn_driver.h	/^	int 				stderrno; \/* worker threadrk 설정 *\/$/;"	m	struct:httpn_file_info
+storage_url	httpn_driver.h	/^	char					*storage_url;$/;"	m	struct:httpn_session_pool
+string	http_codes.c	/^	char	string[32];$/;"	m	struct:tag_http_code	file:
+t_create	httpn_driver.h	/^	perf_val_t 		t_create; \/* creation time *\/$/;"	m	struct:tag_httpn_io_context
+t_done	httpn_driver.h	/^	perf_val_t 		t_done;$/;"	m	struct:tag_httpn_io_context
+t_elapsed	httpn_request.h	/^	double 			t_elapsed;$/;"	m	struct:httpn_request
+t_fba	httpn_driver.h	/^	perf_val_t 		t_fba;$/;"	m	struct:tag_httpn_io_context
+t_hdrend	httpn_driver.h	/^	perf_val_t 		t_hdrend;$/;"	m	struct:tag_httpn_io_context
+t_healthcheck	httpn_driver.h	/^	bt_timer_t				t_healthcheck;	\/* health-check timer *\/$/;"	m	struct:httpn_driver_info
+t_pause	httpn_driver.h	/^	perf_val_t 		t_pause;$/;"	m	struct:tag_httpn_io_context
+t_resume	httpn_driver.h	/^	perf_val_t 		t_resume;$/;"	m	struct:tag_httpn_io_context
+t_send	httpn_driver.h	/^	perf_val_t 		t_send;$/;"	m	struct:tag_httpn_io_context
+tag	httpn_driver.h	/^		char			*tag;$/;"	m	struct:tag_node
+tag_cc_resp_element	http_driver.c	/^typedef struct tag_cc_resp_element {$/;"	s	file:
+tag_http_code	http_codes.c	/^struct tag_http_code {$/;"	s	file:
+tag_httpn_io_context	httpn_driver.h	/^struct tag_httpn_io_context {$/;"	s
+tag_httpn_io_context_exc	httpn_driver.h	/^struct tag_httpn_io_context_exc {$/;"	s
+tag_httpn_mux_info	httpn_driver.h	/^typedef struct tag_httpn_mux_info {$/;"	s
+tag_httpn_url	httpn_driver.h	/^typedef struct tag_httpn_url {$/;"	s
+tag_node	httpn_driver.h	/^typedef struct tag_node {$/;"	s
+tag_post_info	http_driver.c	/^struct tag_post_info {$/;"	s	file:
+tag_stream_data_info	http_driver.c	/^struct tag_stream_data_info {$/;"	s	file:
+target_action	httpn_driver.h	/^	httpn_pin_state_t 			target_action;;$/;"	m	struct:tag_httpn_io_context
+task	httpn_driver.h	/^	httpn_task_proc_t			task;$/;"	m	struct:tag_httpn_io_context
+tflg	httpn_driver.h	/^	nc_uint32_t					tflg; \/* default 0, dynamically set to T_WARN *\/$/;"	m	struct:tag_httpn_io_context
+thr_mpx	httpn_driver.h	/^	pthread_t				thr_mpx;$/;"	m	struct:tag_httpn_mux_info
+thread_id	session_pool.c	/^thread_id()$/;"	f	file:
+tid	httpn_driver.h	/^	pid_t					tid;$/;"	m	struct:tag_httpn_mux_info
+tid	httpn_driver.h	/^	pthread_t 			tid;$/;"	m	struct:httpn_file_info
+tid_valid	httpn_driver.h	/^	int					tid_valid;$/;"	m	struct:httpn_file_info
+timedout	httpn_driver.h	/^	nc_uint32_t					timedout:1;$/;"	m	struct:tag_httpn_io_context
+timeout	httpn_driver.h	/^	nc_int16_t 				timeout;$/;"	m	struct:httpn_driver_info
+to_server_enc	httpn_driver.h	/^	iconv_t				to_server_enc;$/;"	m	struct:httpn_driver_info
+to_utf_8	httpn_driver.h	/^	iconv_t				to_utf_8;$/;"	m	struct:httpn_driver_info
+total	httpn_driver.h	/^			cfs_size_t			total; \/* total bytes to send *\/$/;"	m	struct:tag_httpn_io_context::__anon10::__anon11
+total	httpn_driver.h	/^			cfs_size_t 			total;$/;"	m	struct:tag_httpn_io_context::__anon10::__anon12
+tries	httpn_driver.h	/^	nc_int8_t 		tries;$/;"	m	struct:tag_httpn_io_context
+u	httpn_driver.h	/^	} u;$/;"	m	struct:tag_httpn_io_context	typeref:union:tag_httpn_io_context::__anon10
+udata	httpn_driver.h	/^	void *						udata;$/;"	m	struct:tag_httpn_io_context
+ufp	httpn_request.h	/^	} ufp;$/;"	m	struct:httpn_request	typeref:struct:httpn_request::__anon18
+upload_bytes	httpn_request.h	/^	double 			upload_bytes;$/;"	m	struct:httpn_request
+uri	httpn_driver.h	/^	char					*uri;$/;"	m	struct:httpn_session_pool
+url	httpn_request.h	/^	char				*url;$/;"	m	struct:httpn_request
+usagelimit	httpn_driver.h	/^	int 				usagelimit;	\/* 위의 경우 1로 설정, 사용 후 0이 되면 curl 핸들 release *\/$/;"	m	struct:__anon13
+useheadforattr	httpn_driver.h	/^	nc_int16_t 				useheadforattr:1; \/* 1: getattr에서 HEAD 사용*\/$/;"	m	struct:httpn_driver_info
+user	httpn_driver.h	/^	char 					*user;$/;"	m	struct:httpn_session_pool
+usercontext	httpn_driver.h	/^	void 							*usercontext;$/;"	m	struct:httpn_driver_info
+value	httpn_driver.h	/^		char			*value;$/;"	m	struct:tag_node
+vector	httpn_driver.h	/^	nc_asio_vector_t 			*vector;$/;"	m	struct:tag_httpn_io_context
+verbose	httpn_driver.h	/^	nc_uint32_t					verbose:1;$/;"	m	struct:tag_httpn_io_context
+volume	httpn_driver.h	/^	nc_mount_context_t			*volume;$/;"	m	struct:tag_httpn_io_context
+w	httpn_driver.h	/^		} w;$/;"	m	union:tag_httpn_io_context::__anon10	typeref:struct:tag_httpn_io_context::__anon10::__anon11
+wpath	httpn_driver.h	/^	char						*wpath; \/* working path *\/$/;"	m	struct:tag_httpn_io_context
+write_cb	httpn_request.h	/^	void				*write_cb; \/* callback data which passwd to the following procs *\/$/;"	m	struct:httpn_request
+write_fp	httpn_request.h	/^	int					write_fp:1;$/;"	m	struct:httpn_request
+write_proc	httpn_request.h	/^	httpn_write_data_proc_t	write_proc;$/;"	m	struct:httpn_request
+write_queue	httpn_driver.h	/^	link_list_t 		write_queue;$/;"	m	struct:httpn_file_info
+write_throttle	httpn_driver.h	/^	int 				write_throttle; \/* reader\/writer에 따라 증감 *\/$/;"	m	struct:httpn_file_info
+xfer_timeout	httpn_driver.h	/^	nc_int16_t 				xfer_timeout;$/;"	m	struct:httpn_driver_info
+xfered	httpn_driver.h	/^	cfs_size_t 			xfered;$/;"	m	struct:httpn_file_info
+zmethod	httpn_driver.h	/^	char						zmethod[32];$/;"	m	struct:tag_httpn_io_context
+zmethod	httpn_request.h	/^	char				zmethod[32];$/;"	m	struct:httpn_request

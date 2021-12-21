@@ -1,0 +1,12 @@
+- Authorization, X-Auth-Token이 tag에 있는 경우, 처리 방법
+	- O_NCX_MUST_REVAL을 nc_open..함수에 전달
+	- netcache core에서는 해당 flag발견시 inode 검색하지 않고, sc_query를 실행(반드시 원본 조회)
+		=> 에러시 리턴
+	- req_option
+		- kv_set_key(URL + AUTH val)
+	- command option
+		--revalif="Authorization, X-Auth-Token" 
+- Amazone의 원타임 URL 캐싱
+	- URL(param'ed URL)에 대해서 key=파라미터 없는 것 까지
+	- 반드시 --revalif와 조합
+ 

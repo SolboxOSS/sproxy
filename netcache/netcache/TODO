@@ -1,0 +1,13 @@
+2.2 base
+1. inode isolation
+	- remove from volume hash table
+	- remove from MDB
+2. removing cache file
+	- remove by error : in dm disk?
+	- remove by normal reclamation : pm_
+
+* racing on redundant loading from partition
+	- register failed case : cache file left intact
+
+* racing on redundant MISS operation
+	- register failed case : cache file remove
