@@ -2,16 +2,17 @@
 
 ## package required for build
 Only CentOS 6 is supported
-install epel repo
-db4 db4-utils db4-devel db4-cxx
-libaio libaio-devel
-curl libcurl libcurl-devel
-gdb bison flex  zlib-devel
-openssl-devel libxml2-devel libuuid-devel.x86_64 sqlite-devel.x86_64 sqlite.x86_64 
-libgcrypt-devel GeoIP-devel gnutls-devel.x86_64
-ffmpeg-devel.x86_64 libjpeg-turbo-devel.x86_64 fdk-aac-devel
-tcl.x86_64 tcl-devel.x86_64 rpm-build.x86_64 gcc-c++
-gnutls30.x86_64  gnutls30-devel GeoIP 
+- install epel repo
+- install rpm
+-- db4 db4-utils db4-devel db4-cxx
+-- libaio libaio-devel
+-- curl libcurl libcurl-devel
+-- gdb bison flex  zlib-devel
+-- openssl-devel libxml2-devel libuuid-devel.x86_64 sqlite-devel.x86_64 sqlite.x86_64 
+-- libgcrypt-devel GeoIP-devel gnutls-devel.x86_64
+-- ffmpeg-devel.x86_64 libjpeg-turbo-devel.x86_64 fdk-aac-devel
+-- tcl.x86_64 tcl-devel.x86_64 rpm-build.x86_64 gcc-c++
+-- gnutls30.x86_64  gnutls30-devel GeoIP 
 
 ## Building solproxy
 Move to source directory
