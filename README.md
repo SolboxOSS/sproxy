@@ -1,6 +1,7 @@
 # solproxy
 
 ## package required for build
+Only CentOS 6 is supported
 install epel repo
 db4 db4-utils db4-devel db4-cxx
 libaio libaio-devel
