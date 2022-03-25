@@ -4553,7 +4553,8 @@ strm_prepare_stream(nc_request_t *req)
 					abs_path = NULL;
 				}
 			}
-
+// segment MP4 방식의 HLS의 경우 AES-128 암호화를 사용하지 못한다.
+#if 0
 			if (ENCRYPT_METHOD_NONE < req->service->hls_encrypt_method) {
 				encrypt = (zipper_builder_encrypt *)mp_alloc(streaming->mpool, sizeof(zipper_builder_encrypt));
 				/* key_url의 크기는 vs_length(req->service->hls_playlist_host_domain) + streaming->real_path_len + strlen(streaming->argument) + 20 정도이지만 귀찮아서 MEDIA_FORMAT_MAX_LEN를 사용 -_- */
@@ -4580,7 +4581,7 @@ strm_prepare_stream(nc_request_t *req)
 				snprintf(hls_video_format+hls_video_format_len, MEDIA_FORMAT_MAX_LEN, "%s%s", gscx__hls_fmp4_video_m3u8_format, (streaming->argument ?streaming->argument :""));
 				snprintf(hls_audio_format+hls_audio_format_len, MEDIA_FORMAT_MAX_LEN, "%s%s", gscx__hls_fmp4_audio_m3u8_format, (streaming->argument ?streaming->argument :""));
 			}
-
+#endif
 			bprm->target.attr.fmp4m3u8.video = hls_video_format;
 			bprm->target.attr.fmp4m3u8.audio = hls_audio_format;
 			bprm->attr.index.adapt = 0xff; /* adaptive 형태로 출력 */
@@ -4637,6 +4638,8 @@ strm_prepare_stream(nc_request_t *req)
 					abs_path = NULL;
 				}
 			}
+// segment MP4 방식의 HLS의 경우 AES-128 암호화를 사용하지 못한다.
+#if 0
 			if (ENCRYPT_METHOD_NONE < req->service->hls_encrypt_method) {
 				encrypt = (zipper_builder_encrypt *)mp_alloc(streaming->mpool, sizeof(zipper_builder_encrypt));
 				/* key_url의 크기는 vs_length(req->service->hls_playlist_host_domain) + streaming->real_path_len + strlen(streaming->argument) + 20 정도이지만 귀찮아서 MEDIA_FORMAT_MAX_LEN를 사용 -_- */
@@ -4655,7 +4658,7 @@ strm_prepare_stream(nc_request_t *req)
 				bprm->attr.bldflag |= BLDFLAG_ENCRYPT;
 
 			}
-
+#endif
 			if (streaming->media_type == MEDIA_TYPE_HLS_FMP4_VIDEO_M3U8) {
 				snprintf(hls_init_format+hls_init_format_len, MEDIA_FORMAT_MAX_LEN, "%s%s", gscx__hls_fmp4_video_init_format, (streaming->argument ?streaming->argument :""));
 				snprintf(hls_format+hls_format_len, MEDIA_FORMAT_MAX_LEN, "%s%s", gscx__hls_fmp4_video_seq_format, (streaming->argument ?streaming->argument :""));
