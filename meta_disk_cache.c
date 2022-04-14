@@ -224,8 +224,8 @@ mdc_make_cache_path(char *key)
 
 /*
  * 디스크에 저장된 meta data cache 파일을 읽는다.
- * 파일이 없는 경우나 문제가 있는 경우 -1을 리턴한다.
- * 정상적으로 캐시파일을 읽은 경우 0을 리턴
+ * 파일이 없는 경우나 문제가 있는 경우 NULL을 리턴한다.
+ * 정상적으로 캐시파일을 읽은 경우 zipperCnt를 리턴
  */
 zipperCnt
 mdc_load_cache(nc_request_t *req, struct nc_stat *objstat, char *url)
