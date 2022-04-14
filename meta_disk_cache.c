@@ -308,7 +308,7 @@ mdc_load_cache(nc_request_t *req, struct nc_stat *objstat, char *url)
 		req->t_zipper_build += (te - ts);
 		strm_destroy_io_handle(temp_ioh);
 		if (zipper_err_success != ret) {
-			TRACE((T_WARN, "[%llu] zipper_create_media_context error. path(%s), reason\n", req->id, cache_path, zipper_err_msg(ret)));
+			TRACE((T_WARN, "[%llu] zipper_create_media_context error. path(%s), reason(%s)\n", req->id, cache_path, zipper_err_msg(ret)));
 			ret = -1;
 			mcontext = NULL;
 			goto end_load_cache;
