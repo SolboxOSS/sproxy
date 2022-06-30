@@ -16,7 +16,7 @@ extern "C" {
 #endif
 
 #define zipper_dump_sync            MAKEFOURCC('z','d','m','p')
-#define zipper_dump_current_ver     4
+#define zipper_dump_current_ver     5
 
 typedef struct _zipper_dump_header
 {

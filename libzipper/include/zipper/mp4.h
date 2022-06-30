@@ -274,6 +274,7 @@ typedef struct _zcxt_parse_param
         
         off_t   audio[MULTI_TRACK_MAX];
         off_t   video[MULTI_TRACK_MAX];
+        off_t   text[MULTI_TRACK_MAX];
         
     } chunksize;
     
@@ -310,8 +311,9 @@ typedef struct _zidx_context
             
         } global;
         
-        mp4_track_desc  *audio;
-        mp4_track_desc  *video;
+        mp4_track_desc *audio;
+        mp4_track_desc *video;
+        mp4_track_desc *text;
         
     } config;
     
@@ -390,6 +392,7 @@ typedef struct _mp4_fullbox_h
 #define STSD_AC3                        0x332D6361
 #define STSD_EC3                        0x332D6365
 #define STSD_AVC1                       0x31637661
+#define STSD_AVC3                       0x33637661
 #define STSD_MP4V                       0x7634706d
 #define STSD_HEVC                       0x31766568
 #define STSD_HVC1                       0x31637668

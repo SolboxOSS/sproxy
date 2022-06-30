@@ -86,6 +86,7 @@ typedef struct _zipper_builder_mp4out_matrix
         
         uint32_t audio;
         uint32_t video;
+        uint32_t text;
         
     } tscale;
     
@@ -93,7 +94,8 @@ typedef struct _zipper_builder_mp4out_matrix
     
     struct {
         
-        uint64_t    audio;
+        uint32_t    text;
+        uint32_t    audio;
         uint64_t    video;
         
     } chunk;
@@ -112,6 +114,7 @@ typedef struct _zipper_builder_mp4out_matrix
         
         uint32_t audio;
         uint32_t video;
+        uint32_t text;
         
     } stsz;
     
@@ -119,6 +122,7 @@ typedef struct _zipper_builder_mp4out_matrix
         
         uint32_t audio;
         uint32_t video;
+        uint32_t text;
         
     } stts;
     
@@ -201,6 +205,7 @@ typedef enum {
     codec_index_aac     = 15,
     codec_index_mp4v    = 16,
     codec_index_avc     = 27,
+    codec_index_text    = 29,
     codec_index_hevc    = 36,
     codec_index_flac    = 58,
 
@@ -222,6 +227,7 @@ enum {
     src_format_mp3,
     src_format_flac,
     src_format_flv,
+    src_format_srt,
     src_format_zdmp,
 };
 
@@ -232,8 +238,9 @@ typedef struct _zipper_media_desc
     uint32_t    bit64:1;
     uint32_t    acc:4;
     uint32_t    vcc:4;
+    uint32_t    tcc:4;
     uint32_t    sfmt:6;
-    uint32_t    resv:17;
+    uint32_t    resv:13;
     uint32_t    bandwidth;
     
     struct {
@@ -283,13 +290,20 @@ typedef struct _zipper_media_desc
         
     } video[MULTI_TRACK_MAX];
     
+    struct {
+        
+        uint8_t     sdci; // 코덱 인덱스 (media_desc_codec_index)
+        uint8_t     lang; // 언어 코드
+        
+    } text[MULTI_TRACK_MAX];
+    
 } zipper_media_desc;
 
 typedef struct _zipper_media_context
 {
     uint32_t msize;
     zipper_media_desc   desc;
-    zidx_context         *ctx;
+    zidx_context        *ctx;
     
 } zipper_media_context;
 
@@ -454,13 +468,15 @@ enum {
     BLDTYPE_FLAC,           // FLAC 파일을 출력한다. (PDL/Pseudo)
     BLDTYPE_FMP4M3U8,       // Fragmented MP4 기반 마스터 M3U8 파일을 출력한다.
     BLDTYPE_FMP4SUBM3U8,    // Fragmented MP4 기반의 서브 M3U8 파일을 출력한다.
+    BLDTYPE_VTT             // 세그먼트 VTT
 };
 
 #define BLDFLAG_INCLUDE_VIDEO       (0x01 << 0)     // 비디오 포함
 #define BLDFLAG_INCLUDE_AUDIO       (0x01 << 1)     // 오디오 포함
-#define BLDFLAG_INCLUDE_ALL         (BLDFLAG_INCLUDE_AUDIO | BLDFLAG_INCLUDE_VIDEO) // 오디오, 비디오 모두 포함
-#define BLDFLAG_CAL_SIZE            (0x01 << 2)     // 출력 사이즈(bytes)만 계산
-#define BLDFLAG_ENCRYPT             (0x01 << 3)     // 암호화
+#define BLDFLAG_INCLUDE_TEXT        (0x01 << 2)     // 텍스트 포함
+#define BLDFLAG_INCLUDE_ALL         (BLDFLAG_INCLUDE_AUDIO | BLDFLAG_INCLUDE_VIDEO | BLDFLAG_INCLUDE_TEXT) // 오디오, 비디오, 텍스트 모두 포함
+#define BLDFLAG_CAL_SIZE            (0x01 << 3)     // 출력 사이즈(bytes)만 계산
+#define BLDFLAG_ENCRYPT             (0x01 << 4)     // 암호화
 
 #define M3U8_TARGET_VER_DEFAULT     3   // default HLS version = 3 (2010/11/19, http://tools.ietf.org/html/draft-pantos-http-live-streaming-05)
 
@@ -473,8 +489,8 @@ enum {
 typedef struct _build_buffer_param
 {
     uint32_t    local:1;
-    uint32_t    avflag:2;
-    uint32_t    offset:29;
+    uint32_t    avflag:3;
+    uint32_t    offset:28;
     off_t       fo;
     
     struct {
