@@ -40,10 +40,16 @@ smil_parser_deinit()
 
 typedef struct tag_smil_info {
 	char			path[1024];
+	// media attribute
 	char			bitrate[12];		/* system-bitrate attribute가 있는 경우에 이곳에 값이 들어감 */
 	char			codecs[64];
 	char			resolution[32];
-	content_info_t * content;
+	// subtitle attribute
+	char			subtitle_lang[32];
+	char 			subtitle_name[32];
+	int				subtitle_type;
+	content_info_t 	*content;
+	subtitle_info_t *subtitle;
 } smil_info_t;
 
 int parser_element_names(nc_request_t *req, adaptive_info_t *adaptive_info, xmlDocPtr doc, xmlNodePtr a_node, smil_info_t *smil_info, mem_pool_t *tmp_mpool);
@@ -51,16 +57,24 @@ int Get_element_Attribute_value(nc_request_t *req, xmlNode * a_node, struct _xml
 
 
 /* 최신 버전에서는 아래의 두가지 형태만 허용한다.
-
+ * switch의 start와 end attribute는 무시된다.
+ * video tag에는 src와 system-bitrate만 필수값이고 codecs와 resolution은 옵션값이다.
+ ** system-bitrate로 트랙을 구분하기 때문에 이값은 smil파일 내에서 unique해야 한다.
+ * 자막(subtitle)의 경우 textstream tag를 사용한다.
+ ** textstream tag에는 name과 src가 필수 값이고 name attibute가 자막의 트랙을 구분하는 용도로 사용되기 때문에 smil 파일 내에서 unique 해야 한다.
+ ** system-language, type은 옵션값인데 type에는 srt나 vtt가 들어간다.
+ *
 <?xml version="1.0" encoding="UTF-8"?>
 <smil>
   <body>
     <playlist>
       <switch start="0" end="0">
-        <video src="/mp4/adaptive/41a014430be00ec4574535d49c26a87e_v3_t31.mp4" system-bitrate="1024000"/>
-        <video src="/mp4/adaptive/41a014430be00ec4574535d49c26a87e_v3_t32.mp4" system-bitrate="2048000"/>
-        <video src="/mp4/adaptive/41a014430be00ec4574535d49c26a87e_v3_t33.mp4" system-bitrate="5120000"/>
-        <video src="/mp4/adaptive/41a014430be00ec4574535d49c26a87e_v3_t34.mp4" system-bitrate="16384000"/>
+        <video src="/mp4/adaptive/41a014430be00ec4574535d49c26a87e_v3_t31.mp4" system-bitrate="1024000" codecs="avc1.100.31, mp4a.40.2" resolution="480x272"/>
+        <video src="/mp4/adaptive/41a014430be00ec4574535d49c26a87e_v3_t32.mp4" system-bitrate="2048000" codecs="avc1.100.31, mp4a.40.2" resolution="640x360"/>
+        <video src="/mp4/adaptive/41a014430be00ec4574535d49c26a87e_v3_t33.mp4" system-bitrate="5120000" codecs="avc1.100.31, mp4a.40.2" resolution="1280x720"/>
+        <video src="/mp4/adaptive/41a014430be00ec4574535d49c26a87e_v3_t34.mp4" system-bitrate="16384000" codecs="avc1.100.31, mp4a.40.2" resolution="1920x1080"/>
+		<textstream system-language="en" name="English" type="vtt" src="/mp4/adaptive/41a014430be00ec4574535d49c26a87e_EN.vtt"/>
+		<textstream system-language="kr" name="Korean" type="vtt" src="/mp4/adaptive/41a014430be00ec4574535d49c26a87e.vtt"/>
       </switch>
     </playlist>
   </body>
@@ -70,10 +84,11 @@ int Get_element_Attribute_value(nc_request_t *req, xmlNode * a_node, struct _xml
 <smil>
   <body>
     <playlist>
-        <video src="/mp4/adaptive/41a014430be00ec4574535d49c26a87e_v3_t31.mp4" system-bitrate="1024000"/>
-        <video src="/mp4/adaptive/41a014430be00ec4574535d49c26a87e_v3_t32.mp4" system-bitrate="2048000"/>
-        <video src="/mp4/adaptive/41a014430be00ec4574535d49c26a87e_v3_t33.mp4" system-bitrate="5120000"/>
-        <video src="/mp4/adaptive/41a014430be00ec4574535d49c26a87e_v3_t34.mp4" system-bitrate="16384000"/>
+        <video src="/mp4/adaptive/41a014430be00ec4574535d49c26a87e_v3_t31.mp4" system-bitrate="1024000" codecs="avc1.100.31, mp4a.40.2" resolution="480x272"/>
+        <video src="/mp4/adaptive/41a014430be00ec4574535d49c26a87e_v3_t32.mp4" system-bitrate="2048000" codecs="avc1.100.31, mp4a.40.2" resolution="640x360"/>
+        <video src="/mp4/adaptive/41a014430be00ec4574535d49c26a87e_v3_t33.mp4" system-bitrate="5120000" codecs="avc1.100.31, mp4a.40.2" resolution="1280x720"/>
+        <video src="/mp4/adaptive/41a014430be00ec4574535d49c26a87e_v3_t34.mp4" system-bitrate="16384000" codecs="avc1.100.31, mp4a.40.2" resolution="1920x1080"/>
+        <textstream system-language="kr" name="Korean" type="srt" src="/adaptive/subtitle/Encanto_FEA_1080P23_STT_ko_KR.srt"/>
     </playlist>
   </body>
 </smil>
@@ -151,6 +166,8 @@ parser_element_names(nc_request_t *req, adaptive_info_t *adaptive_info, xmlDocPt
 	xmlNodePtr cur_node = NULL;
 	xmlChar *key = NULL;
 	content_info_t 	*content = NULL;
+	subtitle_info_t *subtitle = NULL;
+	int subtitle_num = 1;
 	int ret = 0;
 	for (cur_node = a_node; cur_node; cur_node = cur_node->next)
 	{
@@ -160,7 +177,10 @@ parser_element_names(nc_request_t *req, adaptive_info_t *adaptive_info, xmlDocPt
 
 //			if (xmlStrcmp(cur_node->name, (const xmlChar *)"switch") == 0 || xmlStrcmp(cur_node->name, (const xmlChar *)"video") == 0) {
 			if (xmlStrcmp(cur_node->name, (const xmlChar *)"video") == 0) {
+				// 예: <video src="/mp4/adaptive/41a014430be00ec4574535d49c26a87e_v3_t33.mp4" system-bitrate="5120000" codecs="avc1.100.31, mp4a.40.2" resolution="1280x720"/>
 //				printf("Element: %s\n", cur_node->name);
+				smil_info->codecs[0] = '\0';
+				smil_info->resolution[0] = '\0';
 				if (Get_element_Attribute_value(req, cur_node, cur_node->properties, smil_info) == 0) {
 					return 0;
 				}
@@ -168,12 +188,12 @@ parser_element_names(nc_request_t *req, adaptive_info_t *adaptive_info, xmlDocPt
 				if (xmlStrcmp(cur_node->name, (const xmlChar *)"video") == 0) {
 					if (smil_info->path[0] == '\0' ) {
 						/* path는 반드시 있어야 한다. */
-						scx_error_log(req, "src is a mandatory value in the smil file.(%s)\n", adaptive_info->path);
+						scx_error_log(req, "When using a video element, the 'src' attribute is a required value.(%s)\n", adaptive_info->path);
 						return 0;
 					}
 					if (smil_info->bitrate[0] == '\0' ) {
 						/* system-bitrate는 반드시 있어야 한다. */
-						scx_error_log(req, "system-bitrate is a mandatory value in the smil file.(%s)\n", adaptive_info->path);
+						scx_error_log(req, "When using a video element, the 'system-bitrate' attribute is a required value.(%s)\n", adaptive_info->path);
 						return 0;
 					}
 					if (adaptive_info->contents == NULL) {
@@ -205,8 +225,93 @@ parser_element_names(nc_request_t *req, adaptive_info_t *adaptive_info, xmlDocPt
 						sprintf(content->resolution, "%s", smil_info->resolution);
 					}
 					content->available = 1;
-//					printf("End content\n");
+#ifdef DEBUG
+					printf("bitrate: '%s', codecs = %s, resolution: '%s', path: '%s'\n",
+							content->bitrate, (content->codecs != NULL)?content->codecs:"NULL", (content->resolution != NULL)?content->resolution:"NULL", content->path);
+#endif
 				}
+			}
+			else if (xmlStrcmp(cur_node->name, (const xmlChar *)"textstream") == 0) {
+				// 예 : <textstream system-language="en" name="English" type="vtt" src="/mp4/adaptive/41a014430be00ec4574535d49c26a87e_EN.vtt"/>
+				smil_info->subtitle_type = SUBTITLE_TYPE_SRT;
+				smil_info->subtitle_lang[0] = '\0';
+				if (Get_element_Attribute_value(req, cur_node, cur_node->properties, smil_info) == 0) {
+					return 0;
+				}
+
+				if (smil_info->path[0] == '\0' ) {
+					/* path는 반드시 있어야 한다. */
+					scx_error_log(req, "When using a textstream element, the 'src' attribute is a required value.(%s)\n", adaptive_info->path);
+					return 0;
+				}
+				if (smil_info->subtitle_name[0] == '\0' ) {
+					/* system-bitrate는 반드시 있어야 한다. */
+					scx_error_log(req, "When using a textstream element, the 'name' attribute is a required value.(%s)\n", adaptive_info->path);
+					return 0;
+				}
+#if 0
+				if (adaptive_info->subtitle == NULL) {
+					smil_info->subtitle = (subtitle_info_t *)mp_alloc(tmp_mpool,sizeof(subtitle_info_t));
+					ASSERT(smil_info->subtitle);
+					adaptive_info->subtitle  = smil_info->subtitle;
+				}
+				else {
+					smil_info->subtitle->next = (subtitle_info_t *)mp_alloc(tmp_mpool,sizeof(subtitle_info_t));
+					ASSERT(smil_info->subtitle->next);
+					smil_info->subtitle = smil_info->subtitle->next;
+				}
+				subtitle = smil_info->subtitle;
+				subtitle->path = (char *) mp_alloc(tmp_mpool, strlen(smil_info->path)+1);
+				ASSERT(subtitle->path);
+				sprintf(subtitle->path, "%s", smil_info->path);
+				subtitle->subtitle_name = (char *) mp_alloc(tmp_mpool, strlen(smil_info->subtitle_name)+1);
+				ASSERT(subtitle->subtitle_name);
+				sprintf(subtitle->subtitle_name, "%s", smil_info->subtitle_name);
+					/* system-language는 필수 attribute가 아니기 때문에 없는 경우 skip 한다. */
+				if (smil_info->subtitle_lang[0] != '\0' ) {
+					subtitle->subtitle_lang = (char *) mp_alloc(tmp_mpool,strlen(smil_info->subtitle_lang)+1);
+					ASSERT(subtitle->subtitle_lang);
+					sprintf(subtitle->subtitle_lang, "%s", smil_info->subtitle_lang);
+				}
+				subtitle->subtitle_type = smil_info->subtitle_type;
+				subtitle->available = 1;
+				subtitle->subtitle_order = subtitle_num++;
+#ifdef DEBUG
+				printf("name: '%s', type = %d, language: '%s', path: '%s'\n",  subtitle->subtitle_name, subtitle->subtitle_type, (subtitle->subtitle_lang != NULL)?subtitle->subtitle_lang:"NULL", subtitle->path);
+#endif
+#else
+				if (adaptive_info->contents == NULL) {
+					smil_info->content = (content_info_t *)mp_alloc(tmp_mpool,sizeof(content_info_t));
+					ASSERT(smil_info->content);
+					adaptive_info->contents  = smil_info->content;
+				}
+				else {
+					smil_info->content->next = (content_info_t *)mp_alloc(tmp_mpool,sizeof(content_info_t));
+					ASSERT(smil_info->content->next);
+					smil_info->content = smil_info->content->next;
+				}
+				content = smil_info->content;
+				content->type = O_CONTENT_TYPE_SUBTITLE;
+				content->path = (char *) mp_alloc(tmp_mpool, strlen(smil_info->path)+1);
+				ASSERT(content->path);
+				sprintf(content->path, "%s", smil_info->path);
+				content->subtitle_name = (char *) mp_alloc(tmp_mpool, strlen(smil_info->subtitle_name)+1);
+				ASSERT(content->subtitle_name);
+				sprintf(content->subtitle_name, "%s", smil_info->subtitle_name);
+					/* system-language는 필수 attribute가 아니기 때문에 없는 경우 skip 한다. */
+				if (smil_info->subtitle_lang[0] != '\0' ) {
+					content->subtitle_lang = (char *) mp_alloc(tmp_mpool,strlen(smil_info->subtitle_lang)+1);
+					ASSERT(content->subtitle_lang);
+					sprintf(content->subtitle_lang, "%s", smil_info->subtitle_lang);
+				}
+				content->subtitle_type = smil_info->subtitle_type;
+				content->available = 1;
+				content->subtitle_order = subtitle_num++;
+#ifdef DEBUG
+				printf("name: '%s', type = %d, language: '%s', path: '%s'\n",  content->subtitle_name, content->subtitle_type, (content->subtitle_lang != NULL)?content->subtitle_lang:"NULL", content->path);
+#endif
+#endif
+
 			}
 
 			if (parser_element_names(req, adaptive_info, doc, cur_node->children, smil_info, tmp_mpool) == 0) {
@@ -219,8 +324,6 @@ parser_element_names(nc_request_t *req, adaptive_info_t *adaptive_info, xmlDocPt
 	}
 	return 1;
 }
-
-
 
 int
 Get_element_Attribute_value(nc_request_t *req, xmlNode * a_node, struct _xmlAttr * pAtt, smil_info_t *smil_info)
@@ -245,6 +348,25 @@ Get_element_Attribute_value(nc_request_t *req, xmlNode * a_node, struct _xmlAttr
 		}
 		else if (xmlStrcmp(pAtt->name, (const xmlChar *)"resolution") == 0) {
 			xmlStrPrintf(smil_info->resolution, 32, "%s", value);
+		}
+		else if (xmlStrcmp(pAtt->name, (const xmlChar *)"system-language") == 0) {
+			xmlStrPrintf(smil_info->subtitle_lang, 32, "%s", value);
+		}
+		else if (xmlStrcmp(pAtt->name, (const xmlChar *)"name") == 0) {
+			xmlStrPrintf(smil_info->subtitle_name, 32, "%s", value);
+		}
+		else if (xmlStrcmp(pAtt->name, (const xmlChar *)"type") == 0) {
+			if (strncmp((char *)value, "srt", 3) == 0){
+				smil_info->subtitle_type = SUBTITLE_TYPE_SRT;
+			}
+			else if (strncmp((char *)value, "vtt", 3) == 0){
+				smil_info->subtitle_type = SUBTITLE_TYPE_VTT;
+			}
+			else {
+				scx_error_log(req, "Undefined subtitle file type(%s).\n", value);
+				smil_info->subtitle_type = SUBTITLE_TYPE_UNKNOWN;
+
+			}
 		}
 	}
 	if (pAtt->next != NULL)
