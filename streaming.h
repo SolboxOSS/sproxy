@@ -18,11 +18,13 @@ typedef enum {
 	MEDIA_TYPE_HLS,
 	MEDIA_TYPE_HLS_MAIN_M3U8,
 	MEDIA_TYPE_HLS_SUB_M3U8,
+	MEDIA_TYPE_HLS_VTT_M3U8,
 	MEDIA_TYPE_HLS_FMP4_MAIN_M3U8,
 	MEDIA_TYPE_HLS_FMP4_AUDIO_M3U8,
 	MEDIA_TYPE_HLS_FMP4_VIDEO_M3U8,
 	MEDIA_TYPE_HLS_AUDIOLIST,
 	MEDIA_TYPE_HLS_TS,
+	MEDIA_TYPE_HLS_VTT,
 	MEDIA_TYPE_HLS_MANIFEST,
 	MEDIA_TYPE_MPEG_DASH_MANIFEST,		/* Fragmented MP4 type DASH */
 	MEDIA_TYPE_MPEG_DASH_TS_MANIFEST,	/* MEPG2-TS type DASH */
@@ -50,6 +52,7 @@ typedef enum {
 	MEDIA_TYPE_MP3_DOWN,
 	MEDIA_TYPE_FLAC_DOWN,
 	MEDIA_TYPE_SMIL_DOWN,
+	MEDIA_TYPE_SUBTITLE_DOWN,
 	MEDIA_TYPE_CMAF_VIDEO_TUNNEL,
 	MEDIA_TYPE_CMAF_AUDIO_TUNNEL,
 	MEDIA_TYPE_ENC_KEY,
@@ -86,15 +89,19 @@ typedef enum {
 #define O_STRM_TYPE_TEMPO			0x00400000	/* 오디오 배속 변경 Streaming */
 #define O_STRM_TYPE_PREVIEW			0x00800000	/* 미리보기 기능 */
 
-#if 0
-#define O_CONTENT_TYPE_VOD			0x00010000
-#define O_CONTENT_TYPE_LIVE			0x00020000
-#define O_CONTENT_TYPE_NDVR			0x00040000
-#else
-#define O_CONTENT_TYPE_VOD			0x00000100
-#define O_CONTENT_TYPE_ADVER		0x00000200
-#define O_CONTENT_TYPE_LIVE			0x00000400
-#endif
+
+typedef enum {
+	O_CONTENT_TYPE_VOD		= 2000,
+	O_CONTENT_TYPE_ADVER,
+	O_CONTENT_TYPE_LIVE,
+	O_CONTENT_TYPE_SUBTITLE
+} scx_content_type_t;
+
+
+#define SUBTITLE_TYPE_UNKNOWN		0
+#define SUBTITLE_TYPE_SRT			1
+#define SUBTITLE_TYPE_VTT			2
+
 
 typedef enum {
 	ENCRYPT_METHOD_NONE = 0,
@@ -187,12 +194,8 @@ typedef struct tag_builder_info {
  * adaptive streaming의 경우 main1->sub1->sub1->main2->sub2->sub2->main3->sub3->sub3의 순서로 리스트에 저장된다
  */
 typedef struct tag_content_info {
-#if 0
-	/* live ad stiching 기능을 개발하면서 host 지정 기능은 사용 안함 */
-	char		 			*host;		/* 도메인별 설정 파일의 이름 */
-#endif
 	char			 		*path;
-	int						type;		/* 0:VOD, 1:광고, 2:LIVE */
+	int						type;		/* scx_content_type_t에 지정된 값이 들어감, 0:VOD, 1:광고, 2:LIVE , 자막인 경우 O_CONTENT_TYPE_SUBTITLE이 들어감 */
 	int			 			start;		/* start와 end는 milisecond 단위임 */
 	int			 			end;		/* end가 range 요청에 들어 있지 않은 경우는 EOF(동영상의 끝까지)가 들어 간다. */
 	int						is_base;	/* adaptive streaming에서 base media의 경우 여기에 1이 들어감 */
@@ -200,23 +203,39 @@ typedef struct tag_content_info {
 	char					*bitrate;	/* int로 해도 되지만 혹시나 문자가 들어 올 경우를 대비해서 문자열로함 */
 	char					*codecs;	/* 필수 값이 아니때문에 NULL이 들어 올수 있다 */
 	char					*resolution;	/* 필수 값이 아니때문에 NULL이 들어 올수 있다 */
+	// 자막 관련 부분 시작
+	char					*subtitle_lang;	/* kr, en 등 */
+	char 					*subtitle_name;		/* Korean, English 등 */
+	int						subtitle_type;	/* 1:srt, 0:vtt */
+	int						subtitle_order;		/* smil 파일에 들어 있는 자막 순서, 1부터 시작 */
+	// 자막 관련 부분 끝
 	struct tag_content_info	*next;
 } content_info_t;
 
+typedef struct tag_subtitle_info {
+	char			 		*path;
+	int			 			start;		/* start와 end는 milisecond 단위임 */
+	int			 			end;		/* end가 range 요청에 들어 있지 않은 경우는 EOF(동영상의 끝까지)가 들어 간다. */
+	int						is_base;	/* adaptive streaming에서 base media의 경우 여기에 1이 들어감 */
+	int						available;	/* 1 경우 사용 , 0인 경우 무시, smil 파싱 단계에서만 사용 */
+	char					*subtitle_lang;	/* kr, en 등 */
+	char 					*subtitle_name;		/* Korean, English 등 */
+	int						subtitle_type;		/* 1:srt, 0:vtt */
+	int						subtitle_order;		/* smil 파일에 들어 있는 자막 순서, 1부터 시작 */
+	struct tag_subtitle_info	*next;
+} subtitle_info_t;
+
 /* smil 파일별 내용을 저장 하는 구조체 */
 typedef struct tag_adaptive_info {
-#if 0
-	/* live ad stiching 기능을 개발하면서 host 지정 기능은 사용 안함 */
-	char	*host;		/* 도메인별 설정 파일의 이름 */
-#endif
 	char	*path;		/* smil혹은 mp3/mp4 파일 경로 */
 //	char	*arg;		/* smil혹은 mp3/mp4 파일 오리진 요청시 argument가 필요한 경우 */
-	int		type;		/* 0:VOD, 1:광고, 2:LIVE */
+	int		type;		/*  0:VOD, 1:광고, 2:LIVE */
 	int		is_smil;	/* smil 파일인 경우는 1, mp3/mp4 파일인 경우는 0 */
 	int		start;		/* start와 end는 milisecond 단위임 */
 	int		end;		/* end가 range 요청에 들어 있지 않은 경우는 EOF(동영상의 끝까지)가 들어 간다. */
 	int		order;		/* 컨텐츠 순서, 0부터 시작 */
 	struct tag_content_info	*contents;		/* smil을 파싱한 결과를 리스트로 저장, smil이 아닌 경우는 NULL이 들어감 */
+	struct tag_subtitle_info *subtitle;		/* smil에서 파싱한 자막 정보를 저장, smil이 아니거나 자막이 없는 경우는 NULL이 저장됨 */
 	struct tag_adaptive_info *next;
 } adaptive_info_t;
 
@@ -258,6 +277,8 @@ typedef struct streaming_tag {
 	char			*live_origin_path;	/* 라이브 오리진 서버에 요청될때 사용될 실제 path */
 	struct session_info_tag *session;	/* session관련 context */
 	content_info_t 	*content;
+	subtitle_info_t *subtitle;
+	int				subtitle_count;	/* 첫번째 smil 파일에 들어 있는 자막 stream의 수 */
 	builder_info_t 	*builder;
 	source_info_t 	*source;
 	zipper_io_handle *ioh;
