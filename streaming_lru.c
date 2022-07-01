@@ -457,54 +457,6 @@ strm_find_media(nc_request_t *req, int type, char *url, int allocifnotexist, int
 			}
 			else {
 				/* 캐싱된 media 정보가 있는 경우 만료 시간이 지났는지 확인 한다. */
-
-#if 0
-				time_t			timenow = time(NULL);`
-				struct nc_stat 		objstat;
-				if (find_media->vtime < timenow) {
-					/*
-					 * 유효 시간이 지난 경우 원본을 다시 열어서 갱신 여부를 확인한다.
-					 * 이때 media->st_devid ID가 변경된 경우는 해당 media의 available을 0로 표시하고
-					 * media를 찾는 과정을 반복한다.
-					 */
-					/* 만료 시간이 지난 컨텐츠 들은 시간을 다시 확인 한다. */
-
-					if (strm_get_media_attr(req, type, find_media->url, &objstat) == 0 ) {
-						TRACE((T_INFO, "[%llu] Failed to get media attribute. path(%s)\n", req->id, url));
-						/* 원본 파일에 문제가 있는 경우 */
-						goto allocate_uncached_media;
-					}
-
-					if (find_media->mtime != objstat.st_mtime) {
-						/*
-						 * 원본 파일이 변경된 경우 available을 0로 marking 한 후에
-						 * 캐싱되지 않는 media를 새로 생성한다.
-						 */
-						TRACE((T_INFO, "[%llu] Cached media info mtime updated. cache(%ld), update(%ld), path(%s)\n", req->id, find_media->mtime, objstat.st_mtime, url));
-						goto allocate_uncached_media;
-					}
-					else if (find_media->msize != objstat.st_size) {
-						/*
-						 * 원본 파일의 크기가 변경된 경우도 파일이 변경 된걸로 판단.
-						 */
-						TRACE((T_INFO, "[%llu] Cached media size changed. cache(%lld), change(%lld), path(%s)\n", req->id, find_media->msize, objstat.st_size, url));
-						goto allocate_uncached_media;
-					}
-					else if(strncmp(find_media->st_devid, objstat.st_devid, 128) != 0) {
-						/*
-						 * ETag가 바뀌는 경우에도 파일이 변경된걸로 판단한다.
-						 * 이 검사를 skip 하는 기능이 필요할수도 있지만 설정이 너무 복잡해지는것 같아서 제외함.
-						 */
-						TRACE((T_INFO, "[%llu] Cached media info ETag updated. cache(%s), update(%s), path(%s)\n", req->id, find_media->st_devid, objstat.st_devid, url));
-						goto allocate_uncached_media;
-					}
-					else {
-						/* 여기 까지 오는 경우는 원본 파일이 변경되지 않고 netcache core에서 만료 시간이 갱신된 경우라고 봐야  */
-						TRACE((T_DAEMON|T_DEBUG, "[%llu] Cached media info expire time update. cache(%ld), update(%ld), path(%s)\n", req->id, find_media->vtime, objstat.st_mtime, url));
-						find_media->vtime = objstat.st_vtime;
-					}
-				}
-#else
 				time_t			timenow = scx_get_cached_time_sec();
 				if (find_media->vtime < timenow) {
 					/*
@@ -518,7 +470,6 @@ strm_find_media(nc_request_t *req, int type, char *url, int allocifnotexist, int
 					}
 
 				}
-#endif
 
 			}
 		}
