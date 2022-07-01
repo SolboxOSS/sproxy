@@ -474,6 +474,7 @@ enum {
 #define BLDFLAG_INCLUDE_VIDEO       (0x01 << 0)     // 비디오 포함
 #define BLDFLAG_INCLUDE_AUDIO       (0x01 << 1)     // 오디오 포함
 #define BLDFLAG_INCLUDE_TEXT        (0x01 << 2)     // 텍스트 포함
+#define BLDFLAG_INCLUDE_AV          (BLDFLAG_INCLUDE_AUDIO | BLDFLAG_INCLUDE_VIDEO)
 #define BLDFLAG_INCLUDE_ALL         (BLDFLAG_INCLUDE_AUDIO | BLDFLAG_INCLUDE_VIDEO | BLDFLAG_INCLUDE_TEXT) // 오디오, 비디오, 텍스트 모두 포함
 #define BLDFLAG_CAL_SIZE            (0x01 << 3)     // 출력 사이즈(bytes)만 계산
 #define BLDFLAG_ENCRYPT             (0x01 << 4)     // 암호화
