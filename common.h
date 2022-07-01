@@ -191,7 +191,8 @@ typedef struct service_info_tag {
 	/////////////////// 	streaming 관련 시작	///////////////////////////////////////
 	vstring_t 			*ad_origin_hostname;	/* 광고 컨텐츠용 origin 서버에 요청할때 사용하는 host name */
 	vstring_t 			*ad_base_path;			/* origin 요청 url의 앞에 붙는 prefix */
-	uint32_t			hls_target_duration;/* TS Target Duration */
+	uint32_t			hls_target_duration;	/* TS Target Duration */
+	uint32_t			subtitle_target_duration;	/* 자막의 생성 Duration */
 	uint32_t			quick_start_seg;	/* 퀵스타트를 위한 초기 최소 분할 세그먼트의 갯수 */
 	mode_t				permitted_protocol;	/* service 가능한 streaming 프로토콜, HLS, DASH, Progressive등 */
 	mode_t				permitted_mode;		/* service 가능한 streaming mode, single, multi, adaptive등 */
