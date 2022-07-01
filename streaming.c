@@ -4573,6 +4573,7 @@ strm_prepare_stream(nc_request_t *req)
 				bprm->attr.bldflag |= BLDFLAG_ENCRYPT;
 
 			}
+#endif
 			if (builder->is_adaptive == 1) {
 				snprintf(hls_video_format+hls_video_format_len, MEDIA_FORMAT_MAX_LEN, "%s%s", gscx__hls_fmp4_video_m3u8_format, (streaming->argument ?streaming->argument :""));
 				snprintf(hls_audio_format+hls_audio_format_len, MEDIA_FORMAT_MAX_LEN, "%s%s", gscx__hls_fmp4_audio_m3u8_format, (streaming->argument ?streaming->argument :""));
@@ -4581,7 +4582,6 @@ strm_prepare_stream(nc_request_t *req)
 				snprintf(hls_video_format+hls_video_format_len, MEDIA_FORMAT_MAX_LEN, "%s%s", gscx__hls_fmp4_video_m3u8_format, (streaming->argument ?streaming->argument :""));
 				snprintf(hls_audio_format+hls_audio_format_len, MEDIA_FORMAT_MAX_LEN, "%s%s", gscx__hls_fmp4_audio_m3u8_format, (streaming->argument ?streaming->argument :""));
 			}
-#endif
 			bprm->target.attr.fmp4m3u8.video = hls_video_format;
 			bprm->target.attr.fmp4m3u8.audio = hls_audio_format;
 			bprm->attr.index.adapt = 0xff; /* adaptive 형태로 출력 */
