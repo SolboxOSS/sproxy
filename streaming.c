@@ -28,8 +28,6 @@
 #include "sessionmgr.h"
 #include "status.h"
 #include "voxio_def.h"
-//#include "solCMAF.h"
-//#include "err.h"
 #include "scx_list.h"
 #include "streaming.h"
 #include "streaming_lru.h"
