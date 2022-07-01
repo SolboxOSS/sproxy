@@ -943,9 +943,6 @@ next_create_media:
 	}
 
 create_media_end:
-//	ASSERT(media->available); /*media->available가 0인 경우 여기로 들어오면 안된다. */
-//	strm_use_media(media);
-//create_media_error:
 	if (media != NULL) {
 		strm_commit_media(req, media);
 //		if(gres == GLRUR_ALLOCATED)  {
