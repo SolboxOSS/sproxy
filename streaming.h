@@ -187,7 +187,7 @@ typedef struct tag_builder_info {
 	char				*resolution[20];	/* 필수 값이 아니때문에 NULL이 들어 올수 있다 */
 } builder_info_t;
 
-
+#define USE_ANOTHER_SUBTILTE_STRUCT 1
 /*
  *  client로 부터 들어온 요청에 포함된 동영상들의  경로 및 range 정보를 저장
  * content_info의 변수들의 메모리 할당은  streaming_t의 mpool을 사용한다.
@@ -203,12 +203,14 @@ typedef struct tag_content_info {
 	char					*bitrate;	/* int로 해도 되지만 혹시나 문자가 들어 올 경우를 대비해서 문자열로함 */
 	char					*codecs;	/* 필수 값이 아니때문에 NULL이 들어 올수 있다 */
 	char					*resolution;	/* 필수 값이 아니때문에 NULL이 들어 올수 있다 */
+#ifndef USE_ANOTHER_SUBTILTE_STRUCT
 	// 자막 관련 부분 시작
 	char					*subtitle_lang;	/* kr, en 등 */
 	char 					*subtitle_name;		/* Korean, English 등 */
 	int						subtitle_type;	/* 1:srt, 0:vtt */
 	int						subtitle_order;		/* smil 파일에 들어 있는 자막 순서, 1부터 시작 */
 	// 자막 관련 부분 끝
+#endif
 	struct tag_content_info	*next;
 } content_info_t;
 
@@ -286,9 +288,6 @@ typedef struct streaming_tag {
 	zipper_builder_param *bprm;
 	scFragment 		fragment;			/* CMAF fragment context */
 	void			*options; 			/* netcache core에 요청시 새로 만들어서 한다. */
-#if 0	/* req->edited_body 사용하도록 변경 하면서 아래의 부분이 필요 없다. */
-	void			*compiled_buffer;	/* 만들어진 미디어를 임시 저장하는 버퍼. 종료시 별도의 메모리 해제가 필요함 */
-#endif
 	nc_request_t 	*req;
 } streaming_t;
 
