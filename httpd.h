@@ -324,6 +324,7 @@ void nc_request_completed(void *cls, struct MHD_Connection *connection, void **c
 int scx_make_response(nc_request_t *req);
 int scx_update_resp_header(const char *key, const char *value, void *cb);
 int scx_update_ignore_query_url(nc_request_t *req);
+int scx_make_path_to_url(nc_request_t *req);
 
 int vm_init();
 int vm_deinit();
