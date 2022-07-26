@@ -143,7 +143,7 @@
 ///////////////////////////////////////// Streaming 기능 관련 시작 ////////////////////////////////////////////
 #define		SV_STREAMING_ENABLE				"streaming_enable"			/* default/site, not inherited, default : 0, cache에서 streaming 기능 사용(0:사용안함, 1 사용) */
 #define		SV_STREAMING_TARGET_DURATION	"streaming_target_duration"	/* default/site, not inherited */
-#define		SV_SUBTITLE_TARGET_DURATION		"subtitle_target_duration"	/* site only, default : 30, 자막 segment의 생성시간, 단위 : 초*/
+#define		SV_SUBTITLE_TARGET_DURATION		"subtitle_target_duration"	/* site only, default : 60, 자막 segment의 생성시간, 단위 : 초*/
 #define		SV_QUICK_START_SEG				"quick_start_seg"			/* default/site, not inherited ,퀵스타트를 위한 초기 최소 분할 세그먼트의 갯수(단위 : 초, default : 0)*/
 #define		SV_SESSION_ENABLE				"session_enable"			/* default/site, inherited, default : 0 */
 #define		SV_SESSION_TIMEOUT				"session_timeout"			/* default/site, inherited, default : 30 */
