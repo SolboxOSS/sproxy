@@ -249,7 +249,7 @@ parser_element_names(nc_request_t *req, adaptive_info_t *adaptive_info, xmlDocPt
 					scx_error_log(req, "When using a textstream element, the 'name' attribute is a required value.(%s)\n", adaptive_info->path);
 					return 0;
 				}
-#if 0
+#ifdef USE_ANOTHER_SUBTILTE_STRUCT
 				if (adaptive_info->subtitle == NULL) {
 					smil_info->subtitle = (subtitle_info_t *)mp_alloc(tmp_mpool,sizeof(subtitle_info_t));
 					ASSERT(smil_info->subtitle);
@@ -267,11 +267,16 @@ parser_element_names(nc_request_t *req, adaptive_info_t *adaptive_info, xmlDocPt
 				subtitle->subtitle_name = (char *) mp_alloc(tmp_mpool, strlen(smil_info->subtitle_name)+1);
 				ASSERT(subtitle->subtitle_name);
 				sprintf(subtitle->subtitle_name, "%s", smil_info->subtitle_name);
-					/* system-language는 필수 attribute가 아니기 때문에 없는 경우 skip 한다. */
+					/* system-language는 필수 attribute가 아니기 때문에 없는 경우 subtitle_name 값을 사용한다. */
 				if (smil_info->subtitle_lang[0] != '\0' ) {
 					subtitle->subtitle_lang = (char *) mp_alloc(tmp_mpool,strlen(smil_info->subtitle_lang)+1);
 					ASSERT(subtitle->subtitle_lang);
 					sprintf(subtitle->subtitle_lang, "%s", smil_info->subtitle_lang);
+				}
+				else {
+					subtitle->subtitle_lang = (char *) mp_alloc(tmp_mpool,strlen(smil_info->subtitle_name)+1);
+					ASSERT(subtitle->subtitle_lang);
+					sprintf(subtitle->subtitle_lang, "%s", smil_info->subtitle_name);
 				}
 				subtitle->subtitle_type = smil_info->subtitle_type;
 				subtitle->available = 1;
