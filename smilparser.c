@@ -167,7 +167,7 @@ parser_element_names(nc_request_t *req, adaptive_info_t *adaptive_info, xmlDocPt
 	xmlChar *key = NULL;
 	content_info_t 	*content = NULL;
 	subtitle_info_t *subtitle = NULL;
-	int subtitle_num = 1;
+	int subtitle_num = 0;
 	int ret = 0;
 	for (cur_node = a_node; cur_node; cur_node = cur_node->next)
 	{
