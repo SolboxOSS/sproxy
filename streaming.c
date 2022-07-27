@@ -7384,7 +7384,7 @@ strm_purge(nc_request_t *req)
 			strm_purge_media_info(req, content->type, content->path);
 			content = content->next;
 		}
-#if 0
+
 		/* 자막 파일이 있는 경우 같이 퍼지 한다. */
 		subtitle = streaming->subtitle;
 		while (subtitle) {
@@ -7399,7 +7399,7 @@ strm_purge(nc_request_t *req)
 			}
 			subtitle = subtitle->next;
 		}
-#endif
+
 		if ( (streaming->media_mode & O_STRM_TYPE_ADAPTIVE) != 0 ) {
 			/* adaptive mode에는 smil이 한개 이상 있으므로 smil 파일도 같이 퍼지 한다. */
 			adaptive = streaming->adaptive_info;
