@@ -202,6 +202,7 @@ typedef struct tag_content_info {
 	char					*bitrate;	/* int로 해도 되지만 혹시나 문자가 들어 올 경우를 대비해서 문자열로함 */
 	char					*codecs;	/* 필수 값이 아니때문에 NULL이 들어 올수 있다 */
 	char					*resolution;	/* 필수 값이 아니때문에 NULL이 들어 올수 있다 */
+	int						order;		/* track 순서 */
 	struct tag_content_info	*next;
 } content_info_t;
 
@@ -252,7 +253,7 @@ typedef struct streaming_tag {
 	int				build_type;		/* zipper.h에 정의된 값이 들어간다. */
 	int				is_adaptive;	/* adaptive content일 때에는 1일 셋팅된다. */
 	char *			rep_id; 		/* DASH와 HLS fmp4에서는 Representation ID, MSS,HLS ts의 adaptive streaming에서는 bitrate */
-	int				rep_num;		/* CMAF DASH에서 track(audio/video) 구분을 위해 사용 */
+	int				rep_num;		/* CMAF DASH와 fragmented mp4에서 track(audio/video) 구분을 위해 사용 */
 	int				ts_num;			/* media(ts,m4s) 파일의 segment number */
 	uint64_t		media_size;		/* 전송될  m3u8이나 ts파일의 전체 크기 */
 	char			*argument; 		/* url에 포함된 argument,  ?를 포함한 파라미터가 들어 간다. */
