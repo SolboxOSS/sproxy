@@ -274,7 +274,6 @@ typedef struct _zcxt_parse_param
         
         off_t   audio[MULTI_TRACK_MAX];
         off_t   video[MULTI_TRACK_MAX];
-        off_t   text[MULTI_TRACK_MAX];
         
     } chunksize;
     
@@ -311,9 +310,8 @@ typedef struct _zidx_context
             
         } global;
         
-        mp4_track_desc *audio;
-        mp4_track_desc *video;
-        mp4_track_desc *text;
+        mp4_track_desc  *audio;
+        mp4_track_desc  *video;
         
     } config;
     
