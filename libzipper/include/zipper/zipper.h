@@ -86,7 +86,6 @@ typedef struct _zipper_builder_mp4out_matrix
         
         uint32_t audio;
         uint32_t video;
-        uint32_t text;
         
     } tscale;
     
@@ -94,8 +93,7 @@ typedef struct _zipper_builder_mp4out_matrix
     
     struct {
         
-        uint32_t    text;
-        uint32_t    audio;
+        uint64_t    audio;
         uint64_t    video;
         
     } chunk;
@@ -114,7 +112,6 @@ typedef struct _zipper_builder_mp4out_matrix
         
         uint32_t audio;
         uint32_t video;
-        uint32_t text;
         
     } stsz;
     
@@ -122,7 +119,6 @@ typedef struct _zipper_builder_mp4out_matrix
         
         uint32_t audio;
         uint32_t video;
-        uint32_t text;
         
     } stts;
     
@@ -205,7 +201,6 @@ typedef enum {
     codec_index_aac     = 15,
     codec_index_mp4v    = 16,
     codec_index_avc     = 27,
-    codec_index_text    = 29,
     codec_index_hevc    = 36,
     codec_index_flac    = 58,
 
@@ -227,7 +222,6 @@ enum {
     src_format_mp3,
     src_format_flac,
     src_format_flv,
-    src_format_srt,
     src_format_zdmp,
 };
 
@@ -238,9 +232,8 @@ typedef struct _zipper_media_desc
     uint32_t    bit64:1;
     uint32_t    acc:4;
     uint32_t    vcc:4;
-    uint32_t    tcc:4;
     uint32_t    sfmt:6;
-    uint32_t    resv:13;
+    uint32_t    resv:17;
     uint32_t    bandwidth;
     
     struct {
@@ -290,20 +283,13 @@ typedef struct _zipper_media_desc
         
     } video[MULTI_TRACK_MAX];
     
-    struct {
-        
-        uint8_t     sdci; // 코덱 인덱스 (media_desc_codec_index)
-        uint8_t     lang; // 언어 코드
-        
-    } text[MULTI_TRACK_MAX];
-    
 } zipper_media_desc;
 
 typedef struct _zipper_media_context
 {
     uint32_t msize;
     zipper_media_desc   desc;
-    zidx_context        *ctx;
+    zidx_context         *ctx;
     
 } zipper_media_context;
 
@@ -468,16 +454,13 @@ enum {
     BLDTYPE_FLAC,           // FLAC 파일을 출력한다. (PDL/Pseudo)
     BLDTYPE_FMP4M3U8,       // Fragmented MP4 기반 마스터 M3U8 파일을 출력한다.
     BLDTYPE_FMP4SUBM3U8,    // Fragmented MP4 기반의 서브 M3U8 파일을 출력한다.
-    BLDTYPE_VTT             // 세그먼트 VTT
 };
 
 #define BLDFLAG_INCLUDE_VIDEO       (0x01 << 0)     // 비디오 포함
 #define BLDFLAG_INCLUDE_AUDIO       (0x01 << 1)     // 오디오 포함
-#define BLDFLAG_INCLUDE_TEXT        (0x01 << 2)     // 텍스트 포함
-#define BLDFLAG_INCLUDE_AV          (BLDFLAG_INCLUDE_AUDIO | BLDFLAG_INCLUDE_VIDEO)
-#define BLDFLAG_INCLUDE_ALL         (BLDFLAG_INCLUDE_AUDIO | BLDFLAG_INCLUDE_VIDEO | BLDFLAG_INCLUDE_TEXT) // 오디오, 비디오, 텍스트 모두 포함
-#define BLDFLAG_CAL_SIZE            (0x01 << 3)     // 출력 사이즈(bytes)만 계산
-#define BLDFLAG_ENCRYPT             (0x01 << 4)     // 암호화
+#define BLDFLAG_INCLUDE_ALL         (BLDFLAG_INCLUDE_AUDIO | BLDFLAG_INCLUDE_VIDEO) // 오디오, 비디오 모두 포함
+#define BLDFLAG_CAL_SIZE            (0x01 << 2)     // 출력 사이즈(bytes)만 계산
+#define BLDFLAG_ENCRYPT             (0x01 << 3)     // 암호화
 
 #define M3U8_TARGET_VER_DEFAULT     3   // default HLS version = 3 (2010/11/19, http://tools.ietf.org/html/draft-pantos-http-live-streaming-05)
 
@@ -490,8 +473,8 @@ enum {
 typedef struct _build_buffer_param
 {
     uint32_t    local:1;
-    uint32_t    avflag:3;
-    uint32_t    offset:28;
+    uint32_t    avflag:2;
+    uint32_t    offset:29;
     off_t       fo;
     
     struct {
@@ -823,9 +806,9 @@ typedef struct _zipper_builder_param
             struct {
                 
                 char        *format;            // 출력 포맷
-
+                
             } m3u8; // M3U8 설정
-
+            
             struct {
                 
                 char *init;         // 초기화 파일 출력 포맷
@@ -839,9 +822,6 @@ typedef struct _zipper_builder_param
                 char *audio;    // 오디오 M3U8 출력 포맷
                 
             } fmp4m3u8;
-            
-            //  MPD, 마스터 M3U8 생성시 자막 트랙(M3U8)을 지정/설정한다.
-            // subtrk[i].url 이 NULL이면 (i-1)이 마지막 자막 트랙이 된다.
             
             struct {
 
@@ -893,28 +873,6 @@ typedef struct _zipper_builder_param
             
         } attr;
         
-        struct {
-            
-            uint8_t def; // 기본 선택 자막인 경우 1, 그렇지 않으면 0 (def=1인 자막이 없는 경우 첫번째 자막이 자동 DEFAULT+AUTOSELECT로 처리)
-            char *url; // 자막 M3U8 URL(*필수) (생성하는 M3U8의 상대 URL 혹은 절대 URL 모두 가능, zipper에서 별도로 보정하지 않음)
-            char *desc; // NULL일 경우 lang 필드의 값을 그대로 사용
-            char *lang; // ISO639-1 3자리 언어코드(*필수) (예:"kor", "eng", iso639.h 참조)
-            
-            // 마지막 자막 기술 후 다음 인덱스의 url을 NULL로 설정하시면 됩니다.
-            /*
-                예) 한국어/영어 2개 자막 설정 시
-             
-                .sub_link[0].url = "kor/sub.m3u8";
-                .sub_link[0].lang = "kor";
-                .sub_link[1].url = "eng/sub.m3u8";
-                .sub_link[1].lang = "eng";
-                .sub_link[2].url = NULL;
-                .sub_link[2].lang = NULL;
-             
-             */
-                        
-        } sub_link[8];
-
     } target; // 출력 대상 설정
     
     struct {
