@@ -1,4 +1,4 @@
-/github/stars/:org
+![GitHub forks](https://img.shields.io/github/forks/SolboxOSS/sproxy?style=social)
 
 # Introduction
 
