@@ -2,6 +2,7 @@
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/y/SolboxOSS/sproxy)
 ![GitHub forks](https://img.shields.io/github/forks/SolboxOSS/sproxy?style=social)
 ![GitHub contributors](https://img.shields.io/github/contributors-anon/SolboxOSS/sproxy)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FSolboxOSS%2Fsproxy.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FSolboxOSS%2Fsproxy?ref=badge_shield)
 
 
 # Introduction
@@ -90,3 +91,6 @@ server {
 ## License
 
 solproxy is is dual-licensed under the GNU Lesser General PublicLicense (LGPLv2.1+)
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FSolboxOSS%2Fsproxy.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FSolboxOSS%2Fsproxy?ref=badge_large)
