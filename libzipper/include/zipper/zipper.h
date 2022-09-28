@@ -288,6 +288,8 @@ typedef struct _zipper_media_desc
             
         } resolution; // 비디오 크기
         
+        uint8_t tc;
+        
     } video[MULTI_TRACK_MAX];
     
     struct {
@@ -1251,6 +1253,9 @@ typedef struct _zipper_variant_track {
 
         } resolution;
 
+        uint8_t vtc;            // 비디오 Transfer Characteristics 코드(hdr.h 참조)
+                                // 0이면 ctx(NULL이 아닐 경우)로부터 정보를 구한다.
+        
         const char *codecs;     // 코덱 정보
                                 // NULL이고 ctx가 NULL이 아니면 ctx로 부터 그렇지 않으면 기술을 생략한다.
 
