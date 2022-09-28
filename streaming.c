@@ -87,12 +87,17 @@ static strm_reg_t gscx__strm_vod_reg[] = {
 	{NULL, MEDIA_TYPE_MSS_VIDEO, 			O_PROTOCOL_MSS,			BLDTYPE_MOOF, 		2, "video/mp4", 			"^([0-9]+)_video_segment_([0-9]+)\\.ismv$"},
 	{NULL, MEDIA_TYPE_MSS_AUDIO, 			O_PROTOCOL_MSS,			BLDTYPE_MOOF, 		2, "video/mp4", 			"^([0-9]+)_audio_segment_([0-9]+)\\.isma$"},
 	{NULL, MEDIA_TYPE_HLS_MAIN_M3U8, 		O_PROTOCOL_HLS, 		BLDTYPE_NONE, 		0, "application/vnd.apple.mpegurl", "^playlist\\.m3u8$"},
+//	{NULL, MEDIA_TYPE_HLS_MAIN_M3U8_TS,		O_PROTOCOL_HLS|O_PROTOCOL_SEP_TRACK,		BLDTYPE_NONE, 		0, "application/vnd.apple.mpegurl", "^playlist_ts\\.m3u8$"},
 	{NULL, MEDIA_TYPE_HLS_SUB_M3U8, 		O_PROTOCOL_HLS, 		BLDTYPE_M3U8, 		1, "application/vnd.apple.mpegurl", "^content[_]?([0-9]*)\\.m3u8$"},
+	{NULL, MEDIA_TYPE_HLS_VIDEO_M3U8, 		O_PROTOCOL_HLS, 		BLDTYPE_M3U8, 		1, "application/vnd.apple.mpegurl", "^video[_]?([0-9]*)\\.m3u8$"},
+	{NULL, MEDIA_TYPE_HLS_AUDIO_M3U8, 		O_PROTOCOL_HLS, 		BLDTYPE_M3U8, 		1, "application/vnd.apple.mpegurl", "^audio[_]?([0-9]*)\\.m3u8$"},
 	{NULL, MEDIA_TYPE_HLS_VTT_M3U8, 		O_PROTOCOL_HLS, 		BLDTYPE_M3U8, 		1, "application/vnd.apple.mpegurl", "^subtitle[_]?([0-9]*)\\.m3u8$"},
 	{NULL, MEDIA_TYPE_HLS_FMP4_MAIN_M3U8, 	O_PROTOCOL_HLS, 		BLDTYPE_FMP4M3U8, 	0, "application/vnd.apple.mpegurl", "^playlist_fmp4\\.m3u8$"},
 	{NULL, MEDIA_TYPE_HLS_FMP4_AUDIO_M3U8, 	O_PROTOCOL_HLS, 		BLDTYPE_FMP4SUBM3U8,2, "application/vnd.apple.mpegurl", "^fmp4_audio[_]?([0-9]*)\\.m3u8$"},
 	{NULL, MEDIA_TYPE_HLS_FMP4_VIDEO_M3U8, 	O_PROTOCOL_HLS, 		BLDTYPE_FMP4SUBM3U8,2, "application/vnd.apple.mpegurl", "^fmp4_video[_]?([0-9]*)\\.m3u8$"},
 	{NULL, MEDIA_TYPE_HLS_TS, 				O_PROTOCOL_HLS,			BLDTYPE_STS, 		2, "video/MP2T", 			"^content[_]?([0-9]*)_([0-9]+)\\.ts$"},
+	{NULL, MEDIA_TYPE_HLS_VIDEO_TS, 		O_PROTOCOL_HLS,			BLDTYPE_STS, 		2, "video/MP2T", 			"^video[_]?([0-9]*)_([0-9]+)\\.ts$"},
+	{NULL, MEDIA_TYPE_HLS_AUDIO_TS, 		O_PROTOCOL_HLS,			BLDTYPE_STS, 		2, "video/MP2T", 			"^audio[_]?([0-9]*)_([0-9]+)\\.ts$"},
 	{NULL, MEDIA_TYPE_HLS_VTT, 				O_PROTOCOL_HLS, 		BLDTYPE_VTT, 		2, "text/vtt", 				"^subtitle[_]?([0-9]*)_([0-9]+)\\.vtt$"},
 	{NULL, MEDIA_TYPE_MP4, 					O_PROTOCOL_PROGRESSIVE,	BLDTYPE_MP4, 		0, "video/mp4", 			"^content\\.mp4$"},
 	{NULL, MEDIA_TYPE_M4A, 					O_PROTOCOL_PROGRESSIVE,	BLDTYPE_MP4, 		0, "audio/mp4", 			"^content\\.m4a$"},
@@ -1169,6 +1174,8 @@ strm_create_builder(nc_request_t *req, uint32_t dur)
 	time_t			timenow;
 	struct nc_stat 		objstat;
 	int	gres = 0;
+	subtitle_info_t *subtitle = NULL;
+
 
 	ASSERT(streaming);
 	if (streaming->content == NULL) {
@@ -1176,6 +1183,7 @@ strm_create_builder(nc_request_t *req, uint32_t dur)
 		scx_error_log(req, "media content not assigned(%s).\n", vs_data(req->ori_url));
 		return 0;
 	}
+
 
 	builder = allocate_builder(NULL, req->streaming->key, 1);
 
@@ -1193,19 +1201,25 @@ strm_create_builder(nc_request_t *req, uint32_t dur)
 	if (!ioh) {
 		goto create_builder_error;
 	}
+	/* HLS main manifest 요청인 경우는  zipper의  bcontext를 생성할 필요가 없고 media_list와 subtitle_list만 만들면 된다  */
+	if(streaming->media_type == MEDIA_TYPE_HLS_FMP4_MAIN_M3U8 ||
+			streaming->media_type == MEDIA_TYPE_HLS_MAIN_M3U8 ) {
+		builder->bcontext = NULL;
+		goto skip_create_bcontext;
+	}
 
 	/*
 	 * 여기에 media들을 사용해서 builder handle을 만드는 부분을 들어간다.
 	 */
 	zipper_create_builder_param cbprm;
-	if (O_PROTOCOL_RTMP == streaming->protocol) {
+	if ((streaming->protocol & O_PROTOCOL_RTMP) != 0) {
 		cbprm.flag = BLDRFLAG_SEGMENT_BASED_ONLY | BLDRFLAG_PERMIT_DISCONTINUTY;
 		cbprm.segment.qs = 0;
 		cbprm.segment.dur = 1000; // 1초 (RTMP Random Access Point를 효율적으로 제공하기 위해 1초로 고정해 놓을 것)
 
 	}
 	else {
-		if (O_PROTOCOL_HLS == streaming->protocol &&
+		if ((streaming->protocol & O_PROTOCOL_HLS) != 0 &&
 					1 == req->service->hls_permit_discontinuty) {
 			/* HLS인 경우만 이 옵션 사용 가능 */
 			cbprm.flag = BLDRFLAG_PERMIT_DISCONTINUTY;
@@ -1213,9 +1227,9 @@ strm_create_builder(nc_request_t *req, uint32_t dur)
 		else {
 			cbprm.flag = 0;
 		}
-		if (O_PROTOCOL_HLS == streaming->protocol ||
-				O_PROTOCOL_DASH == streaming->protocol ||
-				O_PROTOCOL_MSS == streaming->protocol ) {
+		if ((streaming->protocol & O_PROTOCOL_HLS) != 0 ||
+				(streaming->protocol & O_PROTOCOL_DASH) != 0 ||
+				(streaming->protocol & O_PROTOCOL_MSS) != 0) {
 			/*
 			 * progressive download 형태가 아닌 경우 zipper library에서 불필요하게 호출되면시 CPU를 소모하는 부분을 없애기 위해 설정
 			 * https://jarvis.solbox.com/redmine/issues/32564 일감 참조
@@ -1257,7 +1271,8 @@ strm_create_builder(nc_request_t *req, uint32_t dur)
 		goto create_builder_error;
 	}
 
-	subtitle_info_t *subtitle = NULL;
+skip_create_bcontext:
+
 	if (req->streaming->media_type == MEDIA_TYPE_HLS_VTT_M3U8 ||
 				req->streaming->media_type == MEDIA_TYPE_HLS_VTT) {
 		subtitle = streaming->subtitle;
@@ -1281,29 +1296,30 @@ strm_create_builder(nc_request_t *req, uint32_t dur)
 				prev_list->next = cur_list;
 			}
 			cur_list->media = media;
-			
-			memset(&tcprm, 0, sizeof(track_composition_param));
-			tcprm.comp.range.start = subtitle->start;
-			tcprm.comp.range.end = subtitle->end;
-			tcprm.media = media->mcontext;
-			tcprm.smux.qtype = TRACK_SMUX_QUERY_LANG;
+			if (builder->bcontext) {	// HLS main manifest 요청 아닌 경우만 실행
+				memset(&tcprm, 0, sizeof(track_composition_param));
+				tcprm.comp.range.start = subtitle->start;
+				tcprm.comp.range.end = subtitle->end;
+				tcprm.media = media->mcontext;
+				tcprm.smux.qtype = TRACK_SMUX_QUERY_LANG;
 #ifdef DEBUG
-			printf("base track url = %s, type(%d), start(%d), end(%d), context(%lld)\n", media->url, subtitle->subtitle_type, subtitle->start, subtitle->end, media->mcontext);
+				printf("base track url = %s, type(%d), start(%d), end(%d), context(%lld)\n", media->url, subtitle->subtitle_type, subtitle->start, subtitle->end, media->mcontext);
 #endif
-			if (sigsetjmp(__thread_jmp_buf, 1) == 0) {
-				__thread_jmp_working = 1;
-				ret = zipper_add_track(ioh, builder->bcontext, &tcprm);
-				__thread_jmp_working = 0;
-			}
-			else {
-				/* zipper 라이브러리 문제로 SIGSEGV가 발생하는 경우 재기동 되지 않고 여기가 호출 된다. */
-				ret = zipper_err_internal;
-				TRACE((T_ERROR, "[%llu] zipper_add_track() SIGSEGV occured. path(%s). %s:%d\n", req->id, vs_data(req->ori_url), __FILE__, __LINE__));
-			}
+				if (sigsetjmp(__thread_jmp_buf, 1) == 0) {
+					__thread_jmp_working = 1;
+					ret = zipper_add_track(ioh, builder->bcontext, &tcprm);
+					__thread_jmp_working = 0;
+				}
+				else {
+					/* zipper 라이브러리 문제로 SIGSEGV가 발생하는 경우 재기동 되지 않고 여기가 호출 된다. */
+					ret = zipper_err_internal;
+					TRACE((T_ERROR, "[%llu] zipper_add_track() SIGSEGV occured. path(%s). %s:%d\n", req->id, vs_data(req->ori_url), __FILE__, __LINE__));
+				}
 
-			if (ret != zipper_err_success) {
-				scx_error_log(req, "'%s' zipper_add_track error.(%s)\n", media->url, zipper_err_msg(ret));
-				goto create_builder_error;
+				if (ret != zipper_err_success) {
+					scx_error_log(req, "'%s' zipper_add_track error.(%s)\n", media->url, zipper_err_msg(ret));
+					goto create_builder_error;
+				}
 			}
 			prev_list = cur_list;
 			subtitle = subtitle->next;
@@ -1312,13 +1328,13 @@ strm_create_builder(nc_request_t *req, uint32_t dur)
 		goto create_builder_end;
 	}
 
-	content_info_t *content = req->streaming->content;
+	content_info_t *content = streaming->content;
 	/* 트랙 추가과정 */
 	while (content) {
 		if (streaming->is_adaptive == 1 && streaming->rep_id != NULL) {
 			if (streaming->adaptive_info->next == NULL) {
 				/* adaptive streaming 요청시 전체 track을 사용하지 않고 요청된 트랙만 추가해서 metadata parsing으로 인한 부하를 줄인다. */
-				if (streaming->protocol == O_PROTOCOL_HLS ) {
+				if ((streaming->protocol & O_PROTOCOL_HLS) != 0 ) {
 					/*
 					 * adaptive streaming이고 submanifest 요청이나 TS, m4s, m4a 인(streaming->rep_id가 지정된) 경우에는
 					 * rep_id(bitrate)에 해당하는 컨텐츠의 metadata만 사용하도록 한다.
@@ -1341,7 +1357,7 @@ strm_create_builder(nc_request_t *req, uint32_t dur)
 						continue;
 					}
 				}
-				else if(streaming->protocol == O_PROTOCOL_DASH) {
+				else if((streaming->protocol & O_PROTOCOL_DASH) != 0) {
 					if (streaming->media_type == MEDIA_TYPE_MPEG_DASH_VIDEO_INIT ||
 							streaming->media_type == MEDIA_TYPE_MPEG_DASH_VIDEO ||
 							streaming->media_type == MEDIA_TYPE_MPEG_DASH_AUDIO_INIT ||
@@ -1396,7 +1412,7 @@ strm_create_builder(nc_request_t *req, uint32_t dur)
 		else {
 			prev_list->next = cur_list;
 		}
-
+		content->media = media;
 		cur_list->media = media;
 		cur_list->revision = media->revision;
 		if (builder->is_adaptive == 1) {
@@ -1408,67 +1424,67 @@ strm_create_builder(nc_request_t *req, uint32_t dur)
 		cur_list->tcprm.media = media->mcontext;
 		cur_list->tcprm.smux.qtype = TRACK_SMUX_QUERY_LANG;
 		if (req->streaming->lang) strncpy(cur_list->tcprm.smux.qdata.lang, req->streaming->lang, 3);
+		if (builder->bcontext) {	// HLS main manifest 요청 아닌 경우만 실행
+			if (builder->is_adaptive == 1 && content->is_base == 0) {
+				/* adaptive track일 경우 sub media는 zipper_add_adaptive_track()을 사용한다. */
 
-		if (builder->is_adaptive == 1 && content->is_base == 0) {
-			/* adaptive track일 경우 sub media는 zipper_add_adaptive_track()을 사용한다. */
-
-			cur_list->tcprm.comp.adaptBase = adaptBase;
-			cur_list->is_base = 0;
-//				printf("sub track url = %s, start(%d), end(%d), context(%lld)\n", media->url, content->start, content->end, cur_list->tcprm.comp.adaptBase);
+				cur_list->tcprm.comp.adaptBase = adaptBase;
+				cur_list->is_base = 0;
+	//				printf("sub track url = %s, start(%d), end(%d), context(%lld)\n", media->url, content->start, content->end, cur_list->tcprm.comp.adaptBase);
 #ifdef DEBUG
-			printf("sub track url = %s, type(%d), start(%d), end(%d), context(%lld)\n", media->url, content->type, content->start, content->end, cur_list->tcprm.comp.adaptBase);
+				printf("sub track url = %s, type(%d), start(%d), end(%d), context(%lld)\n", media->url, content->type, content->start, content->end, cur_list->tcprm.comp.adaptBase);
 #endif
-			if (sigsetjmp(__thread_jmp_buf, 1) == 0) {
-				__thread_jmp_working = 1;
-				ret = zipper_add_adaptive_track(ioh, builder->bcontext, &cur_list->tcprm);
-				__thread_jmp_working = 0;
+				if (sigsetjmp(__thread_jmp_buf, 1) == 0) {
+					__thread_jmp_working = 1;
+					ret = zipper_add_adaptive_track(ioh, builder->bcontext, &cur_list->tcprm);
+					__thread_jmp_working = 0;
+				}
+				else {
+					/* zipper 라이브러리 문제로 SIGSEGV가 발생하는 경우 재기동 되지 않고 여기가 호출 된다. */
+					ret = zipper_err_internal;
+					TRACE((T_ERROR, "[%llu] zipper_add_adaptive_track() SIGSEGV occured. path(%s). %s:%d\n", req->id, vs_data(req->ori_url), __FILE__, __LINE__));
+				}
 			}
 			else {
-				/* zipper 라이브러리 문제로 SIGSEGV가 발생하는 경우 재기동 되지 않고 여기가 호출 된다. */
-				ret = zipper_err_internal;
-				TRACE((T_ERROR, "[%llu] zipper_add_adaptive_track() SIGSEGV occured. path(%s). %s:%d\n", req->id, vs_data(req->ori_url), __FILE__, __LINE__));
-			}
-		}
-		else {
-			/* adaptive track인 경우 base media의 정보를 저장한다. */
-			adaptBase = media->mcontext;	/* base media의 임시로 정보를 저장. adaptive track이 아닌 경우는 이부분은 의미 없음 */
-			cur_list->tcprm.comp.range.start = content->start;
-			cur_list->tcprm.comp.range.end = content->end;
-			cur_list->is_base = 1;
+				/* adaptive track인 경우 base media의 정보를 저장한다. */
+				adaptBase = media->mcontext;	/* base media의 임시로 정보를 저장. adaptive track이 아닌 경우는 이부분은 의미 없음 */
+				cur_list->tcprm.comp.range.start = content->start;
+				cur_list->tcprm.comp.range.end = content->end;
+				cur_list->is_base = 1;
 #ifdef DEBUG
-			printf("base track url = %s, type(%d), start(%d), end(%d), context(%lld)\n", media->url, content->type, content->start, content->end, media->mcontext);
+				printf("base track url = %s, type(%d), start(%d), end(%d), context(%lld)\n", media->url, content->type, content->start, content->end, media->mcontext);
 #endif
-			if (sigsetjmp(__thread_jmp_buf, 1) == 0) {
-				__thread_jmp_working = 1;
-				ret = zipper_add_track(ioh, builder->bcontext, &cur_list->tcprm);
-				__thread_jmp_working = 0;
-			}
-			else {
-				/* zipper 라이브러리 문제로 SIGSEGV가 발생하는 경우 재기동 되지 않고 여기가 호출 된다. */
-				ret = zipper_err_internal;
-				TRACE((T_ERROR, "[%llu] zipper_add_track() SIGSEGV occured. path(%s). %s:%d\n", req->id, vs_data(req->ori_url), __FILE__, __LINE__));
-			}
-			/*
-			 * content의 시간을 쓰지 않고 cur_list->tcprm.comp.range의 시간을 쓰는 이유는
-			 * 시간 지정이 맞지 않는(end가 실제 동영상보다 크게 지정된) 경우 zipper_add_track()호출 후
-			 * 라이브러리상에서 보정이 이루어 지기 때문이다.
+				if (sigsetjmp(__thread_jmp_buf, 1) == 0) {
+					__thread_jmp_working = 1;
+					ret = zipper_add_track(ioh, builder->bcontext, &cur_list->tcprm);
+					__thread_jmp_working = 0;
+				}
+				else {
+					/* zipper 라이브러리 문제로 SIGSEGV가 발생하는 경우 재기동 되지 않고 여기가 호출 된다. */
+					ret = zipper_err_internal;
+					TRACE((T_ERROR, "[%llu] zipper_add_track() SIGSEGV occured. path(%s). %s:%d\n", req->id, vs_data(req->ori_url), __FILE__, __LINE__));
+				}
+				/*
+				 * content의 시간을 쓰지 않고 cur_list->tcprm.comp.range의 시간을 쓰는 이유는
+				 * 시간 지정이 맞지 않는(end가 실제 동영상보다 크게 지정된) 경우 zipper_add_track()호출 후
+				 * 라이브러리상에서 보정이 이루어 지기 때문이다.
 
-			 */
-			if(cur_list->tcprm.comp.range.end == EOF) {
-				/* range.end가 EOF일 경우에는 실제 파일 크기 기준으로 계산한다. */
-				cur_list->duration = media->mcontext->desc.duration - (float)cur_list->tcprm.comp.range.start/1000.0;
+				 */
+				if(cur_list->tcprm.comp.range.end == EOF) {
+					/* range.end가 EOF일 경우에는 실제 파일 크기 기준으로 계산한다. */
+					cur_list->duration = media->mcontext->desc.duration - (float)cur_list->tcprm.comp.range.start/1000.0;
+				}
+				else {
+					cur_list->duration = (float)(cur_list->tcprm.comp.range.end - cur_list->tcprm.comp.range.start)/1000.0;
+				}
+				builder->duration += cur_list->duration;
 			}
-			else {
-				cur_list->duration = (float)(cur_list->tcprm.comp.range.end - cur_list->tcprm.comp.range.start)/1000.0;
+
+			if (ret != zipper_err_success) {
+				scx_error_log(req, "'%s' zipper_add_track error.(%s)\n", media->url, zipper_err_msg(ret));
+				goto create_builder_error;
 			}
-			builder->duration += cur_list->duration;
-		}
-
-		if (ret != zipper_err_success) {
-			scx_error_log(req, "'%s' zipper_add_track error.(%s)\n", media->url, zipper_err_msg(ret));
-			goto create_builder_error;
-		}
-
+		}	// end of if (skip_bcontext == 0)
 		content = content->next;
 		prev_list = cur_list;
 	}
@@ -1477,12 +1493,16 @@ strm_create_builder(nc_request_t *req, uint32_t dur)
 		scx_error_log(req, "'%s' empty builder->media_list\n", vs_data(req->ori_url));
 		goto create_builder_error;
 	}
-	zipper_end_track(ioh, builder->bcontext);
-	if (builder->is_adaptive == 1) {
+	if (builder->bcontext) {
+		zipper_end_track(ioh, builder->bcontext);
+	}
+	if(streaming->media_type == MEDIA_TYPE_HLS_FMP4_MAIN_M3U8 ||
+				streaming->media_type == MEDIA_TYPE_HLS_MAIN_M3U8 ) {
 		/* menifest 파일 생성시 들어갈 bitrate 관련 태그정보를 따로 저장한다.
 		 * 처음 한번만 리스트에 적용하면 이후에 다시 넣을 필요는 없다. */
 		content = streaming->content;
 		for (i = 0; i < 20 ; i++) {
+#if 0
 			builder->adaptive_track_name[i] =  mp_alloc(builder->mpool, strlen(content->bitrate)+1);
 			sprintf(builder->adaptive_track_name[i], "%s", content->bitrate);
 			if (content->codecs != NULL ) {
@@ -1493,6 +1513,20 @@ strm_create_builder(nc_request_t *req, uint32_t dur)
 				builder->resolution[i] =  mp_alloc(builder->mpool, strlen(content->resolution)+1);
 				sprintf(builder->resolution[i], "%s", content->resolution);
 			}
+#else
+			builder->track_info[i].adaptive_track_name =  mp_alloc(builder->mpool, strlen(content->bitrate)+1);
+			sprintf(builder->track_info[i].adaptive_track_name, "%s", content->bitrate);
+			if (content->codecs != NULL ) {
+				builder->track_info[i].codecs =  mp_alloc(builder->mpool, strlen(content->codecs)+1);
+				sprintf(builder->track_info[i].codecs, "%s", content->codecs);
+			}
+
+			if (content->resolution != NULL ) {
+				builder->track_info[i].resolution =  mp_alloc(builder->mpool, strlen(content->resolution)+1);
+				sprintf(builder->track_info[i].resolution, "%s", content->resolution);
+			}
+			builder->track_info[i].content = content;
+#endif
 			content = content->next;
 			/* track 한개일 때는 content가 NULL인 조건에 걸리고 여러개의 track인 경우는 content->is_base == 1 조건에 걸린다. */
 			if(NULL == content || content->is_base == 1) {
@@ -1504,14 +1538,15 @@ strm_create_builder(nc_request_t *req, uint32_t dur)
 	}
 
 
-
 create_builder_end:
 	if (ioh) {
 		strm_destroy_io_handle(ioh);
 	}
 	streaming->builder = builder;
-	builder->bcontext_size = zipper_context_size(builder->bcontext);
-	if (0 > builder->bcontext_size) builder->bcontext_size = 0;
+	if (builder->bcontext) {
+		builder->bcontext_size = zipper_context_size(builder->bcontext);
+		if (0 > builder->bcontext_size) builder->bcontext_size = 0;
+	}
 	strm_make_x_play_durations_header(streaming);
 	return 1;
 create_builder_error:
@@ -1545,7 +1580,8 @@ create_builder_error:
 		}
 		cur_list = cur_list->next;
 	}
-	
+	builder->media_list = NULL;
+
 	cur_list = builder->subtitle_list;
 	while (cur_list) {
 		media = cur_list->media;
@@ -1556,8 +1592,6 @@ create_builder_error:
 		cur_list = cur_list->next;
 	}
 	builder->subtitle_list = NULL;
-	
-	builder->media_list = NULL;
 
 	if (builder->mpool) mp_free(builder->mpool);
 
@@ -1652,7 +1686,7 @@ strm_update_session_argument(nc_request_t *req)
 	char *argument = NULL;
 	int	alloc_size = 0;
 	ASSERT(req->streaming);
-	if (O_PROTOCOL_DASH == streaming->protocol && streaming->argument != NULL)  {
+	if ((streaming->protocol & O_PROTOCOL_DASH) != 0 && streaming->argument != NULL)  {
 		/* streaming->argument에 들어 있는 &를 모두 %26로 변경 */
 		strm_url_encode_argument(req);
 	}
@@ -1669,7 +1703,7 @@ strm_update_session_argument(nc_request_t *req)
 				alloc_size += strlen(streaming->argument);
 				argument = (char *) mp_alloc(streaming->mpool, alloc_size);
 				/* argument(get) parameter가 있는 경우 session id 뒤에 붙여 준다.*/
-				if (O_PROTOCOL_DASH == streaming->protocol)  {
+				if ((streaming->protocol & O_PROTOCOL_DASH) != 0)  {
 
 #if 0
 					/* DASH의 경우 XML에서 &를 사용할수 없기 때문에 url encoding 한 %26을 대신 붙인다. */
@@ -3551,7 +3585,7 @@ strm_cmaf_reader(void *cr, uint64_t pos, char *buf, size_t max)
 			/* fragment가 전송 도중 완성된 경우 */
 			if (req->cursor >= fragment_pos) {
 				/* 전송이 모두 끝난 상태 */
-				if (O_PROTOCOL_TUNNEL == streaming->protocol) {
+				if ((streaming->protocol & O_PROTOCOL_TUNNEL) != 0) {
 					/* tunneling 인 경우에는 fragment를 모두 전송하면 다음 fragment를 가져와서 계속 전송한다. */
 					last_fragment = streaming->fragment;
 					streaming->fragment = solCMAF_nextOf_tunnel(cmaf->ctx, last_fragment);
@@ -3700,7 +3734,7 @@ strm_destroy_builder(builder_info_t * builder)
 			subtitle_list->media = NULL;
 		}
 		subtitle_list = subtitle_list->next;
-	}	
+	}
 	builder->subtitle_list = NULL;
 
 //	pthread_mutex_destroy(&builder->lock);
@@ -4224,20 +4258,11 @@ strm_prepare_stream(nc_request_t *req)
 		streaming->media_size = ret;
 	}
 	else if (MEDIA_TYPE_ENC_KEY == streaming->media_type) {
-#if 0
-		req->scx_res.body = (void *)SCX_CALLOC(1, 128);
-		if (ENCRYPT_METHOD_NONE < req->service->hls_encrypt_method) {
-			strm_make_enc_key(req, string_buf);
-			ret = scx_snprintf(req->scx_res.body, 128, "%s", string_buf);
-			streaming->media_size = ret;
-		}
-#else
 		req->scx_res.body = (void *)SCX_CALLOC(1, 16);
 		if (ENCRYPT_METHOD_NONE < req->service->hls_encrypt_method) {
 			strm_make_enc_key(req, req->scx_res.body);
 			streaming->media_size = 16;
 		}
-#endif
 		else {
 			scx_error_log(req, "Host(%s), URL[%s] - encryption key not configured.\n", vs_data(req->service->name), vs_data(req->url));
 			req->p1_error = MHD_HTTP_NOT_FOUND;
@@ -4421,145 +4446,198 @@ strm_prepare_stream(nc_request_t *req)
 
 			break;
 		case MEDIA_TYPE_HLS_MAIN_M3U8:
-			/* 현재는 playlist를 하드코딩으로 처리하지만 나중에 동적으로 처리할수 있도록 개선해야 한다. */
-
-			if (req->service->hls_master_playlist_use_absolute_path) {
-				/* 정적 URL 사용시 */
-				ASSERT(0 < streaming->real_path_len);
-				abs_path_len = streaming->real_path_len + 1;
-				if (req->service->hls_playlist_host_domain) {
-					/* content routing 동작 부분 */
-					if (req->service->cr_service_enable == 1) {
-						/*
-						 * content의 mtime이 cr_hot_content_day에 지정된 날짜가 지나지 않은 컨텐츠는 Hot content라고 판단하고
-						 * content routing 동작을 하지 않고 요청을 받은 서버가 처리 한다.
-						 */
-						if (streaming->builder->media_list->media->mtime < (scx_get_cached_time_sec() - (req->service->cr_hot_content_day * 86400)) ) {
-							/*
-							 * content routing에 사용되는 content의 경로는 요청 url이 아닌 오리진에 요청되는 컨텐츠 경로 기준으로 한다.
-							 * adaptive의 경우에는 smil 파일이 들어 있는 컨텐츠중 제일 첫번째 컨텐츠의 경로를 사용한다.
-							 */
-							hostdomain = cr_find_node(req, streaming->builder->media_list->media->url);
-						}
+			if ( (streaming->protocol & O_PROTOCOL_SEP_TRACK) != 0) {
+				zipperVariant v = NULL;
+				zipper_variant_track vt;
+				zipper_variant_build_param vbp;	
 
 
-					}
-					if (hostdomain == NULL) {
-						hostdomain = vs_data(req->service->hls_playlist_host_domain);
-					}
+				if((ret = zipper_create_variant_context(ioh, &v)) != zipper_err_success) {
+					scx_error_log(req, "'%s' couldn't create zipper variant context, code=%d(%s)\n", vs_data(req->url), ret, zipper_err_msg(ret));
+					goto zipper_build_error;
+				}		
+				memset(&vt, 0, sizeof(vt));		
+				//첫번째 MP4 HLS(video TS) 어뎁티브 스트림 추가 (zipperCnt 컨텍스트 사용 안하고 직접 입력)
+				vt.media.bandwidth = 4000000; // 4Mbps
+				vt.media.resolution.width = 1920;
+				vt.media.resolution.height = 1080;
+				vt.media.codecs = "avc1,mp4a.40.2";
+				vt.url = "[첫번째 MP4 HLS(video TS) 어뎁티브 스트림 URL]";
+				vt.avflag = variant_track_video;
+//				vt.group.audio = "track1";
+
+				if((ret = zipper_variant_add_track(ioh, v, &vt)) != zipper_err_success) {
+					scx_error_log(req, "'%s' couldn't add track to zipper variant context, code=%d(%s)\n", vs_data(req->url), ret, zipper_err_msg(ret));
+					goto zipper_build_error;
+				}	
+
+
+				// 최종 매니패스트 출력
+				memset(&vbp, 0, sizeof(vbp));
+
+				vbp.format = BLDTYPE_M3U8;
+				vbp.m3u8.ver = 3;
+				vbp.flag = BLDFLAG_CAL_SIZE;
+
+				if((ret = zipper_variant_build(ioh, v, &vbp)) != zipper_err_success ||	vbp.output.written == 0) {
+					scx_error_log(req, "'%s' couldn't build zipper variant context, code=%d(%s)\n", vs_data(req->url), ret, zipper_err_msg(ret));
+					goto zipper_build_error;
 				}
 
-				if (hostdomain != NULL) {
-					abs_path_len += strlen(hostdomain) + 10; /* 'scheme://domain:port' 의 길이 */
-				}
-				if (req->service->manifest_prefix_path) {
-					abs_path_len += vs_length(req->service->manifest_prefix_path) + 1; /* 서비스명-볼륨명 형식으로 첫번째 디렉토리에 들어간다. */
-				}
-				if (req->app_inst != NULL) {
-					abs_path_len += strlen(req->app_inst) + 1;
-				}
-				abs_path = (void *)SCX_CALLOC(1, abs_path_len);
-				if (hostdomain != NULL) {
-					pos = snprintf(abs_path, abs_path_len,
-							"%s://%s",
-							req->hls_playlist_protocol?"https":"http", hostdomain);
-				}
-				if (req->service->manifest_prefix_path) {
-					snprintf(abs_path+pos, abs_path_len-pos,
-							"/%s", vs_data(req->service->manifest_prefix_path));
-					pos = strlen(abs_path);
-				}
-				if (req->app_inst != NULL) {
-					snprintf(abs_path+pos, abs_path_len-pos,
-							"/%s", req->app_inst);
-					pos = strlen(abs_path);
-				}
-				snprintf(abs_path+pos, streaming->real_path_len, "%s", vs_data(req->ori_url));
-			}
+				vbp.flag = vbp.flag ^ BLDFLAG_CAL_SIZE;
+				buffer_param.offset = 0;
+				buffer_param.buf = (void *)SCX_MALLOC(vbp.output.written);
+				buffer_param.size = vbp.output.written;
+				streaming->ioh->writer.param = &buffer_param;
 
-			/* body buffer 크기 계산 및 할당 */
-			if (builder->is_adaptive == 1) {
-				track_cnt = builder->adaptive_track_cnt;
+				if((ret = zipper_variant_build(ioh, v, &vbp)) != zipper_err_success ||	vbp.output.written == 0) {
+					scx_error_log(req, "'%s' couldn't build zipper variant context, code=%d(%s)\n", vs_data(req->url), ret, zipper_err_msg(ret));
+					goto zipper_build_error;
+				}
+				streaming->media_size = vbp.output.written;
+				req->scx_res.body = (void *)buffer_param.buf;
+				zipper_free_variant_context(ioh, &v);
+
 			}
 			else {
-				track_cnt = 1;
-			}
-			if (NULL != streaming->argument) {
-				argument_len = strlen(streaming->argument);
-			}
-			max_body_len = (abs_path_len + argument_len + 300) * track_cnt + 1024; /* 300은 EXT-X-STREAM-INF에 들어가는 내용의 최대 길이임 */
-			req->scx_res.body = (void *)SCX_CALLOC(1, max_body_len);
+				/* 현재는 playlist를 하드코딩으로 처리하지만 나중에 동적으로 처리할수 있도록 개선해야 한다. */
+				if (req->service->hls_master_playlist_use_absolute_path) {
+					/* 정적 URL 사용시 */
+					ASSERT(0 < streaming->real_path_len);
+					abs_path_len = streaming->real_path_len + 1;
+					if (req->service->hls_playlist_host_domain) {
+						/* content routing 동작 부분 */
+						if (req->service->cr_service_enable == 1) {
+							/*
+							* content의 mtime이 cr_hot_content_day에 지정된 날짜가 지나지 않은 컨텐츠는 Hot content라고 판단하고
+							* content routing 동작을 하지 않고 요청을 받은 서버가 처리 한다.
+							*/
+							if (streaming->builder->media_list->media->mtime < (scx_get_cached_time_sec() - (req->service->cr_hot_content_day * 86400)) ) {
+								/*
+								* content routing에 사용되는 content의 경로는 요청 url이 아닌 오리진에 요청되는 컨텐츠 경로 기준으로 한다.
+								* adaptive의 경우에는 smil 파일이 들어 있는 컨텐츠중 제일 첫번째 컨텐츠의 경로를 사용한다.
+								*/
+								hostdomain = cr_find_node(req, streaming->builder->media_list->media->url);
+							}
 
-			sprintf(req->scx_res.body, "#EXTM3U\n#EXT-X-VERSION:%u\n", 3);
-			snprintf(hls_format, max_body_len, "m3u8%s\n", (streaming->argument ?streaming->argument :""));
 
-			if (builder->is_adaptive == 1) {
-				for(i = 0; i < builder->adaptive_track_cnt; i++) {
+						}
+						if (hostdomain == NULL) {
+							hostdomain = vs_data(req->service->hls_playlist_host_domain);
+						}
+					}
+
+					if (hostdomain != NULL) {
+						abs_path_len += strlen(hostdomain) + 10; /* 'scheme://domain:port' 의 길이 */
+					}
+					if (req->service->manifest_prefix_path) {
+						abs_path_len += vs_length(req->service->manifest_prefix_path) + 1; /* 서비스명-볼륨명 형식으로 첫번째 디렉토리에 들어간다. */
+					}
+					if (req->app_inst != NULL) {
+						abs_path_len += strlen(req->app_inst) + 1;
+					}
+					abs_path = (void *)SCX_CALLOC(1, abs_path_len);
+					if (hostdomain != NULL) {
+						pos = snprintf(abs_path, abs_path_len,
+								"%s://%s",
+								req->hls_playlist_protocol?"https":"http", hostdomain);
+					}
+					if (req->service->manifest_prefix_path) {
+						snprintf(abs_path+pos, abs_path_len-pos,
+								"/%s", vs_data(req->service->manifest_prefix_path));
+						pos = strlen(abs_path);
+					}
+					if (req->app_inst != NULL) {
+						snprintf(abs_path+pos, abs_path_len-pos,
+								"/%s", req->app_inst);
+						pos = strlen(abs_path);
+					}
+					snprintf(abs_path+pos, streaming->real_path_len, "%s", vs_data(req->ori_url));
+				}
+
+				/* body buffer 크기 계산 및 할당 */
+				if (builder->is_adaptive == 1) {
+					track_cnt = builder->adaptive_track_cnt;
+				}
+				else {
+					track_cnt = 1;
+				}
+				if (NULL != streaming->argument) {
+					argument_len = strlen(streaming->argument);
+				}
+				max_body_len = (abs_path_len + argument_len + 300) * track_cnt + 1024; /* 300은 EXT-X-STREAM-INF에 들어가는 내용의 최대 길이임 */
+				req->scx_res.body = (void *)SCX_CALLOC(1, max_body_len);
+
+				sprintf(req->scx_res.body, "#EXTM3U\n#EXT-X-VERSION:%u\n", 3);
+				snprintf(hls_format, max_body_len, "m3u8%s\n", (streaming->argument ?streaming->argument :""));
+
+				if (builder->is_adaptive == 1) {
+					for(i = 0; i < builder->adaptive_track_cnt; i++) {
+						stsformat(req->scx_res.body+strlen(req->scx_res.body),
+								(char *)gscx__hls_adaptive_extinf_format, builder->track_info[i].adaptive_track_name, i, 0, hls_format, strlen(hls_format));
+						/*
+						*  smil 파일에 들어 있는  codecs와 resolution 정보가 들어간다.
+						*  예 : '#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=4511805,CODECS="avc1.100.31, mp4a.40.2",RESOLUTION=1280x720'
+						*/
+						if (builder->track_info[i].codecs != NULL) {
+							sprintf(req->scx_res.body+strlen(req->scx_res.body), ",CODECS=\"%s\"", builder->track_info[i].codecs);
+						}
+						if (builder->track_info[i].resolution != NULL) {
+							sprintf(req->scx_res.body+strlen(req->scx_res.body), ",RESOLUTION=%s", builder->track_info[i].resolution);
+						}
+						/* smil 파일에 자막이 포함 되어 있는 경우 SUBTITLES attribute가 추가 된다. */
+						if (streaming->subtitle_count > 0) {
+							sprintf(req->scx_res.body+strlen(req->scx_res.body), ",SUBTITLES=\"subs\"");
+						}
+						sprintf(req->scx_res.body+strlen(req->scx_res.body), "\n");
+						/*  정적 URL 사용시 */
+						if (req->service->hls_master_playlist_use_absolute_path) {
+							snprintf(req->scx_res.body+strlen(req->scx_res.body), max_body_len-strlen(req->scx_res.body)-1,
+									"%s/", abs_path);
+						}
+
+						stsformat(req->scx_res.body+strlen(req->scx_res.body),
+								(char *)gscx__hls_adaptive_m3u8_format, (char *)builder->track_info[i].adaptive_track_name, i, 0, hls_format, strlen(hls_format));
+					}
+
+					subtitle_url_size =  hls_subtitle_format_len + 50;
+					subtitle = streaming->subtitle;
+					while (subtitle && streaming->subtitle_count >  array_pos) {	// 첫번째 smil에 들어 있는 자막 트랙만 반영하기 위해 ramain_count를 사용
+						// 예) #EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="subs",NAME="english",LANGUAGE="en",DEFAULT=YES,AUTOSELECT=YES,URI="subtitle_1.m3u8"
+						sprintf(req->scx_res.body+strlen(req->scx_res.body),
+								"#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID=\"subs\",NAME=\"%s\",LANGUAGE=\"%s\"",
+								subtitle->subtitle_name, subtitle->subtitle_lang);
+						if (array_pos == 0) {
+							sprintf(req->scx_res.body+strlen(req->scx_res.body), ",DEFAULT=YES,AUTOSELECT=YES");
+						}
+						else {
+							sprintf(req->scx_res.body+strlen(req->scx_res.body), ",DEFAULT=NO,AUTOSELECT=NO");
+						}
+						sprintf(req->scx_res.body+strlen(req->scx_res.body),
+								",URI=\"subtitle_%d.m3u8%s\"\n", array_pos, (streaming->argument?streaming->argument :""));
+						array_pos++;
+						subtitle = subtitle->next;
+					}
+				}	//end of if (builder->is_adaptive == 1)
+				else {
+					/* EXT-X-STREAM-INF 태그에 BANDWIDTH attribute가 없는 경우는 IOS에서 재생이 안되서 하드코딩으로 값을 넣는다. */
+					snprintf(string_buf, 12, "%d", builder->bandwidth);
 					stsformat(req->scx_res.body+strlen(req->scx_res.body),
-							(char *)gscx__hls_adaptive_extinf_format, builder->adaptive_track_name[i], i, 0, hls_format, strlen(hls_format));
-					/*
-					 *  smil 파일에 들어 있는  codecs와 resolution 정보가 들어간다.
-					 *  예 : '#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=4511805,CODECS="avc1.100.31, mp4a.40.2",RESOLUTION=1280x720'
-					 */
-					if (builder->codecs[i] != NULL) {
-						sprintf(req->scx_res.body+strlen(req->scx_res.body), ",CODECS=\"%s\"", builder->codecs[i]);
-					}
-					if (builder->resolution[i] != NULL) {
-						sprintf(req->scx_res.body+strlen(req->scx_res.body), ",RESOLUTION=%s", builder->resolution[i]);
-					}
-					/* smil 파일에 자막이 포함 되어 있는 경우 SUBTITLES attribute가 추가 된다. */
-					if (streaming->subtitle_count > 0) {
-						sprintf(req->scx_res.body+strlen(req->scx_res.body), ",SUBTITLES=\"subs\"");
-					}
+							(char *)gscx__hls_adaptive_extinf_format, string_buf, 0, 0, hls_format, strlen(hls_format));
+					/* adaptive가 아닌 경우에는 media 정보로 부터 resolution 정보를 가져 온다. */
+					sprintf(req->scx_res.body+strlen(req->scx_res.body), ",RESOLUTION=%dx%d", builder->width, builder->height);
 					sprintf(req->scx_res.body+strlen(req->scx_res.body), "\n");
 					/*  정적 URL 사용시 */
 					if (req->service->hls_master_playlist_use_absolute_path) {
 						snprintf(req->scx_res.body+strlen(req->scx_res.body), max_body_len-strlen(req->scx_res.body)-1,
 								"%s/", abs_path);
 					}
-
 					stsformat(req->scx_res.body+strlen(req->scx_res.body),
-							(char *)gscx__hls_adaptive_m3u8_format, (char *)builder->adaptive_track_name[i], i, 0, hls_format, strlen(hls_format));
+							(char *)gscx__hls_m3u8_format, NULL, 0, 0, hls_format, strlen(hls_format));
 				}
-
-				subtitle_url_size =  hls_subtitle_format_len + 50;
-				subtitle = streaming->subtitle;
-				while (subtitle && streaming->subtitle_count >  array_pos) {	// 첫번째 smil에 들어 있는 자막 트랙만 반영하기 위해 ramain_count를 사용
-					// 예) #EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="subs",NAME="english",LANGUAGE="en",DEFAULT=YES,AUTOSELECT=YES,URI="subtitle_1.m3u8"
-					sprintf(req->scx_res.body+strlen(req->scx_res.body),
-							"#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID=\"subs\",NAME=\"%s\",LANGUAGE=\"%s\"",
-							subtitle->subtitle_name, subtitle->subtitle_lang);
-					if (array_pos == 0) {
-						sprintf(req->scx_res.body+strlen(req->scx_res.body), ",DEFAULT=YES,AUTOSELECT=YES");
-					}
-					else {
-						sprintf(req->scx_res.body+strlen(req->scx_res.body), ",DEFAULT=NO,AUTOSELECT=NO");
-					}
-					sprintf(req->scx_res.body+strlen(req->scx_res.body),
-							",URI=\"subtitle_%d.m3u8%s\"\n", array_pos, (streaming->argument?streaming->argument :""));
-					array_pos++;
-					subtitle = subtitle->next;
-				}
+				if (abs_path) SCX_FREE(abs_path);
+				req->streaming->media_size = strlen(req->scx_res.body);
 			}
-			else {
-				/* EXT-X-STREAM-INF 태그에 BANDWIDTH attribute가 없는 경우는 IOS에서 재생이 안되서 하드코딩으로 값을 넣는다. */
-				snprintf(string_buf, 12, "%d", builder->bandwidth);
-				stsformat(req->scx_res.body+strlen(req->scx_res.body),
-						(char *)gscx__hls_adaptive_extinf_format, string_buf, 0, 0, hls_format, strlen(hls_format));
-				/* adaptive가 아닌 경우에는 media 정보로 부터 resolution 정보를 가져 온다. */
-				sprintf(req->scx_res.body+strlen(req->scx_res.body), ",RESOLUTION=%dx%d", builder->width, builder->height);
-				sprintf(req->scx_res.body+strlen(req->scx_res.body), "\n");
-				/*  정적 URL 사용시 */
-				if (req->service->hls_master_playlist_use_absolute_path) {
-					snprintf(req->scx_res.body+strlen(req->scx_res.body), max_body_len-strlen(req->scx_res.body)-1,
-							"%s/", abs_path);
-				}
-				stsformat(req->scx_res.body+strlen(req->scx_res.body),
-						(char *)gscx__hls_m3u8_format, NULL, 0, 0, hls_format, strlen(hls_format));
-			}
-			if (abs_path) SCX_FREE(abs_path);
-			req->streaming->media_size = strlen(req->scx_res.body);
-
 			break;
 
 		case MEDIA_TYPE_HLS_AUDIOLIST:
@@ -5367,7 +5445,7 @@ strm_prepare_stream(nc_request_t *req)
 	 * media memory metadata를 효율적으로 사용하기 위해 추가
 	 */
 	if (NULL != req->scx_res.body && streaming->builder &&
-			(streaming->protocol == O_PROTOCOL_HLS || streaming->protocol == O_PROTOCOL_DASH)) {
+			((streaming->protocol & O_PROTOCOL_HLS) != 0 || (streaming->protocol & O_PROTOCOL_DASH) != 0)) {
 			strm_destroy_builder(streaming->builder);
 			streaming->builder = NULL;
 	}
@@ -5539,7 +5617,7 @@ streaming_reader(void *cr, uint64_t pos, char *buf, size_t max)
 		return MHD_CONTENT_READER_END_OF_STREAM;
 	}
 #if 0
-	if (O_PROTOCOL_PROGRESSIVE == streaming->protocol) {
+	if ((streaming->protocol & O_PROTOCOL_PROGRESSIVE) != 0) {
 
 		/* 속도 제한은 mp4나 mp3 요청일 때만 걸린다. */
 		if (0 < req->limit_rate || 0 < req->limit_traffic_rate) {
@@ -6145,7 +6223,7 @@ strm_url_parser(nc_request_t *req)
 				}
 			} // end of if ( (O_STRM_TYPE_SINGLE & streaming->media_mode ) != 0)
 
-			if (O_PROTOCOL_DASH  == streaming->protocol
+			if ((streaming->protocol & O_PROTOCOL_DASH) != 0
 					&& BLDTYPE_FMP4SINGLE == streaming->build_type) {
 				/* youtube 방식 DASH(단일 Fragmented MP4 + Range-Get 기반)인 경우 플레이어(CastLabs player)에 따라
 				 * range 요청에 헤더에 있지 않고 argument에 bytes파라미터로 들어 오는 경우가 있음
@@ -6893,7 +6971,7 @@ strm_handle_adaptive(nc_request_t *req)
 		TRACE((T_ERROR, "[%llu] (%s) invalid media mode(%X)\n", req->id, __FUNCTION__, streaming->media_mode));
 		ASSERT(0);
 	}
-	if (streaming->protocol == O_PROTOCOL_PROGRESSIVE) {
+	if ((streaming->protocol & O_PROTOCOL_PROGRESSIVE) != 0) {
 		scx_error_log(req, "Adaptive mode is not support progressive streaming.\n");
 		goto strm_handle_adaptive_error;
 	}
@@ -6912,6 +6990,10 @@ strm_handle_adaptive(nc_request_t *req)
 			ret = strm_handle_smil(req, adaptive, tmp_mpool);
 			if (1 != ret) {
 				goto strm_handle_adaptive_error;
+			}
+			if (adaptive->audio_only_track_exist == 1) {
+				/* audio 분리 track 인 경우  streaming->protocol에  marking을 한다. */
+				streaming->protocol |= O_PROTOCOL_SEP_TRACK;
 			}
 			streaming->is_adaptive = 1; /* 한개라도 smil파일이 있는 경우는 정상적인 adaptive라고 판단한다. */
 			smil_cnt++;
@@ -7316,7 +7398,7 @@ strm_check_protocol_permition(nc_request_t *req)
 {
 	streaming_t 	*streaming = req->streaming;
 	service_info_t *service = req->service;
-	if ( O_PROTOCOL_CORS == streaming->protocol ) {
+	if ((streaming->protocol & O_PROTOCOL_CORS) != 0) {
 		/* crossdomain.xml나 clientaccesspolicy.xml 요청은 아래의 확인 과정을 거치지 않는다. */
 		return 1;
 	}
@@ -7330,7 +7412,7 @@ strm_check_protocol_permition(nc_request_t *req)
 		scx_error_log(req, "Media Mode Not Allowed. URL(%s)\n", vs_data(req->url));
 		return 0;
 	}
-	if (O_PROTOCOL_HLS == streaming->protocol &&
+	if ((streaming->protocol & O_PROTOCOL_HLS) != 0 &&
 			0 == service->allow_different_protocol) {
 		/* HLS이고 allow_different_protocol이 0(허용안함)인 경우는
 		 * menifest에 정의된 프로토콜(http, https)로 접속 했는지 확인하는 과정을 거친다. */
@@ -7392,7 +7474,7 @@ strm_get_track_id(nc_request_t *req)
 		return track_id;
 	}
 	for (i = 0; i < builder->adaptive_track_cnt; i++) {
-		if (strcmp(streaming->rep_id, builder->adaptive_track_name[i]) == 0) {
+		if (strcmp(streaming->rep_id, builder->track_info[i].adaptive_track_name) == 0) {
 			return i;
 		}
 	}
