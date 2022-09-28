@@ -173,6 +173,7 @@ typedef struct tag_builder_info {
 	zipperBldr 			bcontext;
 	uint32_t			bcontext_size;
 	media_info_list_t	*media_list;	/* builder 생성에 사용되고 있는 media의 pointer들 */
+	media_info_list_t	*subtitle_list;	/* 자막 media context 메모리 해제용 */
 	float      			duration;   /* 전체 재생시간  (초) */
 	time_t				ctime;		/* builder 생성시간 */
 	time_t				vtime;		/* builder의 만료 시간(media의 만료시간과 동일). 여러개의 media를 사용할 경우 media의 만료시간중 가장 짧은 만료 시간을 사용한다. */
