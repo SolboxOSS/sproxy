@@ -2515,7 +2515,7 @@ handle_method_streaming_phase(nc_request_t *req)
 			}
 		}
 
-		if (req->streaming->protocol != O_PROTOCOL_CORS) {
+		if ((req->streaming->protocol & O_PROTOCOL_CORS) == 0) {
 #ifdef ZIPPER
 			if (req->service->streaming_method == 1) {
 				/* live ad stiching 기능으로 설정된 경우 */
@@ -6991,7 +6991,21 @@ mhd_option_remove(struct MHD_OptionItem *opt_array, int option)
 	}
 	return SCX_YES;
 }
-
+#if 0
+char dhparms[] = {"-----BEGIN DH PARAMETERS-----\
+MIICCAKCAgEAlWHPUp8n5rI9pzvn1SWOFvHurPUcilmAc0K0dHbpjXNx8i9PJr9W\
+13P5ByfoS1EIVgOnGei6GoTw+akl5rSjWEFQL+yr+uOjgprCIWCFKh7U/9Fe3Ht9\
+eRFFV+o6fBPj3cuZFfg7hxj+nYNY0F5W/QLoYV3EzZ/b7U0c/f4ZElXV0GAyBdkS\
+Myuenhger29i56G8X0Q3Ir1qIZDI6wJsVlozY0Z3vI27D9L2olk/VyDZFyyYwgzE\
+/u1ZqY3JIuo4jE//JLWc0PcOMg/OoYN5URyGXSzcQy0jR4cEmZo8ycovMkqY8dxq\
+x1tE8VoPD7fnhtc4b4M9UhtRhfqRJj/ngc6VeLxV7J9dyK4AMeZAWsyTPFuYsciA\
+jjzzz7XFbhEoi+OXtwFNWqsXG8r2LcxLtjFQT6/qDlqBObHR7T2d8GRw7/6vQLc5\
+WAqDPZ3aKjRGZlm0ECX6F6vhpugQUBZOOpaXqI4tzCYEqcwx3i5eyBzqoIQ7H62c\
+K0kDaOgscmV96m6Wo8MOTaH7jIfXYjvbxNvx9VHqAORG0dawamyiAY12jfyT9ZGM\
+0r/0Nv0DLGTQqDdzTjm+Nyp1+cAxnk+nrRyGYpDzLC88PK7FbkbJanRT1pcxnlYb\
+uKVPF2q1pWJym9ebmAnC9M3Sv/IZHTNKsC17ZGql2Oh6y+3gP9bEx7MCAQI=\
+-----END DH PARAMETERS-----"};
+#endif
 static int
 start_http_service(int load_count)
 {
@@ -7022,9 +7036,10 @@ start_http_service(int load_count)
 		{MHD_OPTION_THREAD_POOL_SIZE, gscx__config->workers, 0},
 		{MHD_OPTION_HTTPS_MEM_KEY, 0, NULL},
 		{MHD_OPTION_HTTPS_MEM_CERT, 0, NULL},
+//		{MHD_OPTION_HTTPS_MEM_DHPARAMS, 0, dhparms},
 #if GNUTLS_VERSION_MAJOR >= 3
 		{MHD_OPTION_HTTPS_CERT_CALLBACK, NULL, NULL},
-//		{MHD_OPTION_HTTPS_PRIORITIES, "NONE:+AES-256-GCM:+SHA384", NULL},
+//		{MHD_OPTION_HTTPS_PRIORITIES, 0, "NONE:+AES-256-GCM:+SHA384"},
 #endif
 		{MHD_OPTION_SOCK_ADDR, 0, NULL},
 		{MHD_OPTION_LISTENING_ADDRESS_REUSE, 1, NULL},	/* TIME_WAIT 상태의 소켓을 재사용 */
