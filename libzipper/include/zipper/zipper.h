@@ -86,6 +86,7 @@ typedef struct _zipper_builder_mp4out_matrix
         
         uint32_t audio;
         uint32_t video;
+        uint32_t text;
         
     } tscale;
     
@@ -93,7 +94,8 @@ typedef struct _zipper_builder_mp4out_matrix
     
     struct {
         
-        uint64_t    audio;
+        uint32_t    text;
+        uint32_t    audio;
         uint64_t    video;
         
     } chunk;
@@ -112,6 +114,7 @@ typedef struct _zipper_builder_mp4out_matrix
         
         uint32_t audio;
         uint32_t video;
+        uint32_t text;
         
     } stsz;
     
@@ -119,6 +122,7 @@ typedef struct _zipper_builder_mp4out_matrix
         
         uint32_t audio;
         uint32_t video;
+        uint32_t text;
         
     } stts;
     
@@ -201,6 +205,7 @@ typedef enum {
     codec_index_aac     = 15,
     codec_index_mp4v    = 16,
     codec_index_avc     = 27,
+    codec_index_text    = 29,
     codec_index_hevc    = 36,
     codec_index_flac    = 58,
 
@@ -222,6 +227,7 @@ enum {
     src_format_mp3,
     src_format_flac,
     src_format_flv,
+    src_format_srt,
     src_format_zdmp,
 };
 
@@ -232,8 +238,9 @@ typedef struct _zipper_media_desc
     uint32_t    bit64:1;
     uint32_t    acc:4;
     uint32_t    vcc:4;
+    uint32_t    tcc:4;
     uint32_t    sfmt:6;
-    uint32_t    resv:17;
+    uint32_t    resv:13;
     uint32_t    bandwidth;
     
     struct {
@@ -283,13 +290,20 @@ typedef struct _zipper_media_desc
         
     } video[MULTI_TRACK_MAX];
     
+    struct {
+        
+        uint8_t     sdci; // 코덱 인덱스 (media_desc_codec_index)
+        uint8_t     lang; // 언어 코드
+        
+    } text[MULTI_TRACK_MAX];
+    
 } zipper_media_desc;
 
 typedef struct _zipper_media_context
 {
     uint32_t msize;
     zipper_media_desc   desc;
-    zidx_context         *ctx;
+    zidx_context        *ctx;
     
 } zipper_media_context;
 
@@ -454,13 +468,16 @@ enum {
     BLDTYPE_FLAC,           // FLAC 파일을 출력한다. (PDL/Pseudo)
     BLDTYPE_FMP4M3U8,       // Fragmented MP4 기반 마스터 M3U8 파일을 출력한다.
     BLDTYPE_FMP4SUBM3U8,    // Fragmented MP4 기반의 서브 M3U8 파일을 출력한다.
+    BLDTYPE_VTT             // 세그먼트 VTT
 };
 
 #define BLDFLAG_INCLUDE_VIDEO       (0x01 << 0)     // 비디오 포함
 #define BLDFLAG_INCLUDE_AUDIO       (0x01 << 1)     // 오디오 포함
-#define BLDFLAG_INCLUDE_ALL         (BLDFLAG_INCLUDE_AUDIO | BLDFLAG_INCLUDE_VIDEO) // 오디오, 비디오 모두 포함
-#define BLDFLAG_CAL_SIZE            (0x01 << 2)     // 출력 사이즈(bytes)만 계산
-#define BLDFLAG_ENCRYPT             (0x01 << 3)     // 암호화
+#define BLDFLAG_INCLUDE_TEXT        (0x01 << 2)     // 텍스트 포함
+#define BLDFLAG_INCLUDE_AV          (BLDFLAG_INCLUDE_AUDIO | BLDFLAG_INCLUDE_VIDEO)
+#define BLDFLAG_INCLUDE_ALL         (BLDFLAG_INCLUDE_AUDIO | BLDFLAG_INCLUDE_VIDEO | BLDFLAG_INCLUDE_TEXT) // 오디오, 비디오, 텍스트 모두 포함
+#define BLDFLAG_CAL_SIZE            (0x01 << 3)     // 출력 사이즈(bytes)만 계산
+#define BLDFLAG_ENCRYPT             (0x01 << 4)     // 암호화
 
 #define M3U8_TARGET_VER_DEFAULT     3   // default HLS version = 3 (2010/11/19, http://tools.ietf.org/html/draft-pantos-http-live-streaming-05)
 
@@ -473,8 +490,8 @@ enum {
 typedef struct _build_buffer_param
 {
     uint32_t    local:1;
-    uint32_t    avflag:2;
-    uint32_t    offset:29;
+    uint32_t    avflag:3;
+    uint32_t    offset:28;
     off_t       fo;
     
     struct {
@@ -806,9 +823,9 @@ typedef struct _zipper_builder_param
             struct {
                 
                 char        *format;            // 출력 포맷
-                
+
             } m3u8; // M3U8 설정
-            
+
             struct {
                 
                 char *init;         // 초기화 파일 출력 포맷
@@ -822,6 +839,9 @@ typedef struct _zipper_builder_param
                 char *audio;    // 오디오 M3U8 출력 포맷
                 
             } fmp4m3u8;
+            
+            //  MPD, 마스터 M3U8 생성시 자막 트랙(M3U8)을 지정/설정한다.
+            // subtrk[i].url 이 NULL이면 (i-1)이 마지막 자막 트랙이 된다.
             
             struct {
 
@@ -873,6 +893,28 @@ typedef struct _zipper_builder_param
             
         } attr;
         
+        struct {
+            
+            uint8_t def; // 기본 선택 자막인 경우 1, 그렇지 않으면 0 (def=1인 자막이 없는 경우 첫번째 자막이 자동 DEFAULT+AUTOSELECT로 처리)
+            char *url; // 자막 M3U8 URL(*필수) (생성하는 M3U8의 상대 URL 혹은 절대 URL 모두 가능, zipper에서 별도로 보정하지 않음)
+            char *desc; // NULL일 경우 lang 필드의 값을 그대로 사용
+            char *lang; // ISO639-1 3자리 언어코드(*필수) (예:"kor", "eng", iso639.h 참조)
+            
+            // 마지막 자막 기술 후 다음 인덱스의 url을 NULL로 설정하시면 됩니다.
+            /*
+                예) 한국어/영어 2개 자막 설정 시
+             
+                .sub_link[0].url = "kor/sub.m3u8";
+                .sub_link[0].lang = "kor";
+                .sub_link[1].url = "eng/sub.m3u8";
+                .sub_link[1].lang = "eng";
+                .sub_link[2].url = NULL;
+                .sub_link[2].lang = NULL;
+             
+             */
+                        
+        } sub_link[8];
+
     } target; // 출력 대상 설정
     
     struct {
@@ -1161,6 +1203,123 @@ off_t zipper_flac_offset(zipper_io_handle *io_handle, uint64_t pts, off_t *dur, 
 // 내부 공유 함수
 mp4_track_desc *_zipper_track_desc(uint8_t type, void *context, uint8_t track, uint8_t index);
     
+// zipper Vairant API //////////////////////////////////////////
+typedef struct _zipper_variant_context *zipperVariant;          // Zipper Variant Context
+
+#define variant_track_video     1
+#define variant_track_audio     2
+#define variant_track_subtitle  4
+
+/*
+ zipper variant 컨텍스트 생성 함수
+ */
+int zipper_create_variant_context(zipper_io_handle *io_handle, zipperVariant *ctx);
+
+/*
+ zipper variant 컨텍스트 해제 함수
+ */
+void zipper_free_variant_context(zipper_io_handle *io_handle, zipperVariant *ctx);
+
+typedef struct _zipper_variant_track {
+
+    struct {
+        zipperCnt ctx;          // 트랙 소스의 zipper 미디어 컨텍스트
+                                // NULL로 지정할 경우 최소 아래의 bandwidth 필드 정보는 직접 기술해 주어야 한다.
+                                // zipper_variant_build()시 오류 리턴
+
+        uint32_t bandwidth;     // BADNWIDTH 정보,
+                                // 0이면 ctx(NULL이 아닐 경우)로부터 정보를 구한다.
+        
+        struct {
+
+            uint16_t width;     // 비디오 해상도 너비
+            uint16_t height;    // 비디오 해상도 높이
+                                // 둘 중 하나라도 0이면 ctx가 NULL이 아니면 ctx로 부터 그렇지 않으면 기술을 생략한다.
+
+        } resolution;
+
+        const char *codecs;     // 코덱 정보
+                                // NULL이고 ctx가 NULL이 아니면 ctx로 부터 그렇지 않으면 기술을 생략한다.
+
+    } media;
+    
+    const char *url;            // 트랙의 매니패스트 URL(상대 경로 권장)
+                                // 직접 사용(별도의 매크로 없음)
+
+    uint8_t avflag;             // 트랙 composition(조합, 단일 혹은 멀티 가능)
+                                // variant_track_* 비트 플래그 조합
+
+    const char *lang;           // 언어 코드 (ISO639-2 3자리)
+                                // NULL이면 미디어 컨텍스트로부터 상속 트랙 그룹으로 지정된 경우에만 유효하다.
+
+    const char *name;           // 트랙 구분 명(그룹 내)
+                                // 트랙 그룹으로 지정된 경우에만 유효하다.
+
+    int priority;               // 기술 상 우선 순위 (순서)
+                                // 이미 같은 priority를 가진 트랙이 있으면 해당 트랙의 다음 순서로 배치된다.
+    
+    struct {
+
+        const char *self;       // 그룹명 (*중요)
+                                // NULL일 경우 스트림으로 그렇지 않으면 트랙 그룹으로 인식한다.
+                                // N개의 트랙이 동일한 그룹명을 가지고 그룹을 형성한다(단일도 가능)
+
+                
+                                // 스트림인 경우 나머지 트랙에 대해 트랙 그룹을 명시, 연결해야 한다.
+                                // 모두 optional이다. (NULL(기본값)로 생략 가능)
+
+        const char *video;      // 비디오 트랙 그룹명
+        const char *audio;      // 오디오 트랙 그룹명
+        const char *subtitle;   // 자막(WebVTT) 트랙 그룹명
+
+    } group;
+
+    char def;                   // 1=기본 선택, 0=
+                                // 모든 트랙이 0이면 가장 높은 priority를 가진 트랙이 자동으로 1로 설정된다.
+
+    char autoselect;            // 1=자동 선택 가능,
+                                // 2=사용자에 의해서만 선택
+                                // 모든 트랙이 0이면 가장 높은 priority를 가진 트랙이 자동으로 1로 설정된다.
+
+} zipper_variant_track;
+
+/*
+ zipper variant 컨텍스트 트랙 및 스트림 추가 함수
+ 
+ @param
+    track[in]: 추가할 트랙 및 스트림 속성 구조체(zipper_variant_track 구조체 참조)
+ 
+ */
+int zipper_variant_add_track(zipper_io_handle *io_handle, zipperVariant ctx, zipper_variant_track *track);
+
+typedef struct _zipper_variant_build_param {
+
+    uint8_t flag;       // 옵션 비트 플래그
+    uint8_t format;     // 출력 포맷 (BLDTYPE_*, 현재는 M3U8(BLDTYPE_M3U8)만)
+        
+    struct {
+
+        uint8_t ver;    // M3U8 버전 (0이면 자동 할당)
+
+    } m3u8;
+
+    struct {
+
+        size_t written; // 출력된 크기(bytes)가 저장된다.
+
+    } output;
+
+} zipper_variant_build_param;
+
+/*
+ zipper variant 매니패스트 출력 함수
+ 
+ @param
+    param[in/out]: 출력 설정 및 결과 정보 저장 구조체 (zipper_variant_build_param 구조체 참조)
+ */
+int zipper_variant_build(zipper_io_handle *io_handle, zipperVariant ctx, zipper_variant_build_param *param);
+
+
 #ifdef __cplusplus
 }
 #endif
