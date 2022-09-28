@@ -17,13 +17,18 @@ typedef enum {
 	MEDIA_TYPE_CLIENTACCESSPOLICY,
 	MEDIA_TYPE_HLS,
 	MEDIA_TYPE_HLS_MAIN_M3U8,
+//	MEDIA_TYPE_HLS_MAIN_M3U8_TS,
 	MEDIA_TYPE_HLS_SUB_M3U8,
+	MEDIA_TYPE_HLS_VIDEO_M3U8,
+	MEDIA_TYPE_HLS_AUDIO_M3U8,
 	MEDIA_TYPE_HLS_VTT_M3U8,
 	MEDIA_TYPE_HLS_FMP4_MAIN_M3U8,
 	MEDIA_TYPE_HLS_FMP4_AUDIO_M3U8,
 	MEDIA_TYPE_HLS_FMP4_VIDEO_M3U8,
 	MEDIA_TYPE_HLS_AUDIOLIST,
 	MEDIA_TYPE_HLS_TS,
+	MEDIA_TYPE_HLS_VIDEO_TS,
+	MEDIA_TYPE_HLS_AUDIO_TS,
 	MEDIA_TYPE_HLS_VTT,
 	MEDIA_TYPE_HLS_MANIFEST,
 	MEDIA_TYPE_MPEG_DASH_MANIFEST,		/* Fragmented MP4 type DASH */
@@ -78,6 +83,9 @@ typedef enum {
 #define	O_PROTOCOL_MSS				0x08000000	/* Microsoft Smooth Streaming */
 #define	O_PROTOCOL_CORS				0x10000000	/* Cross-origin resource sharing */
 #define	O_PROTOCOL_TUNNEL			0x20000000
+
+#define	O_PROTOCOL_SEP_TRACK		0x00010000	/* audio/video 분리 요청인 경우 */
+
 
 
 #define O_STRM_TYPE_SINGLE			0x10000000
@@ -168,6 +176,14 @@ typedef struct tag_media_info_list {
 	track_composition_param tcprm;
 } media_info_list_t;
 
+/* manifest 생성시 사용될 track 정보 기록용 구조체 */
+typedef struct tag_track_info {
+	char 				*adaptive_track_name;	/* adaptive contents의 track(bitrate 별) name, 최대 20개까지 가능 */
+	char				*codecs;	/* 필수 값이 아니때문에 NULL이 들어 올수 있다 */
+	char				*resolution;	/* 필수 값이 아니때문에 NULL이 들어 올수 있다 */
+	struct tag_content_info		*content;	/* 나머지 정보는 이 값을 사용해서 읽는다. zipper mcontext가 필요할 경우 content->media->mcontext로 조회를 하면 됨*/
+} track_info_t;
+
 typedef struct tag_builder_info {
 	mem_pool_t 			*mpool;
 	zipperBldr 			bcontext;
@@ -183,9 +199,7 @@ typedef struct tag_builder_info {
 	int					width;
 	int					height;
 	int					adaptive_track_cnt;		/* adaptive contents인 경우 세팅됨, 하나의 track을 만드는데 사용된 bitrate 별 content의 수 */
-	char 				*adaptive_track_name[20];	/* adaptive contents의 track(bitrate 별) name, 최대 20개까지 가능 */
-	char				*codecs[20];	/* 필수 값이 아니때문에 NULL이 들어 올수 있다 */
-	char				*resolution[20];	/* 필수 값이 아니때문에 NULL이 들어 올수 있다 */
+	track_info_t		track_info[20]; /* adaptive content의 track 정보를 저장, 최대 20개까지 가능 */
 } builder_info_t;
 
 /*
@@ -196,14 +210,21 @@ typedef struct tag_builder_info {
 typedef struct tag_content_info {
 	char			 		*path;
 	int						type;		/* scx_content_type_t에 지정된 값이 들어감, 0:VOD, 1:광고, 2:LIVE , 자막인 경우 O_CONTENT_TYPE_SUBTITLE이 들어감 */
+	int						media_type; /* audio track인 경우 BLDFLAG_INCLUDE_AUDIO, video track인 경우 BLDFLAG_INCLUDE_VIDEO, audio/video가 같이 들어 있는 경우  BLDFLAG_INCLUDE_AV로 설정 */
 	int			 			start;		/* start와 end는 milisecond 단위임 */
 	int			 			end;		/* end가 range 요청에 들어 있지 않은 경우는 EOF(동영상의 끝까지)가 들어 간다. */
 	int						is_base;	/* adaptive streaming에서 base media의 경우 여기에 1이 들어감 */
 	int						available;	/* 1 경우 사용 , 0인 경우 무시, smil 파싱 단계에서만 사용 */
+	int						width;		/* manifest 생성시 사용, smil file에 지정되어 있지 않은 경우 0 */
+	int						height;		/* manifest 생성시 사용, smil file에 지정되어 있지 않은 경우 0 */
 	char					*bitrate;	/* int로 해도 되지만 혹시나 문자가 들어 올 경우를 대비해서 문자열로함 */
 	char					*codecs;	/* 필수 값이 아니때문에 NULL이 들어 올수 있다 */
 	char					*resolution;	/* 필수 값이 아니때문에 NULL이 들어 올수 있다 */
+	char					*lang;		/* kr, en 등 */
+	char 					*name;		/* Korean, English 등 */
+	char					*group_id;	/* smil file의 group-id attribute 값 */
 	int						order;		/* track 순서 */
+	media_info_t 			*media;
 	struct tag_content_info	*next;
 } content_info_t;
 
@@ -229,6 +250,7 @@ typedef struct tag_adaptive_info {
 	int		start;		/* start와 end는 milisecond 단위임 */
 	int		end;		/* end가 range 요청에 들어 있지 않은 경우는 EOF(동영상의 끝까지)가 들어 간다. */
 	int		order;		/* 컨텐츠 순서, 0부터 시작 */
+	int		audio_only_track_exist; // 별도의 audio track이 있는 경우 marking
 	struct tag_content_info	*contents;		/* smil을 파싱한 결과를 리스트로 저장, smil이 아닌 경우는 NULL이 들어감 */
 	struct tag_subtitle_info *subtitle;		/* smil에서 파싱한 자막 정보를 저장, smil이 아니거나 자막이 없는 경우는 NULL이 저장됨 */
 	struct tag_adaptive_info *next;
