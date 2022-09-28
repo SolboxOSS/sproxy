@@ -16,7 +16,7 @@ typedef struct tag_disk_minfo {
 #pragma pack()
 
 #define MEDIA_CACHE_HEADER_MAGIC 			0x5AA5B53B
-#define MEDIA_CACHE_VERSION					3
+#define MEDIA_CACHE_VERSION					4
 #define MEDIA_CACHE_BASE_OFFSET				2048
 
 #define	MEDIA_METADATA_CACHE_DIR_MAX_LEN	128
