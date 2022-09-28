@@ -128,9 +128,9 @@ sm_module_volume_lookup(phase_context_t *ctx)
 
 	if (req->streaming == NULL) return SCX_YES;
 //#ifdef ZIPPER
-	if (O_PROTOCOL_DASH == req->streaming->protocol
-			|| O_PROTOCOL_HLS == req->streaming->protocol
-			|| O_PROTOCOL_MSS == req->streaming->protocol) {
+	if  ((req->streaming->protocol & O_PROTOCOL_DASH) != 0
+			||(req->streaming->protocol & O_PROTOCOL_HLS) != 0
+			|| (req->streaming->protocol & O_PROTOCOL_MSS) != 0) {
 		/* session은 dash나 hls에서만 사용이 가능하다. */
 		if (!sm_handle_session(req)) {
 			scx_error_log(req, "Session handler error. URL(%s)\n", vs_data(req->url));
@@ -152,9 +152,9 @@ sm_module_client_request(phase_context_t *ctx)
 
 	if (req->streaming == NULL) return SCX_YES;
 //#ifdef ZIPPER
-	if (O_PROTOCOL_DASH == req->streaming->protocol
-			|| O_PROTOCOL_HLS == req->streaming->protocol
-			|| O_PROTOCOL_MSS == req->streaming->protocol) {
+	if ((req->streaming->protocol & O_PROTOCOL_DASH) != 0
+			||(req->streaming->protocol & O_PROTOCOL_HLS) != 0
+			|| (req->streaming->protocol & O_PROTOCOL_MSS) != 0) {
 		/* session은 dash나 hls에서만 사용이 가능하다. */
 		if (!sm_handle_session(req)) {
 			scx_error_log(req, "Session handler error. URL(%s)\n", vs_data(req->url));
