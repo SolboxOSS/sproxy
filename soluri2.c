@@ -243,7 +243,7 @@ soluri2_handler(nc_request_t *req)
 {
 	streaming_t *streaming = req->streaming;
 	if (streaming) {
-		if (req->streaming->protocol == O_PROTOCOL_CORS) {
+		if ((req->streaming->protocol & O_PROTOCOL_CORS) != 0) {
 			/* crossdomain.xml요청은 인증을 하지 않는다. */
 			return SCX_YES;
 		}
