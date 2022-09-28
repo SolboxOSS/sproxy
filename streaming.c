@@ -1305,6 +1305,7 @@ strm_create_builder(nc_request_t *req, uint32_t dur)
 				scx_error_log(req, "'%s' zipper_add_track error.(%s)\n", media->url, zipper_err_msg(ret));
 				goto create_builder_error;
 			}
+			prev_list = cur_list;
 			subtitle = subtitle->next;
 		}
 		zipper_end_track(ioh, builder->bcontext);
