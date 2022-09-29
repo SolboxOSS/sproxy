@@ -89,4 +89,4 @@ server {
 
 ## License
 
-solproxy is is dual-licensed under the GNU Lesser General PublicLicense (LGPLv2.1+)
+solproxy is is dual-licensed under the GNU General PublicLicense (GPLv2.0) & Solbox commercial license
