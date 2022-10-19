@@ -823,9 +823,9 @@ typedef struct _zipper_builder_param
             struct {
                 
                 char        *format;            // 출력 포맷
-                
+
             } m3u8; // M3U8 설정
-            
+
             struct {
                 
                 char *init;         // 초기화 파일 출력 포맷
@@ -839,6 +839,9 @@ typedef struct _zipper_builder_param
                 char *audio;    // 오디오 M3U8 출력 포맷
                 
             } fmp4m3u8;
+            
+            //  MPD, 마스터 M3U8 생성시 자막 트랙(M3U8)을 지정/설정한다.
+            // subtrk[i].url 이 NULL이면 (i-1)이 마지막 자막 트랙이 된다.
             
             struct {
 
@@ -890,6 +893,28 @@ typedef struct _zipper_builder_param
             
         } attr;
         
+        struct {
+            
+            uint8_t def; // 기본 선택 자막인 경우 1, 그렇지 않으면 0 (def=1인 자막이 없는 경우 첫번째 자막이 자동 DEFAULT+AUTOSELECT로 처리)
+            char *url; // 자막 M3U8 URL(*필수) (생성하는 M3U8의 상대 URL 혹은 절대 URL 모두 가능, zipper에서 별도로 보정하지 않음)
+            char *desc; // NULL일 경우 lang 필드의 값을 그대로 사용
+            char *lang; // ISO639-1 3자리 언어코드(*필수) (예:"kor", "eng", iso639.h 참조)
+            
+            // 마지막 자막 기술 후 다음 인덱스의 url을 NULL로 설정하시면 됩니다.
+            /*
+                예) 한국어/영어 2개 자막 설정 시
+             
+                .sub_link[0].url = "kor/sub.m3u8";
+                .sub_link[0].lang = "kor";
+                .sub_link[1].url = "eng/sub.m3u8";
+                .sub_link[1].lang = "eng";
+                .sub_link[2].url = NULL;
+                .sub_link[2].lang = NULL;
+             
+             */
+                        
+        } sub_link[8];
+
     } target; // 출력 대상 설정
     
     struct {
