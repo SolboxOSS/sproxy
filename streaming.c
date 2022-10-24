@@ -87,10 +87,12 @@ static strm_reg_t gscx__strm_vod_reg[] = {
 	{NULL, MEDIA_TYPE_MSS_AUDIO, 			O_PROTOCOL_MSS,			BLDTYPE_MOOF, 		2, "video/mp4", 			"^([0-9]+)_audio_segment_([0-9]+)\\.isma$"},
 	{NULL, MEDIA_TYPE_HLS_MAIN_M3U8, 		O_PROTOCOL_HLS, 		BLDTYPE_NONE, 		0, "application/vnd.apple.mpegurl", "^playlist\\.m3u8$"},
 	{NULL, MEDIA_TYPE_HLS_SUB_M3U8, 		O_PROTOCOL_HLS, 		BLDTYPE_M3U8, 		1, "application/vnd.apple.mpegurl", "^content[_]?([0-9]*)\\.m3u8$"},
+	{NULL, MEDIA_TYPE_HLS_VTT_M3U8, 		O_PROTOCOL_HLS, 		BLDTYPE_M3U8, 		1, "application/vnd.apple.mpegurl", "^subtitle[_]?([0-9]*)\\.m3u8$"},
 	{NULL, MEDIA_TYPE_HLS_FMP4_MAIN_M3U8, 	O_PROTOCOL_HLS, 		BLDTYPE_FMP4M3U8, 	0, "application/vnd.apple.mpegurl", "^playlist_fmp4\\.m3u8$"},
 	{NULL, MEDIA_TYPE_HLS_FMP4_AUDIO_M3U8, 	O_PROTOCOL_HLS, 		BLDTYPE_FMP4SUBM3U8,2, "application/vnd.apple.mpegurl", "^fmp4_audio[_]?([0-9]*)\\.m3u8$"},
 	{NULL, MEDIA_TYPE_HLS_FMP4_VIDEO_M3U8, 	O_PROTOCOL_HLS, 		BLDTYPE_FMP4SUBM3U8,2, "application/vnd.apple.mpegurl", "^fmp4_video[_]?([0-9]*)\\.m3u8$"},
 	{NULL, MEDIA_TYPE_HLS_TS, 				O_PROTOCOL_HLS,			BLDTYPE_STS, 		2, "video/MP2T", 			"^content[_]?([0-9]*)_([0-9]+)\\.ts$"},
+	{NULL, MEDIA_TYPE_HLS_VTT, 				O_PROTOCOL_HLS, 		BLDTYPE_VTT, 		2, "text/vtt", 				"^subtitle[_]?([0-9]*)_([0-9]+)\\.vtt$"},
 	{NULL, MEDIA_TYPE_MP4, 					O_PROTOCOL_PROGRESSIVE,	BLDTYPE_MP4, 		0, "video/mp4", 			"^content\\.mp4$"},
 	{NULL, MEDIA_TYPE_M4A, 					O_PROTOCOL_PROGRESSIVE,	BLDTYPE_MP4, 		0, "audio/mp4", 			"^content\\.m4a$"},
 	{NULL, MEDIA_TYPE_M4V, 					O_PROTOCOL_PROGRESSIVE,	BLDTYPE_MP4, 		0, "video/mp4", 			"^content\\.m4v$"},
@@ -106,6 +108,8 @@ static strm_reg_t gscx__strm_vod_reg[] = {
 	// solproxy에서 아래 부분이 있을경우 smil 파일 자체로 퍼지가 안되는 문제 발생
 	// https://jarvis.solbox.com/redmine/issues/33477
 	{NULL, MEDIA_TYPE_SMIL_DOWN,			O_PROTOCOL_PROGRESSIVE,	BLDTYPE_NONE, 		0, "application/smil+xml", 	"^.+\\.[sS][mM][iI][lL]"},	/* 이 type은 캐싱된 smil 퍼지 용도로만 사용 */
+	{NULL, MEDIA_TYPE_SUBTITLE_DOWN,		O_PROTOCOL_PROGRESSIVE,	BLDTYPE_NONE, 		0, "text/plain", 	"^.+\\.[sS][rR][tT]"},	/* 이 type은 캐싱된 srt 파일 퍼지 용도로만 사용 */
+	{NULL, MEDIA_TYPE_SUBTITLE_DOWN,		O_PROTOCOL_PROGRESSIVE,	BLDTYPE_NONE, 		0, "text/plain", 	"^.+\\.[vV][tT][tT]"},	/* 이 type은 캐싱된 vtt 퍼지 용도로만 사용 */
 #endif
 	{NULL, MEDIA_TYPE_CMAF_VIDEO_TUNNEL,	O_PROTOCOL_TUNNEL,		BLDTYPE_NONE, 		1, "video/mpeg", 			"^([0-9]+)_video_tunnel\\.cmaf$"},
 	{NULL, MEDIA_TYPE_CMAF_AUDIO_TUNNEL,	O_PROTOCOL_TUNNEL,		BLDTYPE_NONE, 		1, "audio/mpeg", 			"^([0-9]+)_audio_tunnel\\.cmaf$"},
@@ -184,6 +188,7 @@ const char gscx__hls_extinf_format[] = {"#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDT
 const char gscx__hls_m3u8_format[] = {"content.%e"};	//main m3u8생성 규칙 format
 const char gscx__hls_fmp4_audio_m3u8_format[] = {"fmp4_audio_%a.%e"};	// HLS fmp4 audio manifest naming 규칙
 const char gscx__hls_fmp4_video_m3u8_format[] = {"fmp4_video_%a.%e"};	// HLS fmp4 video manifest naming 규칙
+const char gscx__hls_fmp4_subtitle_m3u8_format[] = {"subtitle_%a.%e"};	// HLS fmp4 subtitle manifest naming 규칙
 const char gscx__hls_fmp4_video_init_format[] 	= {"%a_video_init.m4s"};			//HLS fmp4 video init 파일 naming 규칙
 const char gscx__hls_fmp4_video_seq_format[] 	= {"%a_video_segment_%t.m4s"};	//HLS fmp4 video segment 파일 naming 규칙
 const char gscx__hls_fmp4_audio_init_format[] 	= {"%a_audio_init.m4s"};			//HLS fmp4 audio init 파일 naming 규칙
@@ -769,6 +774,14 @@ strm_create_media(nc_request_t *req, int type, char *url)
 //	jb = SCX_MALLOC(sizeof(jmp_buf));
 	/* 여기에서 key(host+url)를 만드는 과정 필요 */
 	while (1) {
+
+		printf("strm_create_media() called, url(%s)\n", url);
+
+		if (type == O_CONTENT_TYPE_SUBTITLE) {
+			// 자막은 cache를 하지 않기 때문에 아래 부분들은 skip하고 source 생성부터 진행한다.
+			media = strm_allocate_media(req, &gres);
+			goto next_create_media;
+		}
 		/* strm_find_media()을 호출한후 부터 commit이 일어날때 까지는 동일 media는 오직 한 세션만 진입이 가능하다. */
 		media = strm_find_media(req, type, url, U_TRUE, U_TRUE, &gres);
 		if (media == NULL) {
@@ -908,7 +921,9 @@ next_create_media:
 				ret = zipper_err_internal;
 				TRACE((T_ERROR, "[%llu] zipper_create_media_context() SIGSEGV occured.(%s), %s:%d\n", req->id, url, __FILE__, __LINE__));
 			}
-
+#ifdef DEBUG
+			printf("zipper_create_media_context() ret(%d), url(%s)\n", ret, url);
+#endif
 			te = sx_get_time();
 			req->t_zipper_build += (te - ts);
 			if (req->file_errno) {
@@ -927,8 +942,10 @@ next_create_media:
 				strm_set_media(req, media, type, url, ctx, &source->objstat);
 				ATOMIC_ADD(gscx__media_context_create_interval_cnt, 1);
 				ATOMIC_ADD(gscx__media_context_create_interval_size, media->mcontext_size);
-				/* 디스크 캐시에 기록 */
-				mdc_save_cache(req, media, 0);
+				/* 디스크 캐시에 기록, 자막은 cache에 기록하지 않는다. */
+				if (type != O_CONTENT_TYPE_SUBTITLE) {
+					mdc_save_cache(req, media, 0);
+				}
 			}
 			else {
 				media->available = 0;
@@ -1178,7 +1195,28 @@ strm_create_builder(nc_request_t *req, uint32_t dur)
 	content_info_t *content = req->streaming->content;
 	/* 트랙 추가과정 */
 	while (content) {
-		if (streaming->is_adaptive == 1 && streaming->rep_id != NULL && streaming->protocol == O_PROTOCOL_HLS) {
+		/*
+		 * 자막 처리 동작
+		 ** 기본적으로 자막은 adaptive track을 구성하지 않는다
+		 ** req->streaming->media_type이 MEDIA_TYPE_HLS_VTT_M3U8와 MEDIA_TYPE_HLS_VTT인 경우
+		 *** content->type이 O_CONTENT_TYPE_SUBTITLE 인것들중 content->subtitle_order와 streaming->rep_num이 동일 한것만 strm_create_media()를 호출 하고 나머지는 skip
+		 ** 위의 경우를 제외 하고는 content->type이 O_CONTENT_TYPE_SUBTITLE인 경우는 모두 skip 한다.
+		 */
+		if (req->streaming->media_type == MEDIA_TYPE_HLS_VTT_M3U8 ||
+			req->streaming->media_type == MEDIA_TYPE_HLS_VTT) {
+			// 자막 요청인 경우는 요청된 자막 스트림에 대해서만 media context를 만든다.
+			if(!(content->type == O_CONTENT_TYPE_SUBTITLE && streaming->rep_num == content->subtitle_order)) {
+				content = content->next;
+				continue;
+			}
+		}
+		else if (content->type == O_CONTENT_TYPE_SUBTITLE){
+			// 자막 요청이 아닌 경우에는 자막은 media context 생성에서 제외한다.
+			content = content->next;
+			continue;
+		}
+		if (streaming->is_adaptive == 1 && streaming->rep_id != NULL
+				&& (streaming->protocol == O_PROTOCOL_HLS || streaming->protocol == O_PROTOCOL_DASH)) {
 			/*
 			 * adaptive streaming이고 submanifest 요청이나 TS, m4s, m4a 인(streaming->rep_id가 지정된) 경우에는
 			 * rep_id(bitrate)에 해당하는 컨텐츠의 metadata만 사용하도록 한다.
@@ -1255,6 +1293,9 @@ strm_create_builder(nc_request_t *req, uint32_t dur)
 			cur_list->tcprm.comp.adaptBase = adaptBase;
 			cur_list->is_base = 0;
 //				printf("sub track url = %s, start(%d), end(%d), context(%lld)\n", media->url, content->start, content->end, cur_list->tcprm.comp.adaptBase);
+#ifdef DEBUG
+			printf("sub track url = %s, type(%d), start(%d), end(%d), context(%lld)\n", media->url, content->type, content->start, content->end, cur_list->tcprm.comp.adaptBase);
+#endif
 			if (sigsetjmp(__thread_jmp_buf, 1) == 0) {
 				__thread_jmp_working = 1;
 				ret = zipper_add_adaptive_track(ioh, builder->bcontext, &cur_list->tcprm);
@@ -1272,7 +1313,9 @@ strm_create_builder(nc_request_t *req, uint32_t dur)
 			cur_list->tcprm.comp.range.start = content->start;
 			cur_list->tcprm.comp.range.end = content->end;
 			cur_list->is_base = 1;
-//				printf("base track url = %s, start(%d), end(%d), context(%lld)\n", media->url, content->start, content->end, media->mcontext);
+#ifdef DEBUG
+			printf("base track url = %s, type(%d), start(%d), end(%d), context(%lld)\n", media->url, content->type, content->start, content->end, media->mcontext);
+#endif
 			if (sigsetjmp(__thread_jmp_buf, 1) == 0) {
 				__thread_jmp_working = 1;
 				ret = zipper_add_track(ioh, builder->bcontext, &cur_list->tcprm);
@@ -3459,7 +3502,7 @@ strm_cmaf_reader(void *cr, uint64_t pos, char *buf, size_t max)
 		}
 
 	}
-	if (copied != MHD_CONTENT_READER_END_OF_STREAM) {
+	if (ret != MHD_CONTENT_READER_END_OF_STREAM) {
 		copied = ret;
 		req->cursor	+= copied;
 		if (req->remained > 0)
@@ -3960,8 +4003,10 @@ strm_prepare_stream(nc_request_t *req)
 	int	 hls_init_format_len = 0;
 	char * hls_audio_format = NULL;
 	char * hls_video_format = NULL;
+	char * hls_subtitle_format = NULL;
 	int	 hls_audio_format_len = 0;
 	int	 hls_video_format_len = 0;
+	int	 hls_subtitle_format_len = 0;
 	mpd_builder_format *dash_format  = NULL;
 	iis_builder_format *mss_format  = NULL;
 	char *dash_video_init_format = NULL;
@@ -4106,6 +4151,10 @@ strm_prepare_stream(nc_request_t *req)
 			hls_audio_format = (char *) mp_alloc(streaming->mpool, MEDIA_FORMAT_MAX_LEN);
 			ASSERT(hls_video_format);
 			ASSERT(hls_audio_format);
+			if (streaming->subtitle_count > 0) {
+				hls_subtitle_format = (char *) mp_alloc(streaming->mpool, MEDIA_FORMAT_MAX_LEN);
+				ASSERT(hls_subtitle_format);
+			}
 			break;
 		case MEDIA_TYPE_HLS_FMP4_AUDIO_M3U8:
 		case MEDIA_TYPE_HLS_FMP4_VIDEO_M3U8:
@@ -4548,6 +4597,9 @@ strm_prepare_stream(nc_request_t *req)
 				snprintf(abs_path+pos, streaming->real_path_len, "%s", vs_data(req->ori_url));
 				hls_video_format_len = scx_snprintf(hls_video_format, MEDIA_FORMAT_MAX_LEN, "%s/", abs_path);
 				hls_audio_format_len = scx_snprintf(hls_audio_format, MEDIA_FORMAT_MAX_LEN, "%s/", abs_path);
+				if (streaming->subtitle_count > 0) {
+					hls_subtitle_format_len = scx_snprintf(hls_subtitle_format, MEDIA_FORMAT_MAX_LEN, "%s/", abs_path);
+				}
 				if (abs_path) {
 					SCX_FREE(abs_path);
 					abs_path = NULL;
@@ -4584,6 +4636,32 @@ strm_prepare_stream(nc_request_t *req)
 			}
 			bprm->target.attr.fmp4m3u8.video = hls_video_format;
 			bprm->target.attr.fmp4m3u8.audio = hls_audio_format;
+
+
+			/* smil 파일에 자막이 포함 되어 있는 경우 처리 부분 */
+			if (streaming->subtitle_count > 0 && builder->is_adaptive == 1) {
+				content_info_t *content = req->streaming->content;
+				int array_pos = 0;
+				char * subtitle_url = NULL;
+				int subtitle_url_size = 0;
+				subtitle_url_size =  hls_subtitle_format_len + 50;
+
+				while (content && streaming->subtitle_count >  array_pos) {	// 첫번째 smil에 들어 있는 자막 트랙만 반영하기 위해 ramain_count를 사용
+					if (content->type == O_CONTENT_TYPE_SUBTITLE) {
+						subtitle_url =  (char *) mp_alloc(streaming->mpool, subtitle_url_size);
+
+						snprintf(subtitle_url, subtitle_url_size, "%ssubtitle_%d.m3u8%s", hls_subtitle_format, array_pos+1, (streaming->argument ?streaming->argument :""));
+
+
+						bprm->target.sub_link[array_pos].url = subtitle_url;
+						bprm->target.sub_link[array_pos].desc = content->subtitle_name;
+						bprm->target.sub_link[array_pos].lang = content->subtitle_lang;
+						array_pos++;
+					}
+					content = content->next;
+				}
+			}
+
 			bprm->attr.index.adapt = 0xff; /* adaptive 형태로 출력 */
 			bprm->target.range_get.ctx = rgCtx;
 			ts = sx_get_time();
@@ -5876,7 +5954,7 @@ strm_url_parser(nc_request_t *req)
 				(streaming->media_type == MEDIA_TYPE_MP4_DOWN ||
 						streaming->media_type == MEDIA_TYPE_MP3_DOWN ||
 						streaming->media_type == MEDIA_TYPE_FLAC_DOWN ||
-						streaming->media_type == MEDIA_TYPE_SMIL_DOWN) ){
+						streaming->media_type == MEDIA_TYPE_SMIL_DOWN || streaming->media_type == MEDIA_TYPE_SUBTITLE_DOWN) ){
 				/* '/vod/_definst_/pdl/eng/0/dir1/dir2/sample.mp4'에서와 같이 단순 다운로드인 경우를 판별 한다. */
 			streaming->media_mode |= O_STRM_TYPE_DIRECT;
 			streaming->media_path = (char *) mp_alloc(streaming->mpool,vs_length(contents)+vs_length(virtualfile)+2);
@@ -6557,9 +6635,10 @@ strm_handle_adaptive(nc_request_t *req)
 	adaptive_info_t *adaptive, *head_adaptive;
 	content_info_t *content, *head_content;
 	content_info_t *new_content;
+	subtitle_info_t *subtitle, *new_subtitle;
 	int smil_cnt = 0;	/* 요청중 smil 파일로 구성된게 몇개 인지 확인 용*/
 	int	found = 0;
-	int is_base = 0;
+	int is_base = 0, sub_is_base = 0;
 
 	if((streaming->media_mode & O_STRM_TYPE_ADAPTIVE) == 0){
 		/* adaptive mode가 아닌 경우 이 함수가 호출 되면 안됨. */
@@ -6663,8 +6742,10 @@ strm_handle_adaptive(nc_request_t *req)
 	while (adaptive)  {
 		head_content = head_adaptive->contents;
 		is_base = 1;
+		sub_is_base = 0;
 		while (head_content) {
-			if (head_content->available) {
+			// 자막 content는 다른 부분에서 처리한다.
+			if (head_content->available ) {
 				/* 여기서 새로운 content를 생성 */
 				/* base 가 1인 경우 content->is_base를 1로 설정한다. */
 				if (streaming->content == NULL) {
@@ -6677,83 +6758,152 @@ strm_handle_adaptive(nc_request_t *req)
 					ASSERT(new_content->next);
 					new_content = new_content->next;
 				}
-				if (is_base) {
-					/* 각 content의 첫 track인 경우 */
-					new_content->is_base = 1;
-				}
-				if(adaptive->is_smil) {
-					content = adaptive->contents;
-					while (content) {
-						if (strcmp(head_content->bitrate, content->bitrate) == 0) {
-							new_content->path = (char *) mp_alloc(streaming->mpool,strlen(content->path)+1);
-							ASSERT(new_content->path);
-							sprintf(new_content->path, "%s", content->path);
-							new_content->bitrate = (char *) mp_alloc(streaming->mpool,strlen(content->bitrate)+1);
-							ASSERT(new_content->bitrate);
-							sprintf(new_content->bitrate, "%s", content->bitrate);
-							if (content->codecs != NULL ) {
-								new_content->codecs =  mp_alloc(streaming->mpool, strlen(content->codecs)+1);
-								sprintf(new_content->codecs, "%s", content->codecs);
-							}
-							if (content->resolution != NULL ) {
-								new_content->resolution =  mp_alloc(streaming->mpool, strlen(content->resolution)+1);
-								sprintf(new_content->resolution, "%s", content->resolution);
-							}
-#if 0
-							/* 라이브 개발중 임시 코딩으로 삭제 해야함 */
-							if (content->host) {
-								new_content->host = (char *) mp_alloc(streaming->mpool,strlen(content->host)+1);
-								sprintf(new_content->host, "%s", content->host);
-							}
-							else {
-								new_content->host = (char *) mp_alloc(streaming->mpool,vs_length(req->host)+1);
-								sprintf(new_content->host, "%s", vs_data(req->host));
-							}
-#endif
-							break;
 
-						}
-						content = content->next;
+				if (head_content->type != O_CONTENT_TYPE_SUBTITLE) {
+					if (is_base) {
+						/* 각 content의 첫 track인 경우 */
+						new_content->is_base = 1;
 					}
-				}
-				else {
-					/*
-					 * smil이 아닌 mp4나 mp3 인 경우 여기서 생성한다.
-					 * 이 경우 path에는 url에 있던 컨텐츠의 경로가 들어가고
-					 * bitrate 항목에는 첫번째 smil 파일에 들어 있는것과 동일하게 들어간다.
-					 * */
-					new_content->path = (char *) mp_alloc(streaming->mpool,strlen(adaptive->path)+1);
-					ASSERT(new_content->path);
-					sprintf(new_content->path, "%s", adaptive->path);
-					new_content->bitrate = (char *) mp_alloc(streaming->mpool,strlen(head_content->bitrate)+1);
-					ASSERT(new_content->bitrate);
-					sprintf(new_content->bitrate, "%s", head_content->bitrate);
-#if 0
-					/* 라이브 개발중 임시 코딩으로 삭제 해야함 */
-					if (adaptive->host) {
-						new_content->host = (char *) mp_alloc(streaming->mpool,strlen(adaptive->host)+1);
-						sprintf(new_content->host, "%s", adaptive->host);
+					if(adaptive->is_smil) {
+						content = adaptive->contents;
+						while (content) {
+							if (strcmp(head_content->bitrate, content->bitrate) == 0) {
+								new_content->path = (char *) mp_alloc(streaming->mpool,strlen(content->path)+1);
+								ASSERT(new_content->path);
+								sprintf(new_content->path, "%s", content->path);
+								new_content->bitrate = (char *) mp_alloc(streaming->mpool,strlen(content->bitrate)+1);
+								ASSERT(new_content->bitrate);
+								sprintf(new_content->bitrate, "%s", content->bitrate);
+								if (content->codecs != NULL ) {
+									new_content->codecs =  mp_alloc(streaming->mpool, strlen(content->codecs)+1);
+									sprintf(new_content->codecs, "%s", content->codecs);
+								}
+								if (content->resolution != NULL ) {
+									new_content->resolution =  mp_alloc(streaming->mpool, strlen(content->resolution)+1);
+									sprintf(new_content->resolution, "%s", content->resolution);
+								}
+
+								break;
+
+							}
+							content = content->next;
+						}
 					}
 					else {
-						new_content->host = (char *) mp_alloc(streaming->mpool,vs_length(req->host)+1);
-						sprintf(new_content->host, "%s", vs_data(req->host));
+						/*
+						 * smil이 아닌 mp4나 mp3 인 경우 여기서 생성한다.
+						 * 이 경우 path에는 url에 있던 컨텐츠의 경로가 들어가고
+						 * bitrate 항목에는 첫번째 smil 파일에 들어 있는것과 동일하게 들어간다.
+						 * */
+						new_content->path = (char *) mp_alloc(streaming->mpool,strlen(adaptive->path)+1);
+						ASSERT(new_content->path);
+						sprintf(new_content->path, "%s", adaptive->path);
+						new_content->bitrate = (char *) mp_alloc(streaming->mpool,strlen(head_content->bitrate)+1);
+						ASSERT(new_content->bitrate);
+						sprintf(new_content->bitrate, "%s", head_content->bitrate);
+
 					}
-#endif
+					is_base = 0;
+					new_content->type = adaptive->type;
 				}
-				is_base = 0;
-				new_content->type = adaptive->type;
+				else if (head_content->type == O_CONTENT_TYPE_SUBTITLE) {
+#if 0
+					/* base 가 1인 경우 content->is_base를 1로 설정한다. */
+					if (sub_is_base) {
+						/* 각 content의 첫 track인 경우 */
+						new_content->is_base = 1;
+					}
+#else
+					// 자막의 경우 adaptive track을 구성 하지 않기 때문에 모두 base track으로 처리 한다.
+					new_content->is_base = 1;
+#endif
+					if (adaptive == streaming->adaptive_info) {
+						/* 첫 smil 파일에 들어 있는 자막의 수만 count 한다. */
+						streaming->subtitle_count++;
+					}
+					if (head_content->path != NULL ) {
+						new_content->path =  mp_alloc(streaming->mpool, strlen(head_content->path)+1);
+						sprintf(new_content->path, "%s", head_content->path);
+					}
+					if (head_content->subtitle_lang != NULL ) {
+						new_content->subtitle_lang =  mp_alloc(streaming->mpool, strlen(head_content->subtitle_lang)+1);
+						sprintf(new_content->subtitle_lang, "%s", head_content->subtitle_lang);
+					}
+					if (head_content->subtitle_name != NULL ) {
+						new_content->subtitle_name =  mp_alloc(streaming->mpool, strlen(head_content->subtitle_name)+1);
+						sprintf(new_content->subtitle_name, "%s", head_content->subtitle_name);
+					}
+
+					new_content->subtitle_type = head_content->subtitle_type;
+					new_content->subtitle_order = head_content->subtitle_order;
+					new_content->available = 1;
+					new_content->type = head_content->type;
+#ifdef DEBUG
+					printf("name: '%s', type = %d, language: '%s', start: %d, end: %d, path: '%s'\n",
+								new_content->subtitle_name, new_content->subtitle_type,
+								(new_content->subtitle_lang != NULL)?new_content->subtitle_lang:"NULL",
+								new_content->start, new_content->end, new_content->path);
+#endif
+					sub_is_base = 0;
+				}
+
+
+
+
 				new_content->start = adaptive->start;
 				new_content->end = adaptive->end;
-				new_content->type = adaptive->type;
-#if 0
-				/* 라이브 개발중 임시 코딩으로 삭제 해야함 */
-				/* 현재는 모든 컨텐츠가 동일한 host를 사용하지만 contents path내에 서버 주소가 포함 된 경우에는 개별적으로 host를 선택 할수 있도록 해야 한다. */
-				new_content->host = (char *) mp_alloc(streaming->mpool,vs_length(req->host)+1);
-				sprintf(new_content->host, "%s", vs_data(req->host));
-#endif
+
 			}
 			head_content = head_content->next;
 		}
+#if 0
+		//자막 처리 부분
+		subtitle = head_adaptive->subtitle;
+		sub_is_base = 1;
+		while (subtitle) {
+			/* base 가 1인 경우 content->is_base를 1로 설정한다. */
+			if (streaming->subtitle == NULL) {
+				new_subtitle = (subtitle_info_t *)mp_alloc(streaming->mpool,sizeof(subtitle_info_t));
+				ASSERT(new_subtitle);
+				streaming->subtitle = new_subtitle;
+			}
+			else {
+				new_subtitle->next = (subtitle_info_t *)mp_alloc(streaming->mpool,sizeof(subtitle_info_t));
+				ASSERT(new_subtitle->next);
+				new_subtitle = new_subtitle->next;
+			}
+			if (sub_is_base) {
+				/* 각 content의 첫 track인 경우 */
+				new_subtitle->is_base = 1;
+			}
+
+			if (subtitle->path != NULL ) {
+				new_subtitle->path =  mp_alloc(streaming->mpool, strlen(subtitle->path)+1);
+				sprintf(new_subtitle->path, "%s", subtitle->path);
+			}
+			if (subtitle->subtitle_lang != NULL ) {
+				new_subtitle->subtitle_lang =  mp_alloc(streaming->mpool, strlen(subtitle->subtitle_lang)+1);
+				sprintf(new_subtitle->subtitle_lang, "%s", subtitle->subtitle_lang);
+			}
+			if (subtitle->subtitle_name != NULL ) {
+				new_subtitle->subtitle_name =  mp_alloc(streaming->mpool, strlen(subtitle->subtitle_name)+1);
+				sprintf(new_subtitle->subtitle_name, "%s", subtitle->subtitle_name);
+			}
+
+			new_subtitle->subtitle_type = subtitle->subtitle_type;
+			new_subtitle->subtitle_order = subtitle->subtitle_order;
+			new_subtitle->available = 1;
+			new_subtitle->start = adaptive->start;
+			new_subtitle->end = adaptive->end;
+#ifdef DEBUG
+			printf("name: '%s', type = %d, language: '%s', start: %d, end: %d, path: '%s'\n",
+					new_subtitle->subtitle_name, new_subtitle->subtitle_type, (new_subtitle->subtitle_lang != NULL)?new_subtitle->subtitle_lang:"NULL",
+					new_subtitle->start, new_subtitle->end, new_subtitle->path);
+#endif
+			sub_is_base = 0;
+			subtitle = subtitle->next;
+		}
+#endif
 		adaptive = adaptive->next;
 	}
 
@@ -7157,6 +7307,7 @@ strm_purge(nc_request_t *req)
 	service_info_t * service = req->service;
 	content_info_t *content = NULL;
 	adaptive_info_t *adaptive;
+	subtitle_info_t *subtitle = NULL;
 
 	ASSERT(streaming);
 
@@ -7173,7 +7324,7 @@ strm_purge(nc_request_t *req)
 	}
 	else {
 		/* adaptive mode로 smil이 아닌 content를 직접 지정하는 경우는 동일 파일에 대해 여러번 퍼지가 발생 할수 있지만 성능에 영향을 미치는 부분이 아니기 때문에 별도 처리를 하지 않는다. */
-		content_info_t *content = streaming->content;
+		content = streaming->content;
 		while (content) {
 			if (1 == service->use_local_file) {
 				cnt += 1;
@@ -7195,7 +7346,22 @@ strm_purge(nc_request_t *req)
 			strm_purge_media_info(req, content->type, content->path);
 			content = content->next;
 		}
+#if 0
+		/* 자막 파일이 있는 경우 같이 퍼지 한다. */
+		subtitle = streaming->subtitle;
+		while (subtitle) {
+			if (1 == service->use_local_file) {
+				cnt += 1;
+			}
+			else {
 
+				strm_make_path(req, O_CONTENT_TYPE_VOD, subtitle->path, open_path, sizeof(open_path));
+				cnt += nc_purge(service->core->mnt, open_path, req->purge_key?TRUE:FALSE, req->purge_hard?TRUE:FALSE);
+
+			}
+			subtitle = subtitle->next;
+		}
+#endif
 		if ( (streaming->media_mode & O_STRM_TYPE_ADAPTIVE) != 0 ) {
 			/* adaptive mode에는 smil이 한개 이상 있으므로 smil 파일도 같이 퍼지 한다. */
 			adaptive = streaming->adaptive_info;
