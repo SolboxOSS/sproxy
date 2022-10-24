@@ -2320,7 +2320,7 @@ vm_base_config(service_info_t *service)
 	}
 	service->hls_target_duration = hls_target_duration;
 
-	service->subtitle_target_duration = scx_get_uint(site, SV_SUBTITLE_TARGET_DURATION, 60); /* 설정하지 않는 경우 60초임 */
+	service->subtitle_target_duration = scx_get_uint(site, SV_SUBTITLE_TARGET_DURATION, 30); /* 설정하지 않는 경우 30초임 */
 	if (service->subtitle_target_duration < 1) {
 		service->subtitle_target_duration = 1;
 	}
