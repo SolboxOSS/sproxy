@@ -50,7 +50,7 @@ extern void *gscx__timer_wheel_base; //bt_timer용
 		x; \
 	} \
 }
-#else	//BT_TIMER_VER2
+#else	//IS_TIMER_RUN
 #define 	CHECK_TIMER(func,req,x) {\
 	if (1 == gscx__config->ncapi_hang_detect) { \
 		bt_timer_t timer_remove; \
@@ -65,7 +65,7 @@ extern void *gscx__timer_wheel_base; //bt_timer용
 		x; \
 	} \
 }
-#endif	//BT_TIMER_VER2
+#endif	IS_TIMER_RUN
 
 
 
