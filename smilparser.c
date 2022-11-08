@@ -249,7 +249,7 @@ parser_element_names(nc_request_t *req, adaptive_info_t *adaptive_info, xmlDocPt
 					scx_error_log(req, "When using a textstream element, the 'name' attribute is a required value.(%s)\n", adaptive_info->path);
 					return 0;
 				}
-#ifdef USE_ANOTHER_SUBTILTE_STRUCT
+
 				if (adaptive_info->subtitle == NULL) {
 					smil_info->subtitle = (subtitle_info_t *)mp_alloc(tmp_mpool,sizeof(subtitle_info_t));
 					ASSERT(smil_info->subtitle);
@@ -284,38 +284,7 @@ parser_element_names(nc_request_t *req, adaptive_info_t *adaptive_info, xmlDocPt
 #ifdef DEBUG
 				printf("name: '%s', type = %d, language: '%s', path: '%s'\n",  subtitle->subtitle_name, subtitle->subtitle_type, (subtitle->subtitle_lang != NULL)?subtitle->subtitle_lang:"NULL", subtitle->path);
 #endif
-#else
-				if (adaptive_info->contents == NULL) {
-					smil_info->content = (content_info_t *)mp_alloc(tmp_mpool,sizeof(content_info_t));
-					ASSERT(smil_info->content);
-					adaptive_info->contents  = smil_info->content;
-				}
-				else {
-					smil_info->content->next = (content_info_t *)mp_alloc(tmp_mpool,sizeof(content_info_t));
-					ASSERT(smil_info->content->next);
-					smil_info->content = smil_info->content->next;
-				}
-				content = smil_info->content;
-				content->type = O_CONTENT_TYPE_SUBTITLE;
-				content->path = (char *) mp_alloc(tmp_mpool, strlen(smil_info->path)+1);
-				ASSERT(content->path);
-				sprintf(content->path, "%s", smil_info->path);
-				content->subtitle_name = (char *) mp_alloc(tmp_mpool, strlen(smil_info->subtitle_name)+1);
-				ASSERT(content->subtitle_name);
-				sprintf(content->subtitle_name, "%s", smil_info->subtitle_name);
-					/* system-language는 필수 attribute가 아니기 때문에 없는 경우 skip 한다. */
-				if (smil_info->subtitle_lang[0] != '\0' ) {
-					content->subtitle_lang = (char *) mp_alloc(tmp_mpool,strlen(smil_info->subtitle_lang)+1);
-					ASSERT(content->subtitle_lang);
-					sprintf(content->subtitle_lang, "%s", smil_info->subtitle_lang);
-				}
-				content->subtitle_type = smil_info->subtitle_type;
-				content->available = 1;
-				content->subtitle_order = subtitle_num++;
-#ifdef DEBUG
-				printf("name: '%s', type = %d, language: '%s', path: '%s'\n",  content->subtitle_name, content->subtitle_type, (content->subtitle_lang != NULL)?content->subtitle_lang:"NULL", content->path);
-#endif
-#endif
+
 
 			}
 
