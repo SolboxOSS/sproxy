@@ -1272,6 +1272,16 @@ strm_create_builder(nc_request_t *req, uint32_t dur)
 			if (!media) {
 				goto create_builder_error;
 			}
+			cur_list = mp_alloc(builder->mpool, sizeof(media_info_list_t));
+			ASSERT(cur_list);
+			if (builder->subtitle_list == NULL) {
+				builder->subtitle_list = cur_list;
+			}
+			else {
+				prev_list->next = cur_list;
+			}
+			cur_list->media = media;
+			
 			memset(&tcprm, 0, sizeof(track_composition_param));
 			tcprm.comp.range.start = subtitle->start;
 			tcprm.comp.range.end = subtitle->end;
@@ -1534,6 +1544,18 @@ create_builder_error:
 		}
 		cur_list = cur_list->next;
 	}
+	
+	cur_list = builder->subtitle_list;
+	while (cur_list) {
+		media = cur_list->media;
+		if (media) {
+			strm_destroy_media(media);
+			cur_list->media = NULL;
+		}
+		cur_list = cur_list->next;
+	}
+	builder->subtitle_list = NULL;
+	
 	builder->media_list = NULL;
 
 	if (builder->mpool) mp_free(builder->mpool);
@@ -3649,6 +3671,7 @@ strm_destroy_builder(builder_info_t * builder)
 	media_info_t *media;
 	zipper_io_handle  *ioh = NULL;
 	media_info_list_t * media_list = builder->media_list;
+	media_info_list_t * subtitle_list = builder->subtitle_list;
 	mem_pool_t 		*mpool = NULL;
 	if (builder->bcontext) {
 		ioh = strm_set_io_handle(NULL);
@@ -3667,6 +3690,17 @@ strm_destroy_builder(builder_info_t * builder)
 //		strm_unuse_media(media);
 		media_list = media_list->next;
 	}
+	builder->media_list = NULL;
+
+	while (subtitle_list) {
+		media = subtitle_list->media;
+		if (media) {
+			strm_release_media(media);
+			subtitle_list->media = NULL;
+		}
+		subtitle_list = subtitle_list->next;
+	}	
+	builder->subtitle_list = NULL;
 
 //	pthread_mutex_destroy(&builder->lock);
 	if (builder->mpool) {
