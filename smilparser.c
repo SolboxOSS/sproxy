@@ -308,7 +308,6 @@ Get_element_Attribute_value(nc_request_t *req, adaptive_info_t *adaptive_info, x
 			/* 와우자 smil 포맷과 같은 prefix가 있는 경우 prefix 제거 */
 			ptok = strchr((char *)value, ':');
 			if (ptok) {
-
 				ph1_path = ptok+1;
 			}
 			else {
