@@ -1203,6 +1203,123 @@ off_t zipper_flac_offset(zipper_io_handle *io_handle, uint64_t pts, off_t *dur, 
 // 내부 공유 함수
 mp4_track_desc *_zipper_track_desc(uint8_t type, void *context, uint8_t track, uint8_t index);
     
+// zipper Vairant API //////////////////////////////////////////
+typedef struct _zipper_variant_context *zipperVariant;          // Zipper Variant Context
+
+#define variant_track_video     1
+#define variant_track_audio     2
+#define variant_track_subtitle  4
+
+/*
+ zipper variant 컨텍스트 생성 함수
+ */
+int zipper_create_variant_context(zipper_io_handle *io_handle, zipperVariant *ctx);
+
+/*
+ zipper variant 컨텍스트 해제 함수
+ */
+void zipper_free_variant_context(zipper_io_handle *io_handle, zipperVariant *ctx);
+
+typedef struct _zipper_variant_track {
+
+    struct {
+        zipperCnt ctx;          // 트랙 소스의 zipper 미디어 컨텍스트
+                                // NULL로 지정할 경우 최소 아래의 bandwidth 필드 정보는 직접 기술해 주어야 한다.
+                                // zipper_variant_build()시 오류 리턴
+
+        uint32_t bandwidth;     // BADNWIDTH 정보,
+                                // 0이면 ctx(NULL이 아닐 경우)로부터 정보를 구한다.
+        
+        struct {
+
+            uint16_t width;     // 비디오 해상도 너비
+            uint16_t height;    // 비디오 해상도 높이
+                                // 둘 중 하나라도 0이면 ctx가 NULL이 아니면 ctx로 부터 그렇지 않으면 기술을 생략한다.
+
+        } resolution;
+
+        const char *codecs;     // 코덱 정보
+                                // NULL이고 ctx가 NULL이 아니면 ctx로 부터 그렇지 않으면 기술을 생략한다.
+
+    } media;
+    
+    const char *url;            // 트랙의 매니패스트 URL(상대 경로 권장)
+                                // 직접 사용(별도의 매크로 없음)
+
+    uint8_t avflag;             // 트랙 composition(조합, 단일 혹은 멀티 가능)
+                                // variant_track_* 비트 플래그 조합
+
+    const char *lang;           // 언어 코드 (ISO639-2 3자리)
+                                // NULL이면 미디어 컨텍스트로부터 상속 트랙 그룹으로 지정된 경우에만 유효하다.
+
+    const char *name;           // 트랙 구분 명(그룹 내)
+                                // 트랙 그룹으로 지정된 경우에만 유효하다.
+
+    int priority;               // 기술 상 우선 순위 (순서)
+                                // 이미 같은 priority를 가진 트랙이 있으면 해당 트랙의 다음 순서로 배치된다.
+    
+    struct {
+
+        const char *self;       // 그룹명 (*중요)
+                                // NULL일 경우 스트림으로 그렇지 않으면 트랙 그룹으로 인식한다.
+                                // N개의 트랙이 동일한 그룹명을 가지고 그룹을 형성한다(단일도 가능)
+
+                
+                                // 스트림인 경우 나머지 트랙에 대해 트랙 그룹을 명시, 연결해야 한다.
+                                // 모두 optional이다. (NULL(기본값)로 생략 가능)
+
+        const char *video;      // 비디오 트랙 그룹명
+        const char *audio;      // 오디오 트랙 그룹명
+        const char *subtitle;   // 자막(WebVTT) 트랙 그룹명
+
+    } group;
+
+    char def;                   // 1=기본 선택, 0=
+                                // 모든 트랙이 0이면 가장 높은 priority를 가진 트랙이 자동으로 1로 설정된다.
+
+    char autoselect;            // 1=자동 선택 가능,
+                                // 2=사용자에 의해서만 선택
+                                // 모든 트랙이 0이면 가장 높은 priority를 가진 트랙이 자동으로 1로 설정된다.
+
+} zipper_variant_track;
+
+/*
+ zipper variant 컨텍스트 트랙 및 스트림 추가 함수
+ 
+ @param
+    track[in]: 추가할 트랙 및 스트림 속성 구조체(zipper_variant_track 구조체 참조)
+ 
+ */
+int zipper_variant_add_track(zipper_io_handle *io_handle, zipperVariant ctx, zipper_variant_track *track);
+
+typedef struct _zipper_variant_build_param {
+
+    uint8_t flag;       // 옵션 비트 플래그
+    uint8_t format;     // 출력 포맷 (BLDTYPE_*, 현재는 M3U8(BLDTYPE_M3U8)만)
+        
+    struct {
+
+        uint8_t ver;    // M3U8 버전 (0이면 자동 할당)
+
+    } m3u8;
+
+    struct {
+
+        size_t written; // 출력된 크기(bytes)가 저장된다.
+
+    } output;
+
+} zipper_variant_build_param;
+
+/*
+ zipper variant 매니패스트 출력 함수
+ 
+ @param
+    param[in/out]: 출력 설정 및 결과 정보 저장 구조체 (zipper_variant_build_param 구조체 참조)
+ */
+int zipper_variant_build(zipper_io_handle *io_handle, zipperVariant ctx, zipper_variant_build_param *param);
+
+
 #ifdef __cplusplus
 }
 #endif
