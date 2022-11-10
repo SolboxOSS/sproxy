@@ -1248,28 +1248,50 @@ strm_create_builder(nc_request_t *req, uint32_t dur)
 	content_info_t *content = req->streaming->content;
 	/* 트랙 추가과정 */
 	while (content) {
-		if (streaming->is_adaptive == 1 && streaming->rep_id != NULL
-				&& streaming->protocol == O_PROTOCOL_HLS ) {
-			/*
-			 * adaptive streaming이고 submanifest 요청이나 TS, m4s, m4a 인(streaming->rep_id가 지정된) 경우에는
-			 * rep_id(bitrate)에 해당하는 컨텐츠의 metadata만 사용하도록 한다.
-			 * strm_create_builder()에서 아래의 조건을 만족 하는 경우에 요청된 해상도에 해당 하는 파일로만 builder context를 생성
-			 *    adaptive(streaming->is_adaptive가 1인 경우)이고 컨텐츠 한개만 사용(streaming->adaptive_info->next가 NULL일때)하는 경우
-			 *    submanifest 요청이나 TS, m4s, m4a 요청인 경우 (streaming->rep_id가 지정된 경우)
-			 * 	  content->bitrate에 값이 있는 경우만 비교, 없는 경우는 기존과 동일하게 builder context에 포함
-			 * 이때 skip되는 컨텐츠가 아닌 경우 content->is_base를 1로 설정해야 한다.
-			 */
+		if (streaming->is_adaptive == 1 && streaming->rep_id != NULL) {
 			if (streaming->adaptive_info->next == NULL) {
-				if (strcmp(content->bitrate, streaming->rep_id) == 0) {
-					content->is_base = 1;
+				/* adaptive streaming 요청시 전체 track을 사용하지 않고 요청된 트랙만 추가해서 metadata parsing으로 인한 부하를 줄인다. */
+				if (streaming->protocol == O_PROTOCOL_HLS ) {
+					/*
+					 * adaptive streaming이고 submanifest 요청이나 TS, m4s, m4a 인(streaming->rep_id가 지정된) 경우에는
+					 * rep_id(bitrate)에 해당하는 컨텐츠의 metadata만 사용하도록 한다.
+					 * strm_create_builder()에서 아래의 조건을 만족 하는 경우에 요청된 해상도에 해당 하는 파일로만 builder context를 생성
+					 *    adaptive(streaming->is_adaptive가 1인 경우)이고 컨텐츠 한개만 사용(streaming->adaptive_info->next가 NULL일때)하는 경우
+					 *    submanifest 요청이나 TS, m4s, m4a 요청인 경우 (streaming->rep_id가 지정된 경우)
+					 * 	  content->bitrate에 값이 있는 경우만 비교, 없는 경우는 기존과 동일하게 builder context에 포함
+					 * 이때 skip되는 컨텐츠가 아닌 경우 content->is_base를 1로 설정해야 한다.
+					 */
+
+					/* fregmented mp4 방식 HLS일때 요청된 track만 추가한다 */
+					if (content->order == streaming->rep_num){
+						content->is_base = 1;
+					}
+					else if (strcmp(content->bitrate, streaming->rep_id) == 0) {	//TS 방식 HLS인 경우
+						content->is_base = 1;
+					}
+					else {
+						content = content->next;
+						continue;
+					}
 				}
-				else {
-					content = content->next;
-					continue;
+				else if(streaming->protocol == O_PROTOCOL_DASH) {
+					if (streaming->media_type == MEDIA_TYPE_MPEG_DASH_VIDEO_INIT ||
+							streaming->media_type == MEDIA_TYPE_MPEG_DASH_VIDEO ||
+							streaming->media_type == MEDIA_TYPE_MPEG_DASH_AUDIO_INIT ||
+							streaming->media_type == MEDIA_TYPE_MPEG_DASH_AUDIO ) {
+						/* fregmented mp4 요청인 경우 요청된 track만 추가 한다. */
+						if (content->order == streaming->rep_num){
+							content->is_base = 1;
+						}
+						else {
+							content = content->next;
+							continue;
+						}
+					}
 				}
 			}
-
 		}
+
 		/* media가 있는지 검색하고 없는 경우 새로 만든다. */
 		media = strm_create_media(req, content->type, content->path);
 		if (!media) {
@@ -4422,7 +4444,7 @@ strm_prepare_stream(nc_request_t *req)
 						sprintf(req->scx_res.body+strlen(req->scx_res.body), ",DEFAULT=NO,AUTOSELECT=NO");
 					}
 					sprintf(req->scx_res.body+strlen(req->scx_res.body),
-							",URI=\"subtitle_%d.m3u8%s\"\n", array_pos+1, (streaming->argument?streaming->argument :""));
+							",URI=\"subtitle_%d.m3u8%s\"\n", array_pos, (streaming->argument?streaming->argument :""));
 					array_pos++;
 					subtitle = subtitle->next;
 				}
@@ -4731,7 +4753,7 @@ strm_prepare_stream(nc_request_t *req)
 				subtitle = streaming->subtitle;
 				while (subtitle && streaming->subtitle_count >  array_pos) {	// 첫번째 smil에 들어 있는 자막 트랙만 반영하기 위해 array_pos를 사용
 					subtitle_url =  (char *) mp_alloc(streaming->mpool, subtitle_url_size);
-					snprintf(subtitle_url, subtitle_url_size, "%ssubtitle_%d.m3u8%s", hls_subtitle_format, array_pos+1, (streaming->argument?streaming->argument :""));
+					snprintf(subtitle_url, subtitle_url_size, "%ssubtitle_%d.m3u8%s", hls_subtitle_format, array_pos, (streaming->argument?streaming->argument :""));
 					bprm->target.sub_link[array_pos].url = subtitle_url;
 					bprm->target.sub_link[array_pos].desc = subtitle->subtitle_name;
 					bprm->target.sub_link[array_pos].lang = subtitle->subtitle_lang;
@@ -4815,18 +4837,44 @@ strm_prepare_stream(nc_request_t *req)
 
 			}
 #endif
-			if (streaming->media_type == MEDIA_TYPE_HLS_FMP4_VIDEO_M3U8) {
-				snprintf(hls_init_format+hls_init_format_len, MEDIA_FORMAT_MAX_LEN, "%s%s", gscx__hls_fmp4_video_init_format, (streaming->argument ?streaming->argument :""));
-				snprintf(hls_format+hls_format_len, MEDIA_FORMAT_MAX_LEN, "%s%s", gscx__hls_fmp4_video_seq_format, (streaming->argument ?streaming->argument :""));
+			if (streaming->is_adaptive == 1 && streaming->adaptive_info->next == NULL) {
+				/*
+				 * 하나의 컨텐츠(smil 파일이 한개)로만 adaptive streaming 하는 경우
+				 * media indexing 부하를 최소화 하기 위해서 요청된 트랙만 zipper_add_track()에서 추가 하는 방식으로 했기 때문에
+				 * 아래 처럼 track 번호를 직접 지정 하고
+				 * bprm->attr.index.adapt를 0으로 한다.
+				 */
+				if (streaming->media_type == MEDIA_TYPE_HLS_FMP4_VIDEO_M3U8) {
+					snprintf(hls_init_format+hls_init_format_len, MEDIA_FORMAT_MAX_LEN, "%d_video_init.m4s%s", streaming->rep_num, (streaming->argument ?streaming->argument :""));
+					snprintf(hls_format+hls_format_len, MEDIA_FORMAT_MAX_LEN, "%d_video_segment_%%t.m4s%s", streaming->rep_num, (streaming->argument ?streaming->argument :""));
+				}
+				else {	/* MEDIA_TYPE_HLS_FMP4_AUDIO_M3U8 인 경우 */
+					snprintf(hls_init_format+hls_init_format_len, MEDIA_FORMAT_MAX_LEN, "%d_audio_init.m4s%s", streaming->rep_num, (streaming->argument ?streaming->argument :""));
+					snprintf(hls_format+hls_format_len, MEDIA_FORMAT_MAX_LEN, "%d_audio_segment_%%t.m4s%s", streaming->rep_num, (streaming->argument ?streaming->argument :""));
+				}
+
+				bprm->attr.index.adapt = 0;
 			}
-			else {	/* MEDIA_TYPE_HLS_FMP4_AUDIO_M3U8 인 경우 */
-				snprintf(hls_init_format+hls_init_format_len, MEDIA_FORMAT_MAX_LEN, "%s%s", gscx__hls_fmp4_audio_init_format, (streaming->argument ?streaming->argument :""));
-				snprintf(hls_format+hls_format_len, MEDIA_FORMAT_MAX_LEN, "%s%s", gscx__hls_fmp4_audio_seq_format, (streaming->argument ?streaming->argument :""));
+			else {
+				/*
+				 * 두개 이상의 파일을 사용해서 zipping 을 하는 경우에는 모든 트랙을 추가 하는 방식으로 한다.
+				 * 요청된 track 뿐만 아니라 모든 트랙을 다 zipper_add_track()에 추가 하는 경우
+				 */
+				if (streaming->media_type == MEDIA_TYPE_HLS_FMP4_VIDEO_M3U8) {
+					snprintf(hls_init_format+hls_init_format_len, MEDIA_FORMAT_MAX_LEN, "%s%s", gscx__hls_fmp4_video_init_format, (streaming->argument ?streaming->argument :""));
+					snprintf(hls_format+hls_format_len, MEDIA_FORMAT_MAX_LEN, "%s%s", gscx__hls_fmp4_video_seq_format, (streaming->argument ?streaming->argument :""));
+				}
+				else {	/* MEDIA_TYPE_HLS_FMP4_AUDIO_M3U8 인 경우 */
+					snprintf(hls_init_format+hls_init_format_len, MEDIA_FORMAT_MAX_LEN, "%s%s", gscx__hls_fmp4_audio_init_format, (streaming->argument ?streaming->argument :""));
+					snprintf(hls_format+hls_format_len, MEDIA_FORMAT_MAX_LEN, "%s%s", gscx__hls_fmp4_audio_seq_format, (streaming->argument ?streaming->argument :""));
+				}
+				bprm->attr.index.adapt = streaming->rep_num;
 			}
+
 			bprm->target.attr.fmp4subm3u8.init = hls_init_format;
 			bprm->target.attr.fmp4subm3u8.segment = hls_format;
 
-			bprm->attr.index.adapt = streaming->rep_num;
+
 			bprm->target.range_get.ctx = rgCtx;
 			ts = sx_get_time();
 			if (sigsetjmp(__thread_jmp_buf, 1) == 0) {
@@ -4987,7 +5035,19 @@ strm_prepare_stream(nc_request_t *req)
 			else {
 				bprm->attr.bldflag = BLDFLAG_INCLUDE_VIDEO | BLDFLAG_CAL_SIZE;
 			}
-			bprm->attr.index.adapt = atoi(streaming->rep_id);
+			if (streaming->is_adaptive == 1 && streaming->adaptive_info->next == NULL) {
+				/*
+				 * 하나의 컨텐츠(smil 파일이 한개)로만 adaptive streaming 하는 경우
+				 * media indexing 부하를 최소화 하기 위해서 요청된 트랙만 zipper_add_track()에서 추가 하는 방식으로 했기 때문에
+				 * 아래 처럼 track 번호를 직접 지정 하고
+				 * bprm->attr.index.adapt를 0으로 한다.
+				 */
+				bprm->attr.index.adapt = 0;
+			}
+			else {
+				bprm->attr.index.adapt = atoi(streaming->rep_id);
+			}
+
 			if (streaming->media_type == MEDIA_TYPE_MPEG_DASH_AUDIO ||
 				streaming->media_type == MEDIA_TYPE_MPEG_DASH_VIDEO) {
 				segment_number = zipper_segment_index(builder->bcontext, bprm->attr.index.adapt, streaming->ts_num);
@@ -6717,6 +6777,7 @@ strm_handle_adaptive(nc_request_t *req)
 	int smil_cnt = 0;	/* 요청중 smil 파일로 구성된게 몇개 인지 확인 용*/
 	int	found = 0;
 	int is_base = 0, sub_is_base = 0;
+	int	order = 0;
 
 	if((streaming->media_mode & O_STRM_TYPE_ADAPTIVE) == 0){
 		/* adaptive mode가 아닌 경우 이 함수가 호출 되면 안됨. */
@@ -6820,7 +6881,7 @@ strm_handle_adaptive(nc_request_t *req)
 	while (adaptive)  {
 		head_content = head_adaptive->contents;
 		is_base = 1;
-		sub_is_base = 0;
+		order = 0;
 		while (head_content) {
 			// 자막 content는 다른 부분에서 처리한다.
 			if (head_content->available ) {
@@ -6885,7 +6946,7 @@ strm_handle_adaptive(nc_request_t *req)
 					new_content->type = adaptive->type;
 				}
 
-
+				new_content->order = order++;
 				new_content->start = adaptive->start;
 				new_content->end = adaptive->end;
 
