@@ -342,6 +342,7 @@ static struct option long_options[] =  {
 #define 	SBX_HTTP_HEADER_PRELOAD		 		"X-Preload"
 #define 	SBX_HTTP_HEADER_PRELOAD_STATUS 		"X-Preload-Status"
 #define 	SBX_HTTP_HEADER_PRETTY		 		"X-Pretty"
+#define 	SBX_HTTP_HEADER_CACHE_STATUS	 		"X-Cache-Status"
 header_element_t __header_tags[] = {
 	{MHD_HTTP_HEADER_ACCEPT,  			HEADER_REQ,						NULL},
 	{MHD_HTTP_HEADER_ACCEPT_CHARSET,	HEADER_REQ,						NULL},
