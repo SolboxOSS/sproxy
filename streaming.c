@@ -192,17 +192,31 @@ const char gscx__hls_fmp4_audio_m3u8_format[] = {"fmp4_audio_%a.%e"};	// HLS fmp
 const char gscx__hls_fmp4_video_m3u8_format[] = {"fmp4_video_%a.%e"};	// HLS fmp4 video manifest naming 규칙
 const char gscx__hls_fmp4_subtitle_m3u8_format[] = {"subtitle_%a.%e"};	// HLS fmp4 subtitle manifest naming 규칙
 const char gscx__hls_fmp4_video_init_format[] 	= {"%a_video_init.m4s"};			//HLS fmp4 video init 파일 naming 규칙
-const char gscx__hls_fmp4_video_seq_format[] 	= {"%a_video_segment_%t.m4s"};	//HLS fmp4 video segment 파일 naming 규칙
 const char gscx__hls_fmp4_audio_init_format[] 	= {"%a_audio_init.m4s"};			//HLS fmp4 audio init 파일 naming 규칙
+#if 0
+const char gscx__hls_fmp4_video_seq_format[] 	= {"%a_video_segment_%t.m4s"};	//HLS fmp4 video segment 파일 naming 규칙
 const char gscx__hls_fmp4_audio_seq_format[] 	= {"%a_audio_segment_%t.m4s"};	//HLS fmp4 audio init 파일 naming 규칙
+#else
+const char gscx__hls_fmp4_video_seq_format[] 	= {"%a_video_segment_%i.m4s"};	//HLS fmp4 video segment 파일 naming 규칙
+const char gscx__hls_fmp4_audio_seq_format[] 	= {"%a_audio_segment_%i.m4s"};	//HLS fmp4 audio init 파일 naming 규칙
+#endif
 const char gscx__hls_adaptive_extinf_format[] = {"#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=%d"};	//m3u8생성 규칙 format
 const char gscx__hls_adaptive_m3u8_format[] = {"content_%d.%e"};	//adaptive main m3u8생성 규칙 format
 const char gscx__dash_video_init_format[] 	= {"$RepresentationID$_video_init.m4s"};	//DASH 생성 규칙 format
-const char gscx__dash_video_seq_format[] 	= {"$RepresentationID$_video_segment_$Time$.m4s"};	//DASH 생성 규칙 format
 const char gscx__dash_audio_init_format[] 	= {"$RepresentationID$_audio_init.m4s"};	//DASH 생성 규칙 format
+#if 0
+const char gscx__dash_video_seq_format[] 	= {"$RepresentationID$_video_segment_$Time$.m4s"};	//DASH 생성 규칙 format
 const char gscx__dash_audio_seq_format[] 	= {"$RepresentationID$_audio_segment_$Time$.m4s"};	//DASH 생성 규칙 format
+#else
+const char gscx__dash_video_seq_format[] 	= {"$RepresentationID$_video_segment_$Number$.m4s"};	//DASH 생성 규칙 format
+const char gscx__dash_audio_seq_format[] 	= {"$RepresentationID$_audio_segment_$Number$.m4s"};	//DASH 생성 규칙 format
+#endif
 const char gscx__dash_ts_index_format[] 	= {"$RepresentationID$_segment_index.sidx"};
+#if 0
 const char gscx__dash_ts_format[] 			= {"$RepresentationID$_segment_$Time$.ts"};
+#else
+const char gscx__dash_ts_format[] 			= {"$RepresentationID$_segment_$Number$.ts"};
+#endif
 const char gscx__dash_yt_video_format[] 	= {"%a_video_single.m4s"};	//DASH 생성 규칙 format
 const char gscx__dash_yt_audio_format[] 	= {"%a_audio_single.m4s"};	//DASH 생성 규칙 format
 const char gscx__mss_video_format[] 		= {"{bitrate}_video_segment_{start time}.ismv"};	//Smooth Streaming 생성 규칙 format
@@ -4846,11 +4860,11 @@ strm_prepare_stream(nc_request_t *req)
 				 */
 				if (streaming->media_type == MEDIA_TYPE_HLS_FMP4_VIDEO_M3U8) {
 					snprintf(hls_init_format+hls_init_format_len, MEDIA_FORMAT_MAX_LEN, "%d_video_init.m4s%s", streaming->rep_num, (streaming->argument ?streaming->argument :""));
-					snprintf(hls_format+hls_format_len, MEDIA_FORMAT_MAX_LEN, "%d_video_segment_%%t.m4s%s", streaming->rep_num, (streaming->argument ?streaming->argument :""));
+					snprintf(hls_format+hls_format_len, MEDIA_FORMAT_MAX_LEN, "%d_video_segment_%%i.m4s%s", streaming->rep_num, (streaming->argument ?streaming->argument :""));
 				}
 				else {	/* MEDIA_TYPE_HLS_FMP4_AUDIO_M3U8 인 경우 */
 					snprintf(hls_init_format+hls_init_format_len, MEDIA_FORMAT_MAX_LEN, "%d_audio_init.m4s%s", streaming->rep_num, (streaming->argument ?streaming->argument :""));
-					snprintf(hls_format+hls_format_len, MEDIA_FORMAT_MAX_LEN, "%d_audio_segment_%%t.m4s%s", streaming->rep_num, (streaming->argument ?streaming->argument :""));
+					snprintf(hls_format+hls_format_len, MEDIA_FORMAT_MAX_LEN, "%d_audio_segment_%%i.m4s%s", streaming->rep_num, (streaming->argument ?streaming->argument :""));
 				}
 
 				bprm->attr.index.adapt = 0;
@@ -5050,8 +5064,11 @@ strm_prepare_stream(nc_request_t *req)
 
 			if (streaming->media_type == MEDIA_TYPE_MPEG_DASH_AUDIO ||
 				streaming->media_type == MEDIA_TYPE_MPEG_DASH_VIDEO) {
+#if 0
 				segment_number = zipper_segment_index(builder->bcontext, bprm->attr.index.adapt, streaming->ts_num);
-				//segment_number = streaming->ts_num;	/* 테스트 위한 코딩 반드시 변경 필요 */
+#else
+				segment_number = streaming->ts_num - 1; //manifest에 1번 부터 시작이라 1번 segment 요청이 실제로 0번 segment 요청 이다.
+#endif
 				if(segment_number == (uint32_t)EOF) {
 					scx_error_log(req, "'%s' zipper_segment_index error(%d)\n", vs_data(req->url), streaming->ts_num);
 					goto send_stream_error;
@@ -5081,7 +5098,11 @@ strm_prepare_stream(nc_request_t *req)
 			bprm->attr.bldflag = BLDFLAG_INCLUDE_ALL | BLDFLAG_CAL_SIZE;
 			bprm->attr.index.adapt = atoi(streaming->rep_id);
 			if (streaming->media_type == MEDIA_TYPE_MPEG_DASH_TS) {
+#if 0
 				segment_number = zipper_segment_index(builder->bcontext, bprm->attr.index.adapt, streaming->ts_num);
+#else
+				segment_number = streaming->ts_num - 1; //manifest에 1번 부터 시작이라 1번 segment 요청이 실제로 0번 segment 요청 이다.
+#endif
 				if(segment_number == (uint32_t)EOF) {
 					scx_error_log(req, "'%s' zipper_segment_index error(%d)\n", vs_data(req->url), streaming->ts_num);
 					goto send_stream_error;
