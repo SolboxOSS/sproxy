@@ -1223,12 +1223,25 @@ void zipper_free_variant_context(zipper_io_handle *io_handle, zipperVariant *ctx
 typedef struct _zipper_variant_track {
 
     struct {
-        zipperCnt ctx;          // 트랙 소스의 zipper 미디어 컨텍스트
-                                // NULL로 지정할 경우 최소 아래의 bandwidth 필드 정보는 직접 기술해 주어야 한다.
-                                // zipper_variant_build()시 오류 리턴
-
+        
+        struct {
+            zipperCnt ctx;          // 트랙 소스의 zipper 미디어 컨텍스트
+                                    // NULL로 지정할 경우 최소 아래의 bandwidth 필드 정보는 직접 기술해 주어야 한다.
+                                    // zipper_variant_build()시 오류 리턴
+            
+            struct {
+                
+                uint8_t video:4;    // 트랙 소스에 사용된 비디오 트랙 인덱스(0~)
+                uint8_t audio:4;    // 트랙 소스에 사용된 오디오 트랙 인덱스(0~)
+                
+            } map;
+            
+        } src;                  // 미디어 컨텍스트를 사용해 스트림 속성을 지정할 경우 사용
+                                // 아래 정보를 직접 기술 시 무시된다.
+        
         uint32_t bandwidth;     // BADNWIDTH 정보,
                                 // 0이면 ctx(NULL이 아닐 경우)로부터 정보를 구한다.
+                                // * BANDWIDTH 정보는 반드시 필요하다.만약 0으로 설정 시 .src 정보를 기술해야 한다.
         
         struct {
 
@@ -1241,7 +1254,8 @@ typedef struct _zipper_variant_track {
         const char *codecs;     // 코덱 정보
                                 // NULL이고 ctx가 NULL이 아니면 ctx로 부터 그렇지 않으면 기술을 생략한다.
 
-    } media;
+    } media;                    // .media 정보는 해당 트랙이 스트림으로 사용시(.group.sef == NULL) 스트림 속성 기술에 필요한 정보들이다.
+                                // 만약 트랙 그룹인 경우에는 기술하지 않아도 된다(생략 가능).
     
     const char *url;            // 트랙의 매니패스트 URL(상대 경로 권장)
                                 // 직접 사용(별도의 매크로 없음)
