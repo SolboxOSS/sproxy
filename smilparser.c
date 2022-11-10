@@ -53,7 +53,7 @@ typedef struct tag_smil_info {
 } smil_info_t;
 
 int parser_element_names(nc_request_t *req, adaptive_info_t *adaptive_info, xmlDocPtr doc, xmlNodePtr a_node, smil_info_t *smil_info, mem_pool_t *tmp_mpool);
-int Get_element_Attribute_value(nc_request_t *req, xmlNode * a_node, struct _xmlAttr * pAtt, smil_info_t *smil_info);
+int Get_element_Attribute_value(nc_request_t *req, adaptive_info_t *adaptive_info, xmlNode * a_node, struct _xmlAttr * pAtt, smil_info_t *smil_info);
 
 
 /* 최신 버전에서는 아래의 두가지 형태만 허용한다.
@@ -92,38 +92,27 @@ int Get_element_Attribute_value(nc_request_t *req, xmlNode * a_node, struct _xml
     </playlist>
   </body>
 </smil>
+
 */
 
 /*
- * 개선 버전에서는 codecs과 resolution attribute가 추가됨
- */
-/*
+ * 와우자 smil 포맷
+ * prefix가 있고 경로를 상대 경로로 사용
 <?xml version="1.0" encoding="UTF-8"?>
 <smil>
+<head>
+</head>
   <body>
-    <playlist>
-      <switch start="0" end="0">
-        <video src="/mp4/adaptive/41a014430be00ec4574535d49c26a87e_v3_t31.mp4" system-bitrate="1024000" codecs="avc1.100.31, mp4a.40.2" resolution="480x272"/>
-        <video src="/mp4/adaptive/41a014430be00ec4574535d49c26a87e_v3_t32.mp4" system-bitrate="2048000" codecs="avc1.100.31, mp4a.40.2" resolution="640x360"/>
-        <video src="/mp4/adaptive/41a014430be00ec4574535d49c26a87e_v3_t33.mp4" system-bitrate="5120000" codecs="avc1.100.31, mp4a.40.2" resolution="1280x720"/>
-        <video src="/mp4/adaptive/41a014430be00ec4574535d49c26a87e_v3_t34.mp4" system-bitrate="16384000" codecs="avc1.100.31, mp4a.40.2" resolution="1920x1080"/>
-      </switch>
-    </playlist>
+  <switch>
+        <video src="mp4:41a014430be00ec4574535d49c26a87e_v3_t31.mp4" system-bitrate="1024000"/>
+        <video src="mp4:41a014430be00ec4574535d49c26a87e_v3_t32.mp4" system-bitrate="2048000"/>
+        <video src="mp4:41a014430be00ec4574535d49c26a87e_v3_t33.mp4" system-bitrate="5120000"/>
+        <video src="mp4:41a014430be00ec4574535d49c26a87e_v3_t34.mp4" system-bitrate="16384000"/>
+  </switch>
   </body>
 </smil>
+ */
 
-<?xml version="1.0" encoding="UTF-8"?>
-<smil>
-  <body>
-    <playlist>
-        <video src="/mp4/adaptive/41a014430be00ec4574535d49c26a87e_v3_t31.mp4" system-bitrate="1024000" codecs="avc1.100.31, mp4a.40.2" resolution="480x272"/>
-        <video src="/mp4/adaptive/41a014430be00ec4574535d49c26a87e_v3_t32.mp4" system-bitrate="2048000" codecs="avc1.100.31, mp4a.40.2" resolution="640x360"/>
-        <video src="/mp4/adaptive/41a014430be00ec4574535d49c26a87e_v3_t33.mp4" system-bitrate="5120000" codecs="avc1.100.31, mp4a.40.2" resolution="1280x720"/>
-        <video src="/mp4/adaptive/41a014430be00ec4574535d49c26a87e_v3_t34.mp4" system-bitrate="16384000" codecs="avc1.100.31, mp4a.40.2" resolution="1920x1080"/>
-    </playlist>
-  </body>
-</smil>
- */
 
 int
 smil_parse(nc_request_t *req, struct tag_adaptive_info *adaptive_info, char *smil_buffer, mem_pool_t *tmp_mpool)
@@ -181,7 +170,7 @@ parser_element_names(nc_request_t *req, adaptive_info_t *adaptive_info, xmlDocPt
 //				printf("Element: %s\n", cur_node->name);
 				smil_info->codecs[0] = '\0';
 				smil_info->resolution[0] = '\0';
-				if (Get_element_Attribute_value(req, cur_node, cur_node->properties, smil_info) == 0) {
+				if (Get_element_Attribute_value(req, adaptive_info, cur_node, cur_node->properties, smil_info) == 0) {
 					return 0;
 				}
 
@@ -235,7 +224,7 @@ parser_element_names(nc_request_t *req, adaptive_info_t *adaptive_info, xmlDocPt
 				// 예 : <textstream system-language="en" name="English" type="vtt" src="/mp4/adaptive/41a014430be00ec4574535d49c26a87e_EN.vtt"/>
 				smil_info->subtitle_type = SUBTITLE_TYPE_SRT;
 				smil_info->subtitle_lang[0] = '\0';
-				if (Get_element_Attribute_value(req, cur_node, cur_node->properties, smil_info) == 0) {
+				if (Get_element_Attribute_value(req, adaptive_info, cur_node, cur_node->properties, smil_info) == 0) {
 					return 0;
 				}
 
@@ -300,10 +289,14 @@ parser_element_names(nc_request_t *req, adaptive_info_t *adaptive_info, xmlDocPt
 }
 
 int
-Get_element_Attribute_value(nc_request_t *req, xmlNode * a_node, struct _xmlAttr * pAtt, smil_info_t *smil_info)
+Get_element_Attribute_value(nc_request_t *req, adaptive_info_t *adaptive_info, xmlNode * a_node, struct _xmlAttr * pAtt, smil_info_t *smil_info)
 {
 	streaming_t *streaming = req->streaming;
+	char	*ptok;
+	char 	 *ph1_path;
+	char	*real_path;
 	xmlChar * value = NULL;
+	int		len = 0;
 	if (pAtt == NULL) {
 		scx_error_log(req, "empty Attribute value in the smil file.\n", req);
 		return 0;
@@ -312,7 +305,31 @@ Get_element_Attribute_value(nc_request_t *req, xmlNode * a_node, struct _xmlAttr
 //	printf("name: '%s', value: '%s'\n", pAtt->name, value);
 	if (value != NULL) {
 		if (xmlStrcmp(pAtt->name, (const xmlChar *)"src") == 0) {
-			xmlStrPrintf(smil_info->path, 1024, "%s", value);
+			/* 와우자 smil 포맷과 같은 prefix가 있는 경우 prefix 제거 */
+			ptok = strchr((char *)value, ':');
+			if (ptok) {
+
+				ph1_path = ptok+1;
+			}
+			else {
+				ph1_path = (char *)value;
+			}
+			if (*ph1_path != '/') {
+				/*
+				 * 상대 경로인 경우
+				 * smil 파일 경로에서 smil 파일명만 제외한 경로를 뽑아서 사용한다.
+				 */
+				real_path = strrchr(adaptive_info->path, '/');
+				if (real_path != adaptive_info->path) {
+					snprintf(smil_info->path, real_path - adaptive_info->path + 1, "%s", adaptive_info->path);
+					len = strlen(smil_info->path);
+				}
+				snprintf(smil_info->path + len, 1024 - len, "/%s", ph1_path);
+			}
+			else {
+				// 절대 경로인 경우
+				snprintf(smil_info->path, 1024, "%s", ph1_path);
+			}
 		}
 		else if (xmlStrcmp(pAtt->name, (const xmlChar *)"system-bitrate") == 0) {
 			xmlStrPrintf(smil_info->bitrate, 12, "%s", value);
@@ -345,7 +362,7 @@ Get_element_Attribute_value(nc_request_t *req, xmlNode * a_node, struct _xmlAttr
 	}
 	if (pAtt->next != NULL)
 	{
-		Get_element_Attribute_value(req, a_node, pAtt->next, smil_info);
+		Get_element_Attribute_value(req, adaptive_info, a_node, pAtt->next, smil_info);
 	}
 	if (value) xmlFree(value);
 	return 1;
