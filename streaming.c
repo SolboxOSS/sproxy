@@ -263,6 +263,7 @@ media_info_t * strm_create_media(nc_request_t *req, int type, char *url);
 int strm_set_media(nc_request_t *req, media_info_t 	*media,  int type, char *url, zipperCnt ctx, struct nc_stat *objstat);
 int strm_set_objstat(nc_request_t *req);
 int strm_write_func(unsigned char *block, size_t size, void *param);
+static void strm_make_x_play_durations_header(streaming_t *streaming);
 zipperBldr strm_live_create_preroll_bldr_callback(uint32_t dur, void *param);
 void strm_live_expire_preroll_bldr_callback(zipperBldr bldr, void *param);
 int strm_live_create_context(nc_request_t *req);
@@ -1102,6 +1103,47 @@ strm_reset_media(media_info_t * media)
 }
 
 /*
+ * X-Play-Durations 헤더를 생성하는 함수
+ * media가 한개인 경우는 'X-Play-Durations : 0.000'
+ * 두개 이상인 경우는 'X-Play-Durations : 0.000(0.000,0.000,0.000)'의 형식으로 만든다.
+ * 자막 요청의 경우에는 X-Play-Durations 헤더를 응답하지 않는다.
+ */
+static void
+strm_make_x_play_durations_header(streaming_t *streaming)
+{
+	int	len = 0;
+	char rewbuf[256] = {'\0'};
+	if ( streaming->builder != NULL && streaming->builder->media_list) { // 자막 요청의 경우 streaming->builder->media_list가 NULL이다
+		media_info_list_t 	*media_list = streaming->builder->media_list;
+		ASSERT(media_list);
+		if (streaming->builder->duration == media_list->duration) {
+			/* 컨텐츠가 한개만 있는 경우 */
+			snprintf(rewbuf, 256, "%g", streaming->builder->duration);
+		}
+		else {
+			/* 컨텐츠가 두개 이상인 경우 */
+			snprintf(rewbuf, 256, "%g(%g", streaming->builder->duration, media_list->duration);
+			media_list = media_list->next;
+			while (media_list != NULL) { /* content가 한개 이상인 경우만 헤더를 만든다.*/
+				if (media_list->is_base == 1) {
+					len = strlen(rewbuf);
+					/* adaptive track 인 경우 base track 사용한다. */
+					snprintf(rewbuf+len, 256 - len, ",%g",  media_list->duration);
+				}
+				media_list = media_list->next;
+			}
+			len = strlen(rewbuf);
+			snprintf(rewbuf+len, 256 - len, ")");
+		}
+		len = strlen(rewbuf);
+		streaming->x_play_duration  = (char *) mp_alloc(streaming->mpool, len+1);
+		snprintf(streaming->x_play_duration , len + 1, "%s", rewbuf);
+
+	}
+	return;
+}
+
+/*
  * client의 요청에 해당하는 builder 정보가 있는지 확인 하고 없는 경우 새로 생성한다.
  * strm_live_create_preroll_bldr_callback()에서 호출 될때에만 dur이 0이 아닌 값이 들어 있다.
  * 이 경우 설정된 hls_target_duration이 아닌 dur 값을 사용한다.
@@ -1459,6 +1501,7 @@ create_builder_end:
 	streaming->builder = builder;
 	builder->bcontext_size = zipper_context_size(builder->bcontext);
 	if (0 > builder->bcontext_size) builder->bcontext_size = 0;
+	strm_make_x_play_durations_header(streaming);
 	return 1;
 create_builder_error:
 
@@ -5283,6 +5326,16 @@ strm_prepare_stream(nc_request_t *req)
 
 		strm_set_objstat(req);
 	}
+	/*
+	 * HLS나 DASH인 경우는 body가 이미 만들어진 상태 이기 때문에 streaming->builder를 더 유지할 필요가 없으므로
+	 * 여기서 삭제 한다.
+	 * media memory metadata를 효율적으로 사용하기 위해 추가
+	 */
+	if (NULL != req->scx_res.body && streaming->builder &&
+			(streaming->protocol == O_PROTOCOL_HLS || streaming->protocol == O_PROTOCOL_DASH)) {
+			strm_destroy_builder(streaming->builder);
+			streaming->builder = NULL;
+	}
 	return 1;
 zipper_build_error:
 	if (streaming->builder != NULL &&
@@ -7213,38 +7266,9 @@ strm_add_streaming_header(nc_request_t *req)
 		MHD_add_response_header(req->response, MHD_HTTP_HEADER_CONTENT_TYPE, rewbuf);
 	}
 
-	/*
-	 * X-Play-Durations 헤더 추가 부분
-	 * media가 한개인 경우는 'X-Play-Durations : 0.000'
-	 * 두개 이상인 경우는 'X-Play-Durations : 0.000(0.000,0.000,0.000)'의 형식으로 만든다.
-	 * 자막 요청의 경우에는 X-Play-Durations 헤더를 응답하지 않는다.
-	 */
-	if ( streaming->builder != NULL && streaming->builder->media_list) { // 막 요청의 경우 streaming->builder->media_list가 NULL이다
-		media_info_list_t 	*media_list = streaming->builder->media_list;
-		ASSERT(media_list);
-		if (streaming->builder->duration == media_list->duration) {
-			/* 컨텐츠가 한개만 있는 경우 */
-			snprintf(rewbuf, 256, "%g", streaming->builder->duration);
-		}
-		else {
-			/* 컨텐츠가 두개 이상인 경우 */
-			snprintf(rewbuf, 256, "%g(%g", streaming->builder->duration, media_list->duration);
-			media_list = media_list->next;
-			while (media_list != NULL) { /* content가 한개 이상인 경우만 헤더를 만든다.*/
-				if (media_list->is_base == 1) {
-					len = strlen(rewbuf);
-					/* adaptive track 인 경우 base track 사용한다. */
-					snprintf(rewbuf+len, 256 - len, ",%g",  media_list->duration);
-				}
-				media_list = media_list->next;
-			}
-			len = strlen(rewbuf);
-			snprintf(rewbuf+len, 256 - len, ")");
-		}
-
-		MHD_add_response_header(req->response, "X-Play-Durations", rewbuf);
+	if (streaming->x_play_duration) {
+		MHD_add_response_header(req->response, "X-Play-Durations", streaming->x_play_duration);
 	}
-
 	return 0;
 }
 
