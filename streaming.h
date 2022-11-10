@@ -269,6 +269,7 @@ typedef struct streaming_tag {
 	char			*live_path;		/* client의 요청 url에 들어 있는 라이브 path */
 	int				live_real_path_len;	/* live_path에서 가상 파일을 뺀 path 길이 (마지막 '/' 포함) */
 	char			*live_origin_path;	/* 라이브 오리진 서버에 요청될때 사용될 실제 path */
+	char			*x_play_duration;	/* X-Play-Durations 헤더의 value */
 	struct session_info_tag *session;	/* session관련 context */
 	content_info_t 	*content;
 	subtitle_info_t *subtitle;
