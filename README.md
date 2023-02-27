@@ -1,19 +1,18 @@
-![GitHub Repo stars](https://img.shields.io/github/stars/SolboxOSS/sproxy?style=social)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/y/SolboxOSS/sproxy)
-![GitHub forks](https://img.shields.io/github/forks/SolboxOSS/sproxy?style=social)
-![GitHub contributors](https://img.shields.io/github/contributors-anon/SolboxOSS/sproxy)
-
-
 # Introduction
+
+![GitHub Repo stars](https://img.shields.io/github/stars/SolboxOSS/sproxy?style=social) ![GitHub commit activity](https://img.shields.io/github/commit-activity/y/SolboxOSS/sproxy) ![GitHub forks](https://img.shields.io/github/forks/SolboxOSS/sproxy?style=social) ![GitHub contributors](https://img.shields.io/github/contributors-anon/SolboxOSS/sproxy)
+
+## Introduction
 
 Sproxy is a reverse proxy that acts as a proxy server in the edge section close to the user on behalf of various web servers.
 
 * Github: [https://github.com/SolboxOSS/sproxy](https://github.com/SolboxOSS/sproxy)
 * Project page: [https://sproxy.solbox.com/](https://sproxy.solbox.com)
+*
 
-## How to RUN
+### How to RUN
 
-### package required for build
+#### package required for build
 
 Only CentOS 6 is supported
 
@@ -29,7 +28,7 @@ Only CentOS 6 is supported
   * tcl.x86\_64 tcl-devel.x86\_64 rpm-build.x86\_64 gcc-c++
   * gnutls30.x86\_64 gnutls30-devel GeoIP
 
-### Building solproxy
+#### Building solproxy
 
 Move to source directory
 
@@ -38,7 +37,7 @@ Move to source directory
 * Build solproxy
   * ./solproxy\_build.sh
 
-### Environment
+#### Environment
 
 * make directory
   * mkdir -p /usr/service/etc/solproxy
@@ -50,7 +49,7 @@ Move to source directory
   * cp libnetcache/lib/libhttpn\_driver.so\* /usr/lib64/
 * set env
 
-### Example configuration
+#### Example configuration
 
 * /usr/service/etc/solproxy/default.conf
 
@@ -81,12 +80,12 @@ server {
 }
 ```
 
-### How to run
+#### How to run
 
 * export CSA\_PIDFILE=/var/run/solproxy.pid
 * export CSA\_CONFPATH=/usr/service/etc/solproxy
 * solproxy\_build/solproxy
 
-## License
+### License
 
 solproxy is is dual-licensed under the GNU General PublicLicense (GPLv2.0) or commercial license
