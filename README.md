@@ -1,6 +1,6 @@
 # Introduction
 
-![GitHub Repo stars](https://img.shields.io/github/stars/SolboxOSS/sproxy?style=social) ![GitHub commit activity](https://img.shields.io/github/commit-activity/y/SolboxOSS/sproxy) ![GitHub forks](https://img.shields.io/github/forks/SolboxOSS/sproxy?style=social) ![GitHub contributors](https://img.shields.io/github/contributors-anon/SolboxOSS/sproxy)
+![GitHub Repo stars](https://img.shields.io/github/stars/SolboxOSS/sproxy?style=social) ![GitHub commit activity](https://img.shields.io/github/commit-activity/t/SolboxOSS/sproxy) ![GitHub forks](https://img.shields.io/github/forks/SolboxOSS/sproxy?style=social) ![GitHub contributors](https://img.shields.io/github/contributors-anon/SolboxOSS/sproxy)
 
 ## Introduction
 
