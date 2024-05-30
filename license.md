@@ -1,6 +1,8 @@
 # License
 
-\=======================================================================Section 1 (Overview):
+\=======================================================================
+
+Section 1 (Overview):
 
 sproxy use a Dual License business model for its software development and offers licenses for two distinct purposes - open source and commercial development
 
