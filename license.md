@@ -8,7 +8,7 @@ sproxy use a Dual License business model for its software development and offers
 
 1. If you wish to use the open source license with sproxy, this software is licensed under GPL V2. You agrees that you will contribute all your source code to the open source community and you will give them the right to share it with everyone too. The complete GPL v2 terms are included in Section 2.
 2. If you want to have a commercial advantage by having a closed source solution, you must purchase an appropriate commercial licenses from Solbox Inc.. By purchasing a commercial license, you are no longer obligated to publish your source code. You can use sproxy with the commercial license terms listed in Section 3.
-3. sproxy uses GNU libmicrohttpd with dynamic linking. GNU libmicrohttpd is under the GNU Lesser General Public License (LGPLv2.1+).
+3. sproxy uses GNU libmicrohttpd. GNU libmicrohttpd is under the GNU Lesser General Public License (LGPLv2.1+).
 
 \=======================================================================
 
