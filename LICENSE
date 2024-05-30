@@ -17,7 +17,7 @@ Solbox Inc.. By purchasing a commercial license, you are no longer
 obligated to publish your source code. You can use sproxy with the 
 commercial license terms listed in Section 3.
 
-3. sproxy uses GNU libmicrohttpd with dynamic linking.
+3. sproxy uses GNU libmicrohttpd.
 GNU libmicrohttpd is under the GNU Lesser General Public License (LGPLv2.1+).
 
 ========================================================================
